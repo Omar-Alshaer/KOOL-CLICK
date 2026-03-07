@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Student Home</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card" style="margin-top: 1rem">
+        <h1 class="kc-title">Student Dashboard</h1>
+        <div id="studentMini"></div>
+      </section>
+
+      <section class="kc-three" style="margin-top: 1rem">
+        <article class="kc-card">
+          <h2 class="kc-title">Quick Actions</h2>
+          <div class="kc-list">
+            <a class="kc-btn" href="./menu.html">Browse Menu</a>
+            <a class="kc-btn" href="./cart.html">Open Cart</a>
+            <a class="kc-btn" href="./orders.html">Track Orders</a>
+          </div>
+        </article>
+
+        <article class="kc-card">
+          <h2 class="kc-title">Order Flow</h2>
+          <p class="kc-muted" id="statusFlow"></p>
+          <p class="kc-muted">Cashier can update status and remaining delivery time.</p>
+        </article>
+
+        <article class="kc-card">
+          <h2 class="kc-title">Rewards Rule</h2>
+          <p class="kc-muted">Every 50 EGP gives 5 points.</p>
+          <p class="kc-muted">Higher levels unlock larger discounts.</p>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/student-home.js"></script>
+  </body>
+</html>

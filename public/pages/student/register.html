@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Student Register</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader">
+        <div class="kc-brand">
+          <img src="../../assets/temp/logo.png" alt="Kool Click" />
+          <div class="kc-brand-text">
+            <span class="kc-brand-title">Kool Click</span>
+            <span class="kc-brand-slogan">Click. Order. Enjoy.</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="kc-register-hero">
+        <h1 class="kc-register-hero-title">Create Your Student Character</h1>
+        <p class="kc-register-hero-subtitle">
+          Student area only. No access to admin, manager, or cashier pages.
+        </p>
+        <div class="kc-register-rules">
+          <span class="kc-chip">ID: 8 digits (starts with 2)</span>
+          <span class="kc-chip">Phone: 01XXXXXXXXX</span>
+          <span class="kc-chip">Pick your avatar</span>
+        </div>
+      </section>
+
+      <section class="kc-card kc-register-card">
+        <form id="registerForm" class="kc-form">
+          <div class="kc-register-grid">
+            <section class="kc-register-panel">
+              <h2 class="kc-title">Student Info</h2>
+              <div class="kc-two">
+                <div>
+                  <label for="fullName">Full Name</label>
+                  <input id="fullName" name="fullName" type="text" required />
+                </div>
+
+                <div>
+                  <label for="universityId">University ID</label>
+                  <input id="universityId" name="universityId" type="text" maxlength="8" placeholder="2xxxxxxx" required />
+                </div>
+
+                <div>
+                  <label for="phone">Phone Number</label>
+                  <input id="phone" name="phone" type="tel" placeholder="01XXXXXXXXX" required />
+                </div>
+
+                <div>
+                  <label for="birthDate">Birth Date</label>
+                  <input id="birthDate" name="birthDate" type="date" required />
+                </div>
+              </div>
+            </section>
+
+            <section class="kc-register-panel">
+              <h2 class="kc-title">Security</h2>
+              <div class="kc-two">
+                <div>
+                  <label for="password">Password</label>
+                  <input id="password" name="password" type="password" minlength="6" required />
+                </div>
+
+                <div>
+                  <label for="confirmPassword">Confirm Password</label>
+                  <input id="confirmPassword" name="confirmPassword" type="password" minlength="6" required />
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <input id="selectedAvatar" type="hidden" name="selectedAvatar" />
+
+          <section class="kc-note kc-avatar-panel">
+            <div class="kc-avatar-head">
+              <strong class="kc-avatar-title">Choose Avatar</strong>
+              <span class="kc-chip">Selected: <span id="selectedAvatarName">none</span></span>
+            </div>
+            <p class="kc-muted kc-avatar-help">Pick a character style for your student profile.</p>
+
+            <div class="kc-avatar-picked">
+              <img id="selectedAvatarPreview" src="" alt="Selected avatar" />
+              <button id="openAvatarModalBtn" class="kc-avatar-open-btn" type="button">Open Avatar Gallery</button>
+            </div>
+          </section>
+
+          <div class="kc-register-actions">
+            <input type="submit" value="Create Account" />
+            <a class="kc-btn kc-btn-secondary" href="./login.html">Back to Login</a>
+          </div>
+        </form>
+
+        <p id="msg" class="kc-muted" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <div id="avatarModal" class="kc-modal" aria-hidden="true">
+      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-label="Avatar Gallery">
+        <div class="kc-modal-head">
+          <h3 class="kc-title" style="margin: 0">Choose Your Avatar</h3>
+          <button id="closeAvatarModalBtn" type="button" class="kc-btn-secondary">Close</button>
+        </div>
+        <p class="kc-muted" id="avatarLoadMsg">Loading avatars...</p>
+        <div id="avatarModalGrid" class="kc-avatar-grid"></div>
+      </div>
+    </div>
+
+    <script type="module" src="../../js/student-register.js"></script>
+  </body>
+</html>

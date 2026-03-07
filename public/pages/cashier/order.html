@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Order</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card" style="margin-top: 1rem">
+        <h1 class="kc-title">Order</h1>
+        <div id="cashierMini"></div>
+      </section>
+
+      <section class="kc-card" style="margin-top: 1rem">
+        <div class="kc-grid">
+          <div class="kc-item">
+            <h2 class="kc-title" style="margin-bottom: 0.5rem">Find Order</h2>
+            <div class="kc-inline">
+              <input id="orderSearchInput" class="kc-cashier-field" type="text" placeholder="Enter Order ID or KC-XXXX" />
+              <button id="orderSearchBtn" type="button">Find</button>
+              <button id="orderRefreshBtn" type="button" class="kc-btn-secondary">Refresh</button>
+            </div>
+          </div>
+
+          <div class="kc-item">
+            <h2 class="kc-title" style="margin-bottom: 0.5rem">Current List</h2>
+            <select id="orderPicker" class="kc-cashier-field" style="width: 100%"></select>
+          </div>
+        </div>
+      </section>
+
+      <section id="orderRoot" class="kc-grid" style="margin-top: 1rem"></section>
+    </main>
+
+    <script type="module" src="../../js/cashier-order.js"></script>
+  </body>
+</html>

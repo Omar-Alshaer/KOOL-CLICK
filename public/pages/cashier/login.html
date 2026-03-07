@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Cashier Login</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header>
+        <div class="kc-brand">
+          <img src="../../assets/temp/logo.png" alt="Kool Click" />
+          <div class="kc-brand-text">
+            <span class="kc-brand-title">Kool Click</span>
+            <span class="kc-brand-slogan">Cashier Panel</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="kc-register-hero">
+        <h1 class="kc-register-hero-title">Cashier Login</h1>
+        <p class="kc-register-hero-subtitle">Manage restaurant orders and delivery handoff.</p>
+      </section>
+
+      <section class="kc-card kc-login-card">
+        <h2 class="kc-title">Sign In</h2>
+        <form id="cashierLoginForm" class="kc-form kc-login-form">
+          <div class="kc-login-field">
+            <label for="phone">Phone Number</label>
+            <input id="phone" type="tel" placeholder="01XXXXXXXXX" required />
+          </div>
+
+          <div class="kc-login-field">
+            <label for="password">Password</label>
+            <input id="password" type="password" required />
+          </div>
+
+          <div class="kc-register-actions">
+            <input type="submit" value="Login" />
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/cashier-login.js"></script>
+  </body>
+</html>

@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="880" viewBox="0 0 880 880" shape-rendering="crispEdges">
+  <rect width="880" height="880" fill="#efe3ff"/>
+
+  <defs>
+    <g id="ico-burger" fill="currentColor">
+      <rect x="4" y="8" width="28" height="4"/>
+      <rect x="2" y="12" width="32" height="4"/>
+      <rect x="5" y="16" width="26" height="4"/>
+      <rect x="3" y="21" width="30" height="3"/>
+      <rect x="4" y="24" width="28" height="4"/>
+    </g>
+    <g id="ico-pizza" fill="currentColor">
+      <path d="M18 4 32 30 4 30Z"/>
+      <rect x="10" y="20" width="4" height="4" fill="#fff7ff"/>
+      <rect x="20" y="16" width="4" height="4" fill="#fff7ff"/>
+    </g>
+    <g id="ico-hotdog" fill="currentColor">
+      <rect x="3" y="12" width="30" height="12"/>
+      <rect x="6" y="9" width="24" height="4"/>
+      <rect x="6" y="24" width="24" height="4"/>
+    </g>
+    <g id="ico-taco" fill="currentColor">
+      <path d="M4 26a14 14 0 0 1 28 0Z"/>
+      <rect x="8" y="18" width="20" height="4"/>
+    </g>
+    <g id="ico-burrito" fill="currentColor">
+      <rect x="6" y="8" width="24" height="20" rx="2"/>
+      <rect x="10" y="12" width="16" height="2" fill="#fff7ff"/>
+      <rect x="10" y="16" width="16" height="2" fill="#fff7ff"/>
+      <rect x="10" y="20" width="12" height="2" fill="#fff7ff"/>
+    </g>
+    <g id="ico-chicken" fill="currentColor">
+      <rect x="8" y="10" width="18" height="14"/>
+      <rect x="24" y="14" width="8" height="6"/>
+      <rect x="30" y="12" width="3" height="3"/>
+      <rect x="30" y="19" width="3" height="3"/>
+    </g>
+    <g id="ico-sandwich" fill="currentColor">
+      <rect x="4" y="10" width="28" height="6"/>
+      <rect x="6" y="16" width="24" height="4"/>
+      <rect x="4" y="20" width="28" height="6"/>
+    </g>
+    <g id="ico-fries" fill="currentColor">
+      <rect x="6" y="8" width="4" height="14"/>
+      <rect x="12" y="6" width="4" height="16"/>
+      <rect x="18" y="7" width="4" height="15"/>
+      <rect x="24" y="8" width="4" height="14"/>
+      <rect x="7" y="22" width="22" height="6"/>
+    </g>
+    <g id="ico-egg" fill="currentColor">
+      <rect x="7" y="10" width="22" height="16" rx="4"/>
+      <rect x="15" y="15" width="6" height="6" fill="#fff7ff"/>
+    </g>
+    <g id="ico-donut" fill="currentColor">
+      <rect x="7" y="7" width="22" height="22"/>
+      <rect x="14" y="14" width="8" height="8" fill="#efe3ff"/>
+    </g>
+    <g id="ico-cookie" fill="currentColor">
+      <rect x="8" y="8" width="20" height="20"/>
+      <rect x="12" y="12" width="2" height="2" fill="#fff7ff"/>
+      <rect x="20" y="14" width="2" height="2" fill="#fff7ff"/>
+      <rect x="16" y="20" width="2" height="2" fill="#fff7ff"/>
+    </g>
+    <g id="ico-cake" fill="currentColor">
+      <rect x="6" y="20" width="24" height="8"/>
+      <rect x="8" y="14" width="20" height="6"/>
+      <rect x="14" y="8" width="2" height="6"/>
+      <rect x="18" y="8" width="2" height="6"/>
+    </g>
+    <g id="ico-coffee" fill="currentColor">
+      <rect x="6" y="12" width="18" height="12"/>
+      <rect x="24" y="14" width="6" height="8"/>
+      <rect x="8" y="8" width="2" height="4"/>
+      <rect x="14" y="8" width="2" height="4"/>
+    </g>
+    <g id="ico-bubble" fill="currentColor">
+      <rect x="10" y="8" width="14" height="18"/>
+      <rect x="16" y="4" width="2" height="4"/>
+      <rect x="13" y="20" width="2" height="2" fill="#fff7ff"/>
+      <rect x="19" y="20" width="2" height="2" fill="#fff7ff"/>
+    </g>
+    <g id="ico-soda" fill="currentColor">
+      <rect x="9" y="8" width="16" height="18"/>
+      <rect x="13" y="4" width="8" height="4"/>
+      <rect x="15" y="2" width="2" height="2"/>
+    </g>
+    <g id="ico-juice" fill="currentColor">
+      <rect x="10" y="8" width="14" height="18"/>
+      <rect x="16" y="4" width="2" height="6"/>
+      <rect x="13" y="14" width="8" height="2" fill="#fff7ff"/>
+    </g>
+    <g id="ico-cocktail" fill="currentColor">
+      <path d="M6 8h24L18 20Z"/>
+      <rect x="17" y="20" width="2" height="8"/>
+      <rect x="13" y="28" width="10" height="2"/>
+    </g>
+  </defs>
+
+  <!-- random-ish mixed placements -->
+  <g fill="#3B0270" transform="translate(24 26) rotate(11)"><use href="#ico-burger"/></g>
+  <g fill="#6F00FF" transform="translate(118 72) rotate(-19)"><use href="#ico-pizza"/></g>
+  <g fill="#E9B3FB" transform="translate(206 30) rotate(33)"><use href="#ico-hotdog"/></g>
+  <g fill="#9b59ff" transform="translate(294 82) rotate(-13)"><use href="#ico-taco"/></g>
+  <g fill="#3B0270" transform="translate(372 22) rotate(17)"><use href="#ico-burrito"/></g>
+  <g fill="#6F00FF" transform="translate(466 62) rotate(-31)"><use href="#ico-chicken"/></g>
+  <g fill="#E9B3FB" transform="translate(552 20) rotate(7)"><use href="#ico-sandwich"/></g>
+  <g fill="#8b46ef" transform="translate(638 72) rotate(-5)"><use href="#ico-fries"/></g>
+  <g fill="#3B0270" transform="translate(734 30) rotate(25)"><use href="#ico-egg"/></g>
+
+  <g fill="#6F00FF" transform="translate(34 178) rotate(-24)"><use href="#ico-donut"/></g>
+  <g fill="#E9B3FB" transform="translate(124 150) rotate(9)"><use href="#ico-cookie"/></g>
+  <g fill="#3B0270" transform="translate(206 214) rotate(-12)"><use href="#ico-cake"/></g>
+  <g fill="#6F00FF" transform="translate(288 162) rotate(41)"><use href="#ico-coffee"/></g>
+  <g fill="#a157ff" transform="translate(372 208) rotate(-16)"><use href="#ico-bubble"/></g>
+  <g fill="#3B0270" transform="translate(458 154) rotate(14)"><use href="#ico-soda"/></g>
+  <g fill="#6F00FF" transform="translate(548 206) rotate(-29)"><use href="#ico-juice"/></g>
+  <g fill="#E9B3FB" transform="translate(632 160) rotate(5)"><use href="#ico-cocktail"/></g>
+  <g fill="#3B0270" transform="translate(724 210) rotate(-22)"><use href="#ico-burger"/></g>
+
+  <g fill="#6F00FF" transform="translate(26 312) rotate(18)"><use href="#ico-pizza"/></g>
+  <g fill="#3B0270" transform="translate(112 364) rotate(-10)"><use href="#ico-hotdog"/></g>
+  <g fill="#E9B3FB" transform="translate(198 318) rotate(27)"><use href="#ico-taco"/></g>
+  <g fill="#9f67ff" transform="translate(286 360) rotate(-7)"><use href="#ico-burrito"/></g>
+  <g fill="#3B0270" transform="translate(372 314) rotate(21)"><use href="#ico-chicken"/></g>
+  <g fill="#6F00FF" transform="translate(462 356) rotate(-32)"><use href="#ico-sandwich"/></g>
+  <g fill="#E9B3FB" transform="translate(550 308) rotate(10)"><use href="#ico-fries"/></g>
+  <g fill="#3B0270" transform="translate(640 362) rotate(-17)"><use href="#ico-egg"/></g>
+  <g fill="#6F00FF" transform="translate(732 316) rotate(36)"><use href="#ico-donut"/></g>
+
+  <g fill="#E9B3FB" transform="translate(20 470) rotate(-14)"><use href="#ico-cookie"/></g>
+  <g fill="#3B0270" transform="translate(108 432) rotate(27)"><use href="#ico-cake"/></g>
+  <g fill="#6F00FF" transform="translate(194 486) rotate(-4)"><use href="#ico-coffee"/></g>
+  <g fill="#b479ff" transform="translate(282 442) rotate(34)"><use href="#ico-bubble"/></g>
+  <g fill="#3B0270" transform="translate(368 492) rotate(-21)"><use href="#ico-soda"/></g>
+  <g fill="#6F00FF" transform="translate(454 440) rotate(8)"><use href="#ico-juice"/></g>
+  <g fill="#E9B3FB" transform="translate(544 488) rotate(-27)"><use href="#ico-cocktail"/></g>
+  <g fill="#3B0270" transform="translate(634 442) rotate(16)"><use href="#ico-burger"/></g>
+  <g fill="#6F00FF" transform="translate(724 490) rotate(-11)"><use href="#ico-pizza"/></g>
+
+  <g fill="#3B0270" transform="translate(30 620) rotate(7)"><use href="#ico-hotdog"/></g>
+  <g fill="#6F00FF" transform="translate(118 674) rotate(-23)"><use href="#ico-taco"/></g>
+  <g fill="#E9B3FB" transform="translate(208 624) rotate(29)"><use href="#ico-burrito"/></g>
+  <g fill="#3B0270" transform="translate(294 672) rotate(-5)"><use href="#ico-chicken"/></g>
+  <g fill="#6F00FF" transform="translate(382 626) rotate(13)"><use href="#ico-sandwich"/></g>
+  <g fill="#a157ff" transform="translate(470 676) rotate(-28)"><use href="#ico-fries"/></g>
+  <g fill="#3B0270" transform="translate(556 624) rotate(22)"><use href="#ico-egg"/></g>
+  <g fill="#6F00FF" transform="translate(646 674) rotate(-9)"><use href="#ico-donut"/></g>
+  <g fill="#E9B3FB" transform="translate(734 628) rotate(34)"><use href="#ico-cookie"/></g>
+</svg>

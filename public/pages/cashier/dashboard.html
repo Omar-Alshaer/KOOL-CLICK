@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Cashier Dashboard</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card" style="margin-top: 1rem">
+        <h1 class="kc-title">Cashier Dashboard</h1>
+        <div id="cashierMini"></div>
+      </section>
+
+      <section class="kc-card kc-cashier-toolbar" style="margin-top: 1rem">
+        <h2 class="kc-title">Quick Controls</h2>
+        <div id="cashierStats" class="kc-cashier-stats"></div>
+        <div class="kc-cashier-controls">
+          <div class="kc-item">
+            <h3 class="kc-title" style="margin-bottom: 0.4rem">Scan QR / Find Order</h3>
+            <div class="kc-inline">
+              <input id="scanInput" class="kc-cashier-field" type="text" placeholder="Scan QR payload or enter Order ID" />
+              <button id="scanFindBtn" type="button">Find</button>
+              <button id="scanOpenBtn" type="button" class="kc-btn-secondary">Open Camera</button>
+            </div>
+          </div>
+
+          <div class="kc-item">
+            <h3 class="kc-title" style="margin-bottom: 0.4rem">Manual Filter</h3>
+            <div class="kc-inline">
+              <input id="orderSearch" class="kc-cashier-field" type="text" placeholder="Search by ID / student" />
+              <select id="sortBy" class="kc-cashier-field">
+                <option value="time">Sort by time</option>
+                <option value="name">Sort by student name</option>
+              </select>
+              <label class="kc-inline" style="margin: 0">
+                <input id="showCompleted" type="checkbox" />
+                <span>Show collected</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ordersRoot" class="kc-grid" style="margin-top: 1rem"></section>
+    </main>
+
+    <div id="cashierOrderModal" class="kc-modal-backdrop" hidden>
+      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-labelledby="cashierOrderModalTitle">
+        <div class="kc-inline" style="justify-content: space-between">
+          <h3 id="cashierOrderModalTitle" class="kc-title" style="margin: 0">Order Details</h3>
+          <button id="orderModalCloseBtn" type="button" class="kc-btn-danger">Close</button>
+        </div>
+        <div id="orderModalBody"></div>
+      </div>
+    </div>
+
+    <div id="cashierScanModal" class="kc-modal-backdrop" hidden>
+      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-labelledby="cashierScanModalTitle">
+        <div class="kc-inline" style="justify-content: space-between">
+          <h3 id="cashierScanModalTitle" class="kc-title" style="margin: 0">Scan QR</h3>
+          <button id="scanCloseBtn" type="button" class="kc-btn-danger">Close Camera</button>
+        </div>
+        <div class="kc-scan-panel">
+          <video id="scanVideo" class="kc-scan-video" playsinline muted></video>
+          <span id="scanHint" class="kc-muted">Point camera to QR code</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="../../js/cashier-dashboard.js"></script>
+  </body>
+</html>

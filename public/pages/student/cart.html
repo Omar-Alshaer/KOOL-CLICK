@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Student Cart</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card" style="margin-top: 1rem">
+        <h1 class="kc-title">Cart</h1>
+        <div id="studentMini"></div>
+      </section>
+
+      <section class="kc-card" style="margin-top: 1rem">
+        <div id="cartRoot"></div>
+
+        <div class="kc-checkout-grid" style="margin-top: 0.8rem">
+          <div class="kc-item">
+            <strong>Payment Method</strong>
+            <div class="kc-payment-options">
+              <label class="kc-payment-option">
+                <input type="radio" name="paymentMethod" value="CashOnDelivery" checked />
+                <span>Cash on Pickup</span>
+              </label>
+              <label class="kc-payment-option">
+                <input type="radio" name="paymentMethod" value="InstaPay" />
+                <span>InstaPay + Receipt</span>
+              </label>
+            </div>
+
+            <div id="receiptSection" class="kc-receipt-panel" style="display: none">
+              <label for="receiptFile">Upload InstaPay Receipt</label>
+              <div class="kc-inline" style="margin-top: 0.45rem">
+                <input id="receiptFile" class="kc-receipt-input" type="file" accept="image/*" />
+                <button id="receiptChooseBtn" type="button" class="kc-btn-secondary">Choose Receipt Image</button>
+                <span id="receiptFileName" class="kc-muted kc-receipt-file-name">No file selected</span>
+              </div>
+              <p class="kc-muted">Receipt is required for InstaPay orders.</p>
+            </div>
+          </div>
+
+          <div class="kc-item">
+            <strong>Promo Code</strong>
+            <div class="kc-inline" style="margin-top: 0.5rem">
+              <input id="promoCodeInput" type="text" placeholder="e.g. WELCOME10" style="max-width: 280px" />
+              <button id="applyPromoBtn" type="button">Apply</button>
+              <button id="clearPromoBtn" type="button" class="kc-btn-secondary">Clear</button>
+            </div>
+            <p id="promoSummary" class="kc-muted" style="margin: 0.5rem 0 0">No promo applied.</p>
+          </div>
+        </div>
+
+        <div class="kc-checkout-totals" style="margin-top: 0.9rem">
+          <div class="kc-inline" style="justify-content: space-between"><span>Subtotal</span><strong id="subtotal">0 EGP</strong></div>
+          <div class="kc-inline" style="justify-content: space-between"><span>Promo Discount</span><strong id="discount">0 EGP</strong></div>
+          <div class="kc-inline" style="justify-content: space-between"><span>Final Payable</span><strong id="total">0 EGP</strong></div>
+          <div id="pointsInfo" class="kc-muted">Points info will appear here.</div>
+        </div>
+
+        <div class="kc-inline" style="justify-content: space-between; margin-top: 0.8rem">
+          <button id="placeOrderBtn" type="button">Place Order</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/student-cart.js"></script>
+  </body>
+</html>
