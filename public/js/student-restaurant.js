@@ -35,10 +35,7 @@ function buildItemsMarkup(category, restaurant) {
     .map(
       (m) => `
         <article class="kc-item">
-          <strong class="kc-food-title">
-            <span class="kc-food-icon" aria-hidden="true">${m.icon || "🍽️"}</span>
-            <span>${m.name}</span>
-          </strong>
+          <strong>${m.name}</strong>
           <div class="kc-muted">${m.desc}</div>
           <div class="kc-inline" style="justify-content: space-between; margin-top: 0.55rem">
             <span>${m.price} EGP</span>
@@ -85,8 +82,7 @@ function renderRestaurantPage(restaurant) {
           .map(
             (c) => `
               <button type="button" class="kc-category-btn ${c.id === defaultCategory ? "active" : ""}" data-category="${c.id}">
-                <span class="kc-food-icon kc-food-icon-sm" aria-hidden="true">${c.icon || "🍽️"}</span>
-                <span>${c.name}</span>
+                ${c.name}
               </button>
             `
           )
@@ -107,10 +103,7 @@ function renderRestaurantPage(restaurant) {
     }
 
     itemsRoot.innerHTML = `
-      <h3 class="kc-title kc-food-title" style="margin-bottom: 0">
-        <span class="kc-food-icon" aria-hidden="true">${category.icon || "🍽️"}</span>
-        <span>${category.name}</span>
-      </h3>
+      <h3 class="kc-title" style="margin-bottom: 0">${category.name}</h3>
       <div class="kc-grid kc-menu-items-grid">${buildItemsMarkup(category, restaurant)}</div>
     `;
 
