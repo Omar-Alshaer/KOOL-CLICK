@@ -1,5 +1,5 @@
-import { guardStudentPage, mountHeader, renderStudentMiniProfile } from "./student-common.js";
-import { cancelStudentOrder, canStudentCancelOrder, getStudentOrders } from "./services/order-service.js";
+import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./clicker-common.js";
+import { cancelClickerOrder, canClickerCancelOrder, getClickerOrders } from "./services/order-service.js";
 import { APP_CONFIG } from "./config/app-config.js";
 import { applyPointsDeltaToProfileCache } from "./services/auth-service.js";
 import { restaurants } from "./data/restaurants.js";
@@ -53,7 +53,14 @@ async function renderOrders(orders) {
   const root = document.getElementById("ordersRoot");
 
   if (!orders.length) {
-    root.innerHTML = '<div class="kc-note">No orders yet.</div>';
+    root.innerHTML = `
+      <div class="kc-empty-state">
+        <div class="kc-empty-icon">📦</div>
+        <h3 class="kc-empty-title">No orders yet</h3>
+        <p class="kc-empty-msg">Place your first order and start earning points!</p>
+        <a class="kc-btn" href="./menu.html">Order Now</a>
+      </div>
+    `;
     return;
   }
 
@@ -96,7 +103,7 @@ async function renderOrders(orders) {
             .join("")}
         </div>
         ${
-          canStudentCancelOrder(order)
+        canClickerCancelOrder(order)
             ? `<div class="kc-order-footer"><button type="button" class="kc-btn-danger kc-order-cancel-btn" data-cancel-order="${order.id}">Cancel Order</button></div>`
             : ""
         }
@@ -107,7 +114,7 @@ async function renderOrders(orders) {
 }
 
 async function loadAndRender(state) {
-  const orders = await getStudentOrders(state.uid);
+  const orders = await getClickerOrders(state.uid);
   await renderOrders(orders);
 
   document.querySelectorAll("button[data-cancel-order]").forEach((btn) => {
@@ -124,9 +131,9 @@ async function loadAndRender(state) {
       if (!ok) return;
 
       try {
-        const result = await cancelStudentOrder({
+        const result = await cancelClickerOrder({
           orderId,
-          universityId: state.profile.universityId,
+          uid: state.uid,
         });
         applyPointsDeltaToProfileCache(state.uid, -result.totalDeducted);
         await showSuccessPopup(
@@ -143,10 +150,10 @@ async function loadAndRender(state) {
 
 async function init() {
   mountHeader({ active: "orders" });
-  const state = await guardStudentPage();
+  const state = await guardClickerPage();
   if (!state) return;
 
-  renderStudentMiniProfile("studentMini", state.profile);
+  renderClickerMiniProfile("clickerMini", state.profile);
 
   try {
     await loadAndRender(state);

@@ -51,8 +51,8 @@ function renderCompleted(orders) {
 
         <div class="kc-two" style="margin-top: 0.55rem">
           <div class="kc-item">
-            <div><strong>Student:</strong> ${order.studentName || "N/A"}</div>
-            <div class="kc-muted">University ID: ${order.studentUniversityId || "N/A"}</div>
+            <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
+            <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
             <div class="kc-muted">Payment: ${order.paymentStatus || "N/A"}</div>
             <div class="kc-muted">Ordered At: ${formatTimestamp(order.createdAt)}</div>
           </div>
@@ -82,9 +82,9 @@ function applyFilter() {
   if (q) {
     out = out.filter((order) => {
       const idHit = order.id.toLowerCase().includes(q);
-      const studentHit = (order.studentName || "").toLowerCase().includes(q);
-      const uniHit = (order.studentUniversityId || "").toLowerCase().includes(q);
-      return idHit || studentHit || uniHit;
+      const clickerHit = (order.clickerName || "").toLowerCase().includes(q);
+      const phoneHit = (order.clickerPhone || "").toLowerCase().includes(q);
+      return idHit || clickerHit || phoneHit;
     });
   }
 

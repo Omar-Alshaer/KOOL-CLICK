@@ -1,9 +1,22 @@
 import { auth } from "./config/firebase.js";
-import { getCurrentStudentProfile, logoutUser, watchAuthState } from "./services/auth-service.js";
+import { getCurrentClickerProfile, logoutUser, watchAuthState } from "./services/auth-service.js";
 import { getLevelFromPoints } from "./utils/levels.js";
 import { showConfirmPopup, showErrorPopup } from "./utils/popup.js";
+import { getCart } from "./utils/storage.js";
 
-export async function guardStudentPage() {
+function getCartCount() {
+  return getCart().reduce((sum, item) => sum + (item.qty || 1), 0);
+}
+
+export function updateCartBadge() {
+  const badge = document.getElementById("kcCartBadge");
+  if (!badge) return;
+  const count = getCartCount();
+  badge.textContent = count;
+  badge.style.display = count > 0 ? "flex" : "none";
+}
+
+export async function guardClickerPage() {
   return new Promise((resolve) => {
     watchAuthState(async (user) => {
       if (!user) {
@@ -12,7 +25,7 @@ export async function guardStudentPage() {
         return;
       }
 
-      const profile = await getCurrentStudentProfile(user.uid, { forceFresh: true });
+      const profile = await getCurrentClickerProfile(user.uid, { forceFresh: true });
       if (!profile) {
         await logoutUser();
         window.location.href = "./login.html";
@@ -33,12 +46,12 @@ export function mountHeader({ active = "" }) {
   host.innerHTML = `
     <div class="kc-topbar">
       <div class="kc-topbar-brand">
-        <img class="kc-topbar-logo" src="../../assets/temp/logo_trans.svg" alt="Kool Click Logo" />
+        <img class="kc-topbar-logo" src="../../assets/brand/logo_trans.svg" alt="Kool Click Logo" />
       </div>
       <nav class="kc-topbar-nav">
         <a class="kc-topbar-link ${active === "home" ? "is-active" : ""}" href="./home.html"><span class="kc-topbar-ico">🏠</span><span class="kc-topbar-txt">Home</span></a>
         <a class="kc-topbar-link ${active === "menu" ? "is-active" : ""}" href="./menu.html"><span class="kc-topbar-ico">🍽️</span><span class="kc-topbar-txt">Menu</span></a>
-        <a class="kc-topbar-link ${active === "cart" ? "is-active" : ""}" href="./cart.html"><span class="kc-topbar-ico">🛒</span><span class="kc-topbar-txt">Cart</span></a>
+        <a class="kc-topbar-link ${active === "cart" ? "is-active" : ""}" href="./cart.html"><span class="kc-topbar-ico">🛒</span><span class="kc-topbar-txt">Cart</span><span id="kcCartBadge" class="kc-cart-badge" style="display:none">0</span></a>
         <a class="kc-topbar-link ${active === "orders" ? "is-active" : ""}" href="./orders.html"><span class="kc-topbar-ico">📦</span><span class="kc-topbar-txt">Orders</span></a>
         <a class="kc-topbar-link ${active === "profile" ? "is-active" : ""}" href="./profile.html"><span class="kc-topbar-ico">👤</span><span class="kc-topbar-txt">Profile</span></a>
         <button id="logoutBtn" class="kc-topbar-link kc-topbar-danger" type="button"><span class="kc-topbar-ico">⏻</span><span class="kc-topbar-txt">Logout</span></button>
@@ -47,6 +60,14 @@ export function mountHeader({ active = "" }) {
   `;
 
   const toggleNode = host.querySelector(".kc-topbar-brand");
+
+  // Update cart badge immediately then listen for changes
+  updateCartBadge();
+  window.addEventListener("storage", (e) => {
+    if (e.key === "koolclick_clicker_cart") updateCartBadge();
+  });
+  // Also update on focus (when user comes back from cart page)
+  window.addEventListener("focus", updateCartBadge);
   const sidebarStateKey = "kc_sidebar_collapsed";
   const applyCollapsed = (collapsed) => {
     document.body.classList.toggle("kc-sidebar-collapsed", collapsed);
@@ -94,7 +115,7 @@ export function mountHeader({ active = "" }) {
   });
 }
 
-export function renderStudentMiniProfile(targetId, profile) {
+export function renderClickerMiniProfile(targetId, profile) {
   const el = document.getElementById(targetId);
   if (!el) return;
 
@@ -105,7 +126,7 @@ export function renderStudentMiniProfile(targetId, profile) {
     <div class="kc-inline">
       <img src="../../assets/Characters/${profile.avatar}" alt="Avatar" width="54" height="54" style="image-rendering: pixelated; border: 2px solid #4b067f" />
       <div>
-        <div><strong>${profile.fullName}</strong> (${profile.universityId})</div>
+        <div><strong>${profile.fullName}</strong>${profile.username ? ` <span class="kc-muted" style="font-size:0.82em">@${profile.username}</span>` : ""}</div>
         <div class="kc-muted">Points: <span class="${pointsClass}">${points}</span> | ${level.name} (L${level.level})</div>
       </div>
     </div>

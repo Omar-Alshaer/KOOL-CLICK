@@ -2,7 +2,7 @@ export const restaurants = [
   {
     id: "r1",
     name: "Pixel Bites",
-    image: "../../assets/temp/logo.svg",
+    image: "../../assets/brand/logo.svg",
     rating: 4.7,
     reviews: 382,
     deliveryTime: "12-18 min",
@@ -29,7 +29,7 @@ export const restaurants = [
   {
     id: "r2",
     name: "Neon Pasta",
-    image: "../../assets/temp/logo.svg",
+    image: "../../assets/brand/logo.svg",
     rating: 4.5,
     reviews: 241,
     deliveryTime: "15-22 min",
@@ -56,7 +56,7 @@ export const restaurants = [
   {
     id: "r3",
     name: "Campus Grill",
-    image: "../../assets/temp/logo.svg",
+    image: "../../assets/brand/logo.svg",
     rating: 4.8,
     reviews: 519,
     deliveryTime: "10-16 min",

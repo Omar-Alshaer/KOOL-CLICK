@@ -35,7 +35,7 @@ export function mountCashierHeader({ active = "dashboard" } = {}) {
   host.innerHTML = `
     <div class="kc-topbar">
       <div class="kc-topbar-brand">
-        <img class="kc-topbar-logo" src="../../assets/temp/logo_trans.svg" alt="Kool Click Logo" />
+        <img class="kc-topbar-logo" src="../../assets/brand/logo_trans.svg" alt="Kool Click Logo" />
       </div>
       <nav class="kc-topbar-nav">
         <a class="kc-topbar-link ${active === "dashboard" ? "is-active" : ""}" href="./dashboard.html"><span class="kc-topbar-ico">📋</span><span class="kc-topbar-txt">Dashboard</span></a>

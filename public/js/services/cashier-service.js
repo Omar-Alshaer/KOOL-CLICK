@@ -193,30 +193,18 @@ export async function collectOrderByCashier({ orderId, cashierRestaurantId }) {
 
     const isCod = order.paymentMethod === APP_CONFIG.paymentMethods.cod;
     const shouldGrantPointsNow = order.pointsGranted !== true;
-    let userSnap = null;
-    let userRef = null;
-    let resolvedUniversityId = order.studentUniversityId || "";
+    let clickerSnap = null;
+    let clickerRef = null;
 
     if (shouldGrantPointsNow) {
-      if (resolvedUniversityId) {
-        userRef = doc(db, "users", resolvedUniversityId);
-        userSnap = await transaction.get(userRef);
-      }
+      const clickerUid = order.clickerUid;
+      if (!clickerUid) throw new Error("Clicker profile not linked to this order.");
 
-      if ((!userSnap || !userSnap.exists()) && order.studentUid) {
-        const indexRef = doc(db, "userAuthIndex", order.studentUid);
-        const indexSnap = await transaction.get(indexRef);
-        const fallbackUniversityId = indexSnap.exists() ? indexSnap.data().universityId : "";
+      clickerRef = doc(db, "clickers", clickerUid);
+      clickerSnap = await transaction.get(clickerRef);
 
-        if (fallbackUniversityId) {
-          resolvedUniversityId = fallbackUniversityId;
-          userRef = doc(db, "users", fallbackUniversityId);
-          userSnap = await transaction.get(userRef);
-        }
-      }
-
-      if (!userSnap || !userSnap.exists()) {
-        throw new Error("Student profile not found, points could not be added.");
+      if (!clickerSnap.exists()) {
+        throw new Error("Clicker profile not found, points could not be added.");
       }
     }
 
@@ -228,12 +216,12 @@ export async function collectOrderByCashier({ orderId, cashierRestaurantId }) {
       updatedAt: serverTimestamp(),
     });
 
-    if (shouldGrantPointsNow && userRef && userSnap?.exists()) {
-      const currentPoints = userSnap.data().points || 0;
+    if (shouldGrantPointsNow && clickerRef && clickerSnap?.exists()) {
+      const currentPoints = clickerSnap.data().points || 0;
       const newPoints = currentPoints + (order.pointsEarned || 0);
       const level = getLevelFromPoints(newPoints);
 
-      transaction.update(userRef, {
+      transaction.update(clickerRef, {
         points: newPoints,
         level: level.level,
         updatedAt: serverTimestamp(),

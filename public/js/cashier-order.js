@@ -106,7 +106,7 @@ function syncPicker() {
   picker.innerHTML = currentOrders
     .map((order) => {
       const finalTotal = getOrderFinalTotal(order);
-      return `<option value="${order.id}">${formatOrderId(order.id)} | ${order.studentName || "Student"} | ${formatMoney(finalTotal)} | ${order.status} | ${formatTimestamp(order.createdAt)}</option>`;
+      return `<option value="${order.id}">${formatOrderId(order.id)} | ${order.clickerName || "Clicker"} | ${formatMoney(finalTotal)} | ${order.status} | ${formatTimestamp(order.createdAt)}</option>`;
     })
     .join("");
 
@@ -158,8 +158,8 @@ function renderSelectedOrder() {
 
       <div class="kc-order-layout kc-order-layout-stack" style="margin-top: 0.65rem">
         <div class="kc-item kc-order-info">
-          <div><strong>Student:</strong> ${order.studentName || "N/A"}</div>
-          <div class="kc-muted">University ID: ${order.studentUniversityId || "N/A"}</div>
+          <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
+          <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
           <div class="kc-muted">Method: ${order.paymentMethod || "N/A"}</div>
           <div class="kc-muted">Payment: ${order.paymentStatus || "N/A"}</div>
           <div class="kc-muted">Ordered At: ${formatTimestamp(order.createdAt)}</div>
@@ -245,7 +245,7 @@ function renderSelectedOrder() {
         orderId: order.id,
         cashierRestaurantId: currentState.profile.restaurantId,
       });
-      const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to student.` : "";
+      const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
       await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
       await loadOrders();
     } catch (error) {

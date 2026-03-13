@@ -59,10 +59,10 @@ function splitDiscountByGroup(groups, totalDiscount) {
   return splits;
 }
 
-export async function placeStudentOrders({
+export async function placeClickerOrders({
   uid,
   fullName,
-  universityId,
+  phone,
   cartItems,
   paymentMethod = APP_CONFIG.paymentMethods.cod,
   receiptImageUrl = "",
@@ -88,9 +88,9 @@ export async function placeStudentOrders({
     const orderRef = doc(collection(db, "orders"));
 
     batch.set(orderRef, {
-      studentUid: uid,
-      studentName: fullName,
-      studentUniversityId: universityId,
+      clickerUid: uid,
+      clickerName: fullName,
+      clickerPhone: phone,
       restaurantId: group.restaurantId,
       items: group.items,
       subtotal,
@@ -117,14 +117,14 @@ export async function placeStudentOrders({
   });
 
   if (totalPointsToGrantNow > 0) {
-    const userRef = doc(db, "users", universityId);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      const currentPoints = userSnap.data().points || 0;
+    const clickerRef = doc(db, "clickers", uid);
+    const clickerSnap = await getDoc(clickerRef);
+    if (clickerSnap.exists()) {
+      const currentPoints = clickerSnap.data().points || 0;
       const newPoints = currentPoints + totalPointsToGrantNow;
       const level = getLevelFromPoints(newPoints);
 
-      batch.update(userRef, {
+      batch.update(clickerRef, {
         points: newPoints,
         level: level.level,
         updatedAt: serverTimestamp(),
@@ -147,11 +147,11 @@ export async function placeStudentOrders({
   };
 }
 
-export async function getStudentOrders(uid) {
+export async function getClickerOrders(uid) {
   try {
     const indexedQuery = query(
       collection(db, "orders"),
-      where("studentUid", "==", uid),
+      where("clickerUid", "==", uid),
       orderBy("createdAt", "desc"),
       limit(30)
     );
@@ -166,7 +166,7 @@ export async function getStudentOrders(uid) {
 
     const fallbackQuery = query(
       collection(db, "orders"),
-      where("studentUid", "==", uid),
+      where("clickerUid", "==", uid),
       limit(60)
     );
 
@@ -182,21 +182,21 @@ export async function getStudentOrders(uid) {
   }
 }
 
-export function canStudentCancelOrder(order) {
+export function canClickerCancelOrder(order) {
   return order.status !== "Collected";
 }
 
-export async function cancelStudentOrder({ orderId, universityId }) {
+export async function cancelClickerOrder({ orderId, uid }) {
   const penalty = APP_CONFIG.points.cancellationPenaltyPoints || 0;
   let totalPenaltyApplied = penalty;
 
   await runTransaction(db, async (transaction) => {
     const orderRef = doc(db, "orders", orderId);
-    const userRef = doc(db, "users", universityId);
+    const clickerRef = doc(db, "clickers", uid);
 
-    const [orderSnap, userSnap] = await Promise.all([
+    const [orderSnap, clickerSnap] = await Promise.all([
       transaction.get(orderRef),
-      transaction.get(userRef),
+      transaction.get(clickerRef),
     ]);
 
     if (!orderSnap.exists()) {
@@ -204,15 +204,15 @@ export async function cancelStudentOrder({ orderId, universityId }) {
     }
 
     const order = orderSnap.data();
-    if (!canStudentCancelOrder(order)) {
+    if (!canClickerCancelOrder(order)) {
       throw new Error("This order can no longer be cancelled.");
     }
 
-    if (!userSnap.exists()) {
-      throw new Error("Student profile not found.");
+    if (!clickerSnap.exists()) {
+      throw new Error("Clicker profile not found.");
     }
 
-    const currentPoints = userSnap.data().points || 0;
+    const currentPoints = clickerSnap.data().points || 0;
     const revokeGrantedPoints = order.pointsGranted ? order.pointsEarned || 0 : 0;
     const totalPenalty = penalty + revokeGrantedPoints;
     totalPenaltyApplied = totalPenalty;
@@ -221,7 +221,7 @@ export async function cancelStudentOrder({ orderId, universityId }) {
 
     transaction.delete(orderRef);
 
-    transaction.update(userRef, {
+    transaction.update(clickerRef, {
       points: newPoints,
       level: level.level,
       updatedAt: serverTimestamp(),

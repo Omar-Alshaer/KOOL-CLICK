@@ -23,7 +23,7 @@ body {
   line-height: 1.05;
   letter-spacing: 0.03em;
   color: var(--kc-ink);
-  background-image: url('/public/assets/temp/back.svg');
+  background-image: url('/public/assets/brand/back.svg');
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -127,6 +127,26 @@ body {
 
 #kcHeader .kc-topbar-link.kc-topbar-danger:hover {
   box-shadow: 3px 3px 0 #7a0f0f;
+}
+
+.kc-cart-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin-left: 4px;
+  border-radius: 9px;
+  background: #ff2d55;
+  color: #fff;
+  font-size: 11px;
+  font-family: "Jersey 10", "Courier New", monospace;
+  font-weight: 700;
+  line-height: 1;
+  border: 1.5px solid #fff;
+  box-shadow: 1px 1px 0 #7a0f0f;
+  pointer-events: none;
 }
 
 /* Sidebar layout for authenticated student/cashier pages */
@@ -338,6 +358,30 @@ body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-logo {
   justify-self: center;
 }
 
+/* Login / Register page header (no sidebar) */
+.kc-login-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.4rem 0 1rem;
+}
+
+.kc-login-header .kc-brand {
+  min-height: 80px;
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  border-width: 3px;
+  box-shadow: 5px 5px 0 #250049;
+  gap: 0.7rem;
+}
+
+.kc-login-header .kc-brand img {
+  width: clamp(72px, 8vw, 110px);
+  max-height: 64px;
+  height: auto;
+  object-fit: contain;
+}
+
 .kc-brand-text {
   display: grid;
   gap: 0.08rem;
@@ -345,6 +389,9 @@ body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-logo {
 
 .kc-brand-title {
   line-height: 0.9;
+  color: #fff1f1;
+  font-size: clamp(26px, 2.4vw, 36px);
+  letter-spacing: 0.06em;
 }
 
 .kc-brand-slogan {
@@ -923,6 +970,48 @@ select {
   padding: 0.6rem;
 }
 
+.kc-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  background: #fdf4ff;
+  border: 3px dashed #c97eff;
+  border-radius: 4px;
+}
+
+.kc-empty-icon {
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 1;
+  filter: grayscale(0.15);
+  animation: kc-empty-bounce 2.4s ease-in-out infinite;
+}
+
+.kc-empty-title {
+  font-family: "Jersey 10", "Courier New", monospace;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  color: #3b0270;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.kc-empty-msg {
+  color: #7a4fa0;
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 28ch;
+  line-height: 1.5;
+}
+
+@keyframes kc-empty-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
 .kc-avatar-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
@@ -1068,6 +1157,35 @@ select {
   margin: 1rem auto 0;
   width: min(860px, 100%);
   padding: 1rem;
+}
+
+.kc-forgot-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding: 0.55rem 1rem;
+  border: 2px dashed #8f4bc2;
+  border-radius: 6px;
+  background: #fdf4ff;
+  color: #6a0dad;
+  font-size: 0.88em;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.kc-forgot-link:hover {
+  background: #f3e0ff;
+  border-color: #5a0091;
+  color: #3b0270;
+}
+
+.kc-forgot-icon {
+  font-size: 1em;
+  line-height: 1;
 }
 
 .kc-login-form {

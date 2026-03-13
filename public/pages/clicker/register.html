@@ -3,26 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kool Click | Student Register</title>
+    <title>Kool Click | Clicker Register</title>
     <link rel="stylesheet" href="../../css/theme.css" />
   </head>
   <body>
     <main class="kc-shell">
-      <header id="kcHeader">
+      <header id="kcHeader" class="kc-login-header">
         <div class="kc-brand">
-          <img src="../../assets/temp/logo_trans.svg" alt="Kool Click" />
+          <img src="../../assets/brand/logo_trans.svg" alt="Kool Click" />
+          <div class="kc-brand-text">
+            <span class="kc-brand-title">KOOL CLICK</span>
+            <span class="kc-brand-slogan">Click. Order. Enjoy.</span>
+          </div>
         </div>
       </header>
 
       <section class="kc-register-hero">
-        <h1 class="kc-register-hero-title">Create Your Student Character</h1>
+        <h1 class="kc-register-hero-title">Create Your Clicker Character</h1>
         <p class="kc-register-hero-subtitle">
-          Student area only. No access to admin, manager, or cashier pages.
+          Your personal Kool Click account. Order food, earn points, unlock rewards.
         </p>
         <div class="kc-register-rules">
-          <span class="kc-chip">ID: 8 digits (starts with 2)</span>
+          <span class="kc-chip">Choose a unique username</span>
           <span class="kc-chip">Phone: 01XXXXXXXXX</span>
           <span class="kc-chip">Pick your avatar</span>
+          <span class="kc-chip">🎂 Birthday bonus points!</span>
         </div>
       </section>
 
@@ -30,7 +35,7 @@
         <form id="registerForm" class="kc-form">
           <div class="kc-register-grid">
             <section class="kc-register-panel">
-              <h2 class="kc-title">Student Info</h2>
+              <h2 class="kc-title">Clicker Info</h2>
               <div class="kc-two">
                 <div>
                   <label for="fullName">Full Name</label>
@@ -38,8 +43,8 @@
                 </div>
 
                 <div>
-                  <label for="universityId">University ID</label>
-                  <input id="universityId" name="universityId" type="text" maxlength="8" placeholder="2xxxxxxx" required />
+                  <label for="username">Username</label>
+                  <input id="username" name="username" type="text" placeholder="letters, numbers, _ (3–20 chars)" autocomplete="username" required />
                 </div>
 
                 <div>
@@ -50,6 +55,11 @@
                 <div>
                   <label for="birthDate">Birth Date</label>
                   <input id="birthDate" name="birthDate" type="date" required />
+                </div>
+
+                <div>
+                  <label for="email">Email <span class="kc-muted" style="font-size:0.75em">(optional)</span></label>
+                  <input id="email" name="email" type="email" placeholder="you@example.com" />
                 </div>
               </div>
             </section>
@@ -77,7 +87,7 @@
               <strong class="kc-avatar-title">Choose Avatar</strong>
               <span class="kc-chip">Selected: <span id="selectedAvatarName">none</span></span>
             </div>
-            <p class="kc-muted kc-avatar-help">Pick a character style for your student profile.</p>
+            <p class="kc-muted kc-avatar-help">Pick a character style for your Clicker profile.</p>
 
             <div class="kc-avatar-picked">
               <img id="selectedAvatarPreview" src="" alt="Selected avatar" />
@@ -106,6 +116,6 @@
       </div>
     </div>
 
-    <script type="module" src="../../js/student-register.js"></script>
+    <script type="module" src="../../js/clicker-register.js"></script>
   </body>
 </html>

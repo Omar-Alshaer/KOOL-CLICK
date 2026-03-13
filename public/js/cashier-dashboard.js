@@ -115,8 +115,8 @@ function renderOrders(orders) {
 
         <div class="kc-order-summary-grid" style="margin-top: 0.55rem">
           <div class="kc-item">
-            <div><strong>Student:</strong> ${order.studentName || "N/A"}</div>
-            <div class="kc-muted">University ID: ${order.studentUniversityId || "N/A"}</div>
+            <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
+            <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
           </div>
           <div class="kc-item">
             <div><strong>Payment:</strong> ${order.paymentStatus || "N/A"}</div>
@@ -174,8 +174,8 @@ function renderOrderModal(order) {
   body.innerHTML = `
     <div class="kc-order-layout kc-order-layout-stack" style="margin-top: 0.55rem">
       <div class="kc-item kc-order-info">
-        <div><strong>Student:</strong> ${order.studentName || "N/A"}</div>
-        <div class="kc-muted">University ID: ${order.studentUniversityId || "N/A"}</div>
+        <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
+        <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
         <div class="kc-muted">Method: ${order.paymentMethod || "N/A"}</div>
         <div class="kc-muted">Payment: ${order.paymentStatus || "N/A"}</div>
         <div class="kc-muted">Status: ${order.status}</div>
@@ -265,7 +265,7 @@ function renderOrderModal(order) {
         orderId: order.id,
         cashierRestaurantId: currentState.profile.restaurantId,
       });
-      const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to student.` : "";
+      const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
       await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
       closeOrderModal();
       await loadOrders();
@@ -486,14 +486,14 @@ function applyFiltersAndRender() {
   if (queryText) {
     filtered = filtered.filter((order) => {
       const idHit = order.id.toLowerCase().includes(queryText);
-      const studentHit = (order.studentName || "").toLowerCase().includes(queryText);
-      const uniHit = (order.studentUniversityId || "").toLowerCase().includes(queryText);
-      return idHit || studentHit || uniHit;
+      const clickerHit = (order.clickerName || "").toLowerCase().includes(queryText);
+      const phoneHit = (order.clickerPhone || "").toLowerCase().includes(queryText);
+      return idHit || clickerHit || phoneHit;
     });
   }
 
   if (sortBy === "name") {
-    filtered.sort((a, b) => (a.studentName || "").localeCompare(b.studentName || ""));
+    filtered.sort((a, b) => (a.clickerName || "").localeCompare(b.clickerName || ""));
   } else {
     filtered.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
   }

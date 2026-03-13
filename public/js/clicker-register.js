@@ -1,7 +1,8 @@
 import {
-  validateUniversityId,
   validatePhone,
+  validateEmail,
   validateBirthDate,
+  validateUsername,
 } from "./utils/validators.js";
 import { APP_CONFIG } from "./config/app-config.js";
 import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
@@ -116,9 +117,10 @@ initAvatars();
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const fullName = document.getElementById("fullName").value.trim();
-  const universityId = document.getElementById("universityId").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  const fullName  = document.getElementById("fullName").value.trim();
+  const username   = document.getElementById("username").value.trim();
+  const phone      = document.getElementById("phone").value.trim();
+  const email      = document.getElementById("email")?.value.trim() || "";
   const birthDate = document.getElementById("birthDate").value;
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
@@ -128,13 +130,26 @@ form?.addEventListener("submit", async (event) => {
     return;
   }
 
-  if (!validateUniversityId(universityId)) {
-    await showErrorPopup("University ID must be 8 digits and start with 2.", "Invalid University ID");
+  if (!username) {
+    await showErrorPopup("Username is required.", "Missing Data");
+    return;
+  }
+
+  if (!validateUsername(username)) {
+    await showErrorPopup(
+      "Username must be 3–20 characters and only contain letters, numbers, or underscores.",
+      "Invalid Username"
+    );
     return;
   }
 
   if (!validatePhone(phone)) {
     await showErrorPopup("Phone must be Egyptian mobile format 01XXXXXXXXX.", "Invalid Phone Number");
+    return;
+  }
+
+  if (email && !validateEmail(email)) {
+    await showErrorPopup("Invalid email address.", "Invalid Email");
     return;
   }
 
@@ -159,7 +174,7 @@ form?.addEventListener("submit", async (event) => {
   }
 
   try {
-    const [{ registerStudent }, { auth }] = await Promise.all([
+    const [{ registerClicker }, { auth }] = await Promise.all([
       import("./services/auth-service.js"),
       import("./config/firebase.js"),
     ]);
@@ -172,11 +187,12 @@ form?.addEventListener("submit", async (event) => {
       return;
     }
 
-    await registerStudent({
-      universityId,
-      password,
+    await registerClicker({
       fullName,
+      username,
       phone,
+      email,
+      password,
       birthDate,
       avatar: selectedAvatar,
     });

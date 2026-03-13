@@ -1,8 +1,8 @@
-import { guardStudentPage, mountHeader, renderStudentMiniProfile } from "./student-common.js";
+import { guardClickerPage, mountHeader, renderClickerMiniProfile, updateCartBadge } from "./clicker-common.js";
 import { APP_CONFIG } from "./config/app-config.js";
 import { getCart, saveCart, clearCart } from "./utils/storage.js";
 import { applyPointsDeltaToProfileCache } from "./services/auth-service.js";
-import { placeStudentOrders } from "./services/order-service.js";
+import { placeClickerOrders } from "./services/order-service.js";
 import { uploadReceiptToCloudinary } from "./services/upload-service.js";
 import { validatePromo } from "./utils/promo.js";
 import { pointsFromAmount } from "./utils/levels.js";
@@ -47,7 +47,14 @@ function renderCart() {
   const root = document.getElementById("cartRoot");
 
   if (!items.length) {
-    root.innerHTML = '<div class="kc-note">Your cart is empty.</div>';
+    root.innerHTML = `
+      <div class="kc-empty-state">
+        <div class="kc-empty-icon">🛒</div>
+        <h3 class="kc-empty-title">Your cart is empty</h3>
+        <p class="kc-empty-msg">Browse our restaurants and add something delicious!</p>
+        <a class="kc-btn" href="./menu.html">Browse Menu</a>
+      </div>
+    `;
     appliedPromo = null;
     document.getElementById("promoSummary").textContent = "No promo applied.";
     updateTotals();
@@ -74,6 +81,7 @@ function renderCart() {
       const cart = getCart();
       cart.splice(Number(btn.dataset.remove), 1);
       saveCart(cart);
+      updateCartBadge();
       renderCart();
     });
   });
@@ -158,10 +166,10 @@ async function getReceiptUrlIfNeeded(paymentMethod) {
 
 async function init() {
   mountHeader({ active: "cart" });
-  const state = await guardStudentPage();
+  const state = await guardClickerPage();
   if (!state) return;
 
-  renderStudentMiniProfile("studentMini", state.profile);
+  renderClickerMiniProfile("clickerMini", state.profile);
 
   renderCart();
   wirePaymentMethodUI();
@@ -193,10 +201,10 @@ async function init() {
 
     try {
       const receiptImageUrl = await getReceiptUrlIfNeeded(paymentMethod);
-      const result = await placeStudentOrders({
+      const result = await placeClickerOrders({
         uid: state.uid,
         fullName: state.profile.fullName,
-        universityId: state.profile.universityId,
+        phone: state.profile.phone,
         cartItems: items,
         paymentMethod,
         receiptImageUrl,
@@ -205,6 +213,7 @@ async function init() {
 
       clearCart();
       applyPointsDeltaToProfileCache(state.uid, result.pointsGrantedNow);
+      updateCartBadge();
       appliedPromo = null;
       document.getElementById("promoCodeInput").value = "";
       document.getElementById("promoSummary").textContent = "No promo applied.";

@@ -1,4 +1,4 @@
-import { guardStudentPage, mountHeader, renderStudentMiniProfile } from "./student-common.js";
+import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./clicker-common.js";
 import { restaurants } from "./data/restaurants.js";
 
 function renderStars(rating) {
@@ -40,10 +40,10 @@ function renderRestaurants() {
 
 async function init() {
   mountHeader({ active: "menu" });
-  const state = await guardStudentPage();
+  const state = await guardClickerPage();
   if (!state) return;
 
-  renderStudentMiniProfile("studentMini", state.profile);
+  renderClickerMiniProfile("clickerMini", state.profile);
   renderRestaurants();
 }
 

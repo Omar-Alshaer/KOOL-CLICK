@@ -8,108 +8,107 @@ import {
   doc,
   setDoc,
   getDoc,
-  deleteDoc,
-  serverTimestamp,
   runTransaction,
+  serverTimestamp,
 } from "../config/firebase.js";
 import { APP_CONFIG } from "../config/app-config.js";
 import { getLevelFromPoints } from "../utils/levels.js";
 
-const PROFILE_CACHE_KEY = "kc_student_profile_cache";
+// ─── Cache ────────────────────────────────────────────────────────────────────
+const PROFILE_CACHE_KEY = "kc_clicker_profile_cache";
 const PROFILE_CACHE_TTL_MS = 5 * 60 * 1000;
 
-function studentEmailFromUniversityId(universityId) {
-  return `${universityId}@students.koolclick.app`;
+function makeAuthEmail(phone) {
+  return `${phone}@koolclick.app`;
 }
 
-function writeProfileCache({ uid, universityId, profile }) {
+function writeProfileCache({ uid, profile }) {
   try {
     localStorage.setItem(
       PROFILE_CACHE_KEY,
-      JSON.stringify({
-        uid,
-        universityId,
-        profile,
-        ts: Date.now(),
-      })
+      JSON.stringify({ uid, profile, ts: Date.now() })
     );
-  } catch {
-    // ignore cache write failures
-  }
+  } catch { /* ignore */ }
 }
 
 function readProfileCache(uid) {
   try {
     const raw = localStorage.getItem(PROFILE_CACHE_KEY);
     if (!raw) return null;
-
     const parsed = JSON.parse(raw);
-    if (!parsed || parsed.uid !== uid || !parsed.profile || !parsed.universityId) return null;
+    if (!parsed || parsed.uid !== uid || !parsed.profile) return null;
     if (Date.now() - parsed.ts > PROFILE_CACHE_TTL_MS) return null;
-
     return parsed;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 function clearProfileCache() {
-  try {
-    localStorage.removeItem(PROFILE_CACHE_KEY);
-  } catch {
-    // ignore cache clear failures
-  }
+  try { localStorage.removeItem(PROFILE_CACHE_KEY); } catch { /* ignore */ }
 }
 
+// ─── Detect login input type ──────────────────────────────────────────────────
+export function detectLoginInput(value) {
+  if (/^[\w.+-]+@[\w.-]+\.[a-z]{2,}$/i.test(value)) return "email";
+  if (/^01\d{9}$/.test(value)) return "phone";
+  return "username";
+}
+
+// ─── Points cache delta ───────────────────────────────────────────────────────
 export function applyPointsDeltaToProfileCache(uid, deltaPoints) {
   if (!deltaPoints) return;
-
   const cached = readProfileCache(uid);
   if (!cached) return;
-
   const current = Number(cached.profile.points || 0);
   const updatedPoints = current + Number(deltaPoints);
   const level = getLevelFromPoints(updatedPoints);
-
   writeProfileCache({
     uid,
-    universityId: cached.universityId,
-    profile: {
-      ...cached.profile,
-      points: updatedPoints,
-      level: level.level,
-    },
+    profile: { ...cached.profile, points: updatedPoints, level: level.level },
   });
 }
 
-export async function registerStudent({ universityId, password, fullName, phone, birthDate, avatar }) {
-  const universityRef = doc(db, "universityIds", universityId);
+// ─── Register ─────────────────────────────────────────────────────────────────
+export async function registerClicker({ fullName, username, phone, email, password, birthDate, avatar }) {
+  const normalizedUsername = username.toLowerCase().trim();
+  const authEmail = makeAuthEmail(phone);
 
-  await runTransaction(db, async (transaction) => {
-    const existing = await transaction.get(universityRef);
-    if (existing.exists()) {
-      throw new Error("University ID already exists.");
-    }
-    transaction.set(universityRef, { reservedAt: serverTimestamp() });
+  const usernameRef = doc(db, "clickerIndex", normalizedUsername);
+  const phoneRef    = doc(db, "clickerIndex", phone);
+
+  // Atomically check + reserve username and phone
+  await runTransaction(db, async (tx) => {
+    const [uSnap, pSnap] = await Promise.all([
+      tx.get(usernameRef),
+      tx.get(phoneRef),
+    ]);
+    if (uSnap.exists()) throw new Error("Username already taken. Choose another.");
+    if (pSnap.exists()) throw new Error("Phone number already registered.");
+    tx.set(usernameRef, { reserved: true });
+    tx.set(phoneRef,    { reserved: true });
   });
 
+  // Create Firebase Auth user
   let cred;
   try {
-    const email = studentEmailFromUniversityId(universityId);
-    cred = await createUserWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    await deleteDoc(universityRef);
-    throw error;
+    cred = await createUserWithEmailAndPassword(auth, authEmail, password);
+  } catch (err) {
+    // Rollback reservations on auth failure
+    await Promise.allSettled([
+      setDoc(usernameRef, { _deleted: true }),
+      setDoc(phoneRef,    { _deleted: true }),
+    ]);
+    throw err;
   }
 
   const signupPoints = APP_CONFIG.signupBonusPoints || 0;
-  const signupLevel = getLevelFromPoints(signupPoints);
+  const signupLevel  = getLevelFromPoints(signupPoints);
   const profile = {
-    role: "student",
+    role: "clicker",
     authUid: cred.user.uid,
-    universityId,
     fullName,
+    username: normalizedUsername,
     phone,
+    email: email || "",
     birthDate,
     avatar,
     points: signupPoints,
@@ -117,88 +116,71 @@ export async function registerStudent({ universityId, password, fullName, phone,
     createdAt: serverTimestamp(),
   };
 
-  await setDoc(doc(db, "users", universityId), profile);
+  // Write profile + finalize index entries
+  await Promise.all([
+    setDoc(doc(db, "clickers", cred.user.uid), profile),
+    setDoc(usernameRef, { uid: cred.user.uid, authEmail }),
+    setDoc(phoneRef,    { uid: cred.user.uid, authEmail }),
+  ]);
 
-  await setDoc(doc(db, "userAuthIndex", cred.user.uid), {
-    universityId,
-    role: "student",
-    createdAt: serverTimestamp(),
-  });
-
-  await setDoc(
-    universityRef,
-    {
-      authUid: cred.user.uid,
-      role: "student",
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
-
-  writeProfileCache({
-    uid: cred.user.uid,
-    universityId,
-    profile: {
-      ...profile,
-      createdAt: null,
-    },
-  });
-
+  writeProfileCache({ uid: cred.user.uid, profile: { ...profile, createdAt: null } });
   return cred.user;
 }
 
-export async function loginStudent({ universityId, password }) {
-  const email = studentEmailFromUniversityId(universityId);
-  const cred = await signInWithEmailAndPassword(auth, email, password);
-  const userDoc = await getDoc(doc(db, "users", universityId));
+// ─── Login ────────────────────────────────────────────────────────────────────
+export async function loginClicker({ identifier, password }) {
+  const type = detectLoginInput(identifier);
+  let authEmail;
 
-  if (!userDoc.exists() || userDoc.data().role !== "student" || userDoc.data().authUid !== cred.user.uid) {
-    await signOut(auth);
-    throw new Error("Only student access is allowed here.");
+  if (type === "email") {
+    authEmail = identifier;
+  } else {
+    const key = type === "phone" ? identifier : identifier.toLowerCase().trim();
+    const snap = await getDoc(doc(db, "clickerIndex", key));
+    if (!snap.exists() || !snap.data().authEmail) {
+      throw new Error(
+        "No account found with this " + (type === "phone" ? "phone number" : "username") + "."
+      );
+    }
+    authEmail = snap.data().authEmail;
   }
 
-  await setDoc(
-    doc(db, "userAuthIndex", cred.user.uid),
-    {
-      universityId,
-      role: "student",
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
+  const cred = await signInWithEmailAndPassword(auth, authEmail, password);
 
-  const profile = userDoc.data();
-  writeProfileCache({ uid: cred.user.uid, universityId, profile });
+  const profileSnap = await getDoc(doc(db, "clickers", cred.user.uid));
+  if (!profileSnap.exists() || profileSnap.data().role !== "clicker") {
+    await signOut(auth);
+    throw new Error("Only Clicker access is allowed here.");
+  }
 
+  const profile = profileSnap.data();
+  writeProfileCache({ uid: cred.user.uid, profile });
   return { user: cred.user, profile };
 }
 
-export async function getCurrentStudentProfile(uid, options = {}) {
+// ─── Get Profile ──────────────────────────────────────────────────────────────
+export async function getCurrentClickerProfile(uid, options = {}) {
   const forceFresh = options?.forceFresh === true;
   const cached = !forceFresh ? readProfileCache(uid) : null;
   if (cached) return cached.profile;
 
-  const indexSnap = await getDoc(doc(db, "userAuthIndex", uid));
-  if (!indexSnap.exists()) return null;
+  const snap = await getDoc(doc(db, "clickers", uid));
+  if (!snap.exists()) return null;
 
-  const { universityId } = indexSnap.data();
-  if (!universityId) return null;
+  const data = snap.data();
+  if (data.role !== "clicker" || data.authUid !== uid) return null;
 
-  const userSnap = await getDoc(doc(db, "users", universityId));
-  if (!userSnap.exists()) return null;
-
-  const data = userSnap.data();
-  if (data.role !== "student" || data.authUid !== uid) return null;
-
-  writeProfileCache({ uid, universityId, profile: data });
+  writeProfileCache({ uid, profile: data });
   return data;
 }
 
+// ─── Logout ───────────────────────────────────────────────────────────────────
 export async function logoutUser() {
   clearProfileCache();
   await signOut(auth);
 }
 
+// ─── Auth State ───────────────────────────────────────────────────────────────
 export function watchAuthState(callback) {
   return onAuthStateChanged(auth, callback);
 }

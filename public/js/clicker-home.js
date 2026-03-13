@@ -1,12 +1,12 @@
-import { guardStudentPage, mountHeader, renderStudentMiniProfile } from "./student-common.js";
+import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./clicker-common.js";
 import { APP_CONFIG } from "./config/app-config.js";
 
 async function init() {
   mountHeader({ active: "home" });
-  const state = await guardStudentPage();
+  const state = await guardClickerPage();
   if (!state) return;
 
-  renderStudentMiniProfile("studentMini", state.profile);
+  renderClickerMiniProfile("clickerMini", state.profile);
 
   document.getElementById("statusFlow").textContent = APP_CONFIG.orderStatuses.join(" -> ");
 }

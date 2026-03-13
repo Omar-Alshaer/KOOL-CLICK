@@ -1,4 +1,4 @@
-import { guardStudentPage, mountHeader, renderStudentMiniProfile } from "./student-common.js";
+import { guardClickerPage, mountHeader, renderClickerMiniProfile, updateCartBadge } from "./clicker-common.js";
 import { restaurants } from "./data/restaurants.js";
 import { getCart, saveCart } from "./utils/storage.js";
 import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
@@ -116,7 +116,7 @@ function renderRestaurantPage(restaurant) {
           name: btn.dataset.name,
           price: Number(btn.dataset.price),
         });
-
+        updateCartBadge();
         await showSuccessPopup(`${btn.dataset.name} added to cart.`, "Added to Cart");
       });
     });
@@ -135,10 +135,10 @@ function renderRestaurantPage(restaurant) {
 
 async function init() {
   mountHeader({ active: "menu" });
-  const state = await guardStudentPage();
+  const state = await guardClickerPage();
   if (!state) return;
 
-  renderStudentMiniProfile("studentMini", state.profile);
+  renderClickerMiniProfile("clickerMini", state.profile);
 
   const restaurant = getRestaurantByUrl();
   if (!restaurant) {

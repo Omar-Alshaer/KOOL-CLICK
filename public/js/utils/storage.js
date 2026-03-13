@@ -1,4 +1,4 @@
-const CART_KEY = "koolclick_student_cart";
+const CART_KEY = "koolclick_clicker_cart";
 
 export function getCart() {
   const raw = localStorage.getItem(CART_KEY);

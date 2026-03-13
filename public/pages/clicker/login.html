@@ -3,37 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kool Click | Student Login</title>
+    <title>Kool Click | Clicker Login</title>
     <link rel="stylesheet" href="../../css/theme.css" />
   </head>
   <body>
     <main class="kc-shell">
-      <header id="kcHeader">
+      <header id="kcHeader" class="kc-login-header">
         <div class="kc-brand">
-          <img src="../../assets/temp/logo_trans.svg" alt="Kool Click" />
+          <img src="../../assets/brand/logo_trans.svg" alt="Kool Click" />
+          <div class="kc-brand-text">
+            <span class="kc-brand-title">KOOL CLICK</span>
+            <span class="kc-brand-slogan">Click. Order. Enjoy.</span>
+          </div>
         </div>
       </header>
 
       <section class="kc-register-hero">
-        <h1 class="kc-register-hero-title">Welcome Back, Student</h1>
+        <h1 class="kc-register-hero-title">Welcome Back, Clicker</h1>
         <p class="kc-register-hero-subtitle">
-          Sign in to your Kool Click student dashboard.
+          Sign in to your Kool Click dashboard.
         </p>
         <div class="kc-register-rules">
-          <span class="kc-chip">Fast campus food ordering</span>
+          <span class="kc-chip">Fast food ordering</span>
           <span class="kc-chip">Live order status updates</span>
           <span class="kc-chip">Points, levels, and discounts</span>
         </div>
       </section>
 
       <section class="kc-card kc-login-card">
-        <h2 class="kc-title">Student Login</h2>
-        <p class="kc-subtitle">Enter your university ID and password.</p>
+        <h2 class="kc-title">Clicker Login</h2>
+        <p class="kc-subtitle">Use your username, phone number, or email.</p>
 
         <form id="loginForm" class="kc-form kc-login-form">
           <div class="kc-login-field">
-            <label for="universityId">University ID</label>
-            <input id="universityId" name="universityId" type="text" maxlength="8" placeholder="2xxxxxxx" required />
+            <label for="identifier">Username / Phone / Email</label>
+            <input id="identifier" name="identifier" type="text" placeholder="username, 01XXXXXXXXX, or email" autocomplete="username" required />
           </div>
 
           <div class="kc-login-field">
@@ -47,10 +51,15 @@
           </div>
         </form>
 
+        <a href="./forgot-password.html" class="kc-forgot-link">
+          <span class="kc-forgot-icon">🔑</span>
+          Forgot your password?
+        </a>
+
         <p id="msg" class="kc-muted" aria-live="polite"></p>
       </section>
     </main>
 
-    <script type="module" src="../../js/student-login.js"></script>
+    <script type="module" src="../../js/clicker-login.js"></script>
   </body>
 </html>

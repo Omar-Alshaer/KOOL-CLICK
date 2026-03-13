@@ -25,12 +25,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCkO-9Dc6bX16rsA9h-k0mmQB67z_Fv8CU",
-  authDomain: "kool-click.firebaseapp.com",
-  projectId: "kool-click",
-  storageBucket: "kool-click.firebasestorage.app",
-  messagingSenderId: "125288037274",
-  appId: "1:125288037274:web:bc9cad0df5dc9f82159823",
+  apiKey: "AIzaSyDloCZn8x3ztqg3rLHw0HjuE8SXmz5ZMRc",
+  authDomain: "kool-clicker.firebaseapp.com",
+  projectId: "kool-clicker",
+  storageBucket: "kool-clicker.firebasestorage.app",
+  messagingSenderId: "247898351186",
+  appId: "1:247898351186:web:c7c579654308124038618b",
 };
 
 const app = initializeApp(firebaseConfig);
