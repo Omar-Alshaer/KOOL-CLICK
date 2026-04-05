@@ -18,6 +18,19 @@ import {
 import { APP_CONFIG } from "../config/app-config.js";
 import { getLevelFromPoints } from "../utils/levels.js";
 
+function normalizeOrderTimestamps(order) {
+  const createdAt = order.createdAt || order.updatedAt || null;
+  const updatedAt = order.updatedAt || order.createdAt || null;
+  const collectedAt = order.collectedAt || null;
+
+  return {
+    ...order,
+    createdAt,
+    updatedAt,
+    collectedAt,
+  };
+}
+
 function cashierEmailFromPhone(phone) {
   const normalized = String(phone).trim();
   return `${normalized}@cashiers.koolclick.app`;
@@ -79,7 +92,7 @@ export async function getCashierOrders(restaurantId) {
     );
 
     const snapshot = await getDocs(indexedQuery);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snapshot.docs.map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }));
   } catch (error) {
     if (error?.code !== "failed-precondition") throw error;
 
@@ -91,7 +104,7 @@ export async function getCashierOrders(restaurantId) {
 
     const snapshot = await getDocs(fallbackQuery);
     return snapshot.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
+      .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
       .slice(0, 80);
   }
@@ -108,7 +121,7 @@ export async function getCashierCollectedOrders(restaurantId) {
     );
 
     const snapshot = await getDocs(indexedQuery);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snapshot.docs.map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }));
   } catch (error) {
     if (error?.code !== "failed-precondition") throw error;
 
@@ -121,7 +134,7 @@ export async function getCashierCollectedOrders(restaurantId) {
 
     const snapshot = await getDocs(fallbackQuery);
     return snapshot.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
+      .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.collectedAt?.seconds || b.updatedAt?.seconds || 0) - (a.collectedAt?.seconds || a.updatedAt?.seconds || 0))
       .slice(0, 120);
   }
@@ -150,8 +163,14 @@ export async function updateOrderProgress({ orderId, status, remainingTimeMinute
       throw new Error("Collected orders cannot be edited.");
     }
 
+    const newStatusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
+    if (order.status !== status) {
+      newStatusHistory.push({ status, at: serverTimestamp() });
+    }
+
     transaction.update(orderRef, {
       status,
+      statusHistory: newStatusHistory,
       remainingTimeMinutes: Number(remainingTimeMinutes),
       updatedAt: serverTimestamp(),
     });
@@ -191,6 +210,11 @@ export async function collectOrderByCashier({ orderId, cashierRestaurantId }) {
       throw new Error("Order already collected.");
     }
 
+    const newStatusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
+    if (order.status !== "Collected") {
+      newStatusHistory.push({ status: "Collected", at: serverTimestamp() });
+    }
+
     const isCod = order.paymentMethod === APP_CONFIG.paymentMethods.cod;
     const shouldGrantPointsNow = order.pointsGranted !== true;
     let clickerSnap = null;
@@ -210,6 +234,7 @@ export async function collectOrderByCashier({ orderId, cashierRestaurantId }) {
 
     transaction.update(orderRef, {
       status: "Collected",
+      statusHistory: newStatusHistory,
       paymentStatus: isCod ? "PaidOnPickup" : (order.paymentStatus || "Confirmed"),
       pointsGranted: true,
       collectedAt: serverTimestamp(),

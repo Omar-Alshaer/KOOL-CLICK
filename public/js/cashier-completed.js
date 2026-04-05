@@ -41,7 +41,7 @@ function renderCompleted(orders) {
     .map(
       (order) => `
       <article class="kc-card">
-        <div class="kc-inline" style="justify-content: space-between">
+        <div class="kc-inline kc-inline-between">
           <div class="kc-order-id-wrap">
             <strong>Order ID</strong>
             <span class="kc-order-id-tag">${formatOrderId(order.id)}</span>
@@ -49,7 +49,7 @@ function renderCompleted(orders) {
           <span class="kc-status Collected">Collected</span>
         </div>
 
-        <div class="kc-two" style="margin-top: 0.55rem">
+        <div class="kc-two kc-section-spaced-xs">
           <div class="kc-item">
             <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
             <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
@@ -64,7 +64,7 @@ function renderCompleted(orders) {
           </div>
         </div>
 
-        <div class="kc-list" style="margin-top: 0.6rem">
+        <div class="kc-list kc-section-spaced-lg">
           ${(order.items || [])
             .map((item) => `<div class="kc-item">${item.name} x${item.qty} - ${item.price * item.qty} EGP</div>`)
             .join("")}

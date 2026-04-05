@@ -1,5 +1,5 @@
 import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./clicker-common.js";
-import { restaurants } from "./data/restaurants.js";
+import { getRestaurants } from "./services/restaurant-service.js";
 
 function renderStars(rating) {
   const full = Math.round(rating);
@@ -9,26 +9,36 @@ function renderStars(rating) {
   }).join("");
 }
 
-function renderRestaurants() {
+function renderRestaurants(restaurants) {
   const root = document.getElementById("menuRoot");
+  if (!restaurants.length) {
+    root.innerHTML = `
+      <div class="kc-empty-state">
+        <div class="kc-empty-icon">🏬</div>
+        <h3 class="kc-empty-title">No restaurants yet</h3>
+        <p class="kc-empty-msg">Admins will add restaurants soon.</p>
+      </div>
+    `;
+    return;
+  }
 
   root.innerHTML = restaurants
     .map(
       (r) => `
       <article class="kc-card kc-restaurant-card">
-        <img class="kc-restaurant-thumb" src="${r.image}" alt="${r.name}" />
+        <img class="kc-restaurant-thumb" src="${r.logoUrl || "../../assets/brand/logo.svg"}" alt="${r.name}" />
         <div class="kc-restaurant-body">
           <h3 class="kc-title">${r.name}</h3>
-          <div class="kc-stars" aria-label="Rating ${r.rating} out of 5">
-            <span class="kc-stars-line">${renderStars(r.rating)}</span>
-            <span class="kc-muted">${r.rating} (${r.reviews} reviews)</span>
-          </div>
+          ${
+            r.rating
+              ? `<div class="kc-stars" aria-label="Rating ${r.rating} out of 5">
+                  <span class="kc-stars-line">${renderStars(r.rating)}</span>
+                  <span class="kc-muted">${r.rating} (${r.reviews || 0} reviews)</span>
+                </div>`
+              : `<div class="kc-muted">New restaurant • No rating yet</div>`
+          }
           <div class="kc-inline kc-muted">
-            <span>${r.deliveryTime}</span>
-            <span>•</span>
-            <span>${r.priceRange}</span>
-            <span>•</span>
-            <span>${r.categories.length} sections</span>
+            <span>${r.campusZone || "Campus"}</span>
           </div>
           <a class="kc-btn" href="./restaurant.html?id=${encodeURIComponent(r.id)}">Open Restaurant</a>
         </div>
@@ -44,7 +54,9 @@ async function init() {
   if (!state) return;
 
   renderClickerMiniProfile("clickerMini", state.profile);
-  renderRestaurants();
+
+  const restaurants = await getRestaurants(200);
+  renderRestaurants(restaurants);
 }
 
 init();

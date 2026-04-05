@@ -4,9 +4,11 @@ import { getCart, saveCart, clearCart } from "./utils/storage.js";
 import { applyPointsDeltaToProfileCache } from "./services/auth-service.js";
 import { placeClickerOrders } from "./services/order-service.js";
 import { uploadReceiptToCloudinary } from "./services/upload-service.js";
-import { validatePromo } from "./utils/promo.js";
+import { validatePromoObject, normalizePromoCode } from "./utils/promo.js";
+import { getPromoByCode } from "./services/promo-service.js";
 import { pointsFromAmount } from "./utils/levels.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
+import { withButtonLoading } from "./utils/loading.js";
 
 let appliedPromo = null;
 
@@ -22,7 +24,7 @@ function getSelectedPaymentMethod() {
 function updateTotals() {
   const items = getCart();
   const subtotal = totalAmount(items);
-  const promoResult = appliedPromo ? validatePromo(subtotal, appliedPromo.code) : { discount: 0, valid: false };
+  const promoResult = appliedPromo ? validatePromoObject(subtotal, appliedPromo) : { discount: 0, valid: false };
   const discount = promoResult.valid ? promoResult.discount : 0;
   const finalPayable = Math.max(0, subtotal - discount);
 
@@ -32,6 +34,7 @@ function updateTotals() {
   document.getElementById("subtotal").textContent = `${subtotal} EGP`;
   document.getElementById("discount").textContent = `${discount} EGP`;
   document.getElementById("total").textContent = `${finalPayable} EGP`;
+  updateOfferSummary(items);
 
   if (method === APP_CONFIG.paymentMethods.instaPay) {
     document.getElementById("pointsInfo").textContent = `InstaPay: ${pointsIfInstant} points will be granted instantly.`;
@@ -40,6 +43,19 @@ function updateTotals() {
   }
 
   return { subtotal, discount, finalPayable };
+}
+
+function updateOfferSummary(items) {
+  const summaryEl = document.getElementById("offerSummary");
+  if (!summaryEl) return;
+  const titles = [
+    ...new Set(
+      items
+        .filter((item) => item.offerId)
+        .map((item) => item.offerTitle || "Special Offer")
+    ),
+  ];
+  summaryEl.textContent = titles.length ? titles.join(", ") : "No offer applied";
 }
 
 function renderCart() {
@@ -57,6 +73,7 @@ function renderCart() {
     `;
     appliedPromo = null;
     document.getElementById("promoSummary").textContent = "No promo applied.";
+    updateOfferSummary([]);
     updateTotals();
     return;
   }
@@ -67,7 +84,23 @@ function renderCart() {
       <div class="kc-item">
         <div><strong>${item.name}</strong> x${item.qty}</div>
         <div class="kc-muted">Restaurant: ${item.restaurantName}</div>
-        <div class="kc-inline" style="justify-content: space-between">
+        ${
+          item.offerId
+            ? `
+              <div class="kc-offer-inline">
+                <span class="kc-badge kc-badge-offer">Offer</span>
+                <span class="kc-muted">${item.offerTitle || "Special Offer"}</span>
+                ${item.offerLabel ? `<span class="kc-badge kc-badge-discount">${item.offerLabel}</span>` : ""}
+              </div>
+            `
+            : ""
+        }
+        ${
+          item.basePrice && Number(item.basePrice) > Number(item.price)
+            ? `<div class="kc-muted">Old price: ${Number(item.basePrice).toFixed(2)} EGP</div>`
+            : ""
+        }
+        <div class="kc-inline kc-inline-between">
           <span>${item.price * item.qty} EGP</span>
           <button type="button" class="kc-btn-danger" data-remove="${index}">Remove</button>
         </div>
@@ -95,7 +128,7 @@ function hasMultipleRestaurants(items) {
 
 async function handleApplyPromo() {
   const codeInput = document.getElementById("promoCodeInput");
-  const code = codeInput.value.trim();
+  const code = normalizePromoCode(codeInput.value);
   const subtotal = totalAmount(getCart());
 
   if (!code) {
@@ -103,7 +136,15 @@ async function handleApplyPromo() {
     return;
   }
 
-  const result = validatePromo(subtotal, code);
+  const items = getCart();
+  if (hasMultipleRestaurants(items)) {
+    await showErrorPopup("Promo codes apply to a single restaurant only.", "Promo Not Allowed");
+    return;
+  }
+
+  const restaurantId = items[0]?.restaurantId || "";
+  const promo = await getPromoByCode(code, restaurantId);
+  const result = validatePromoObject(subtotal, promo);
   if (!result.valid) {
     appliedPromo = null;
     document.getElementById("promoSummary").textContent = result.reason;
@@ -140,14 +181,22 @@ function wirePaymentMethodUI() {
   document.querySelectorAll('input[name="paymentMethod"]').forEach((radio) => {
     radio.addEventListener("change", () => {
       const method = getSelectedPaymentMethod();
-      receiptSection.style.display =
-        method === APP_CONFIG.paymentMethods.instaPay ? "block" : "none";
+      receiptSection?.classList.toggle(
+        "kc-hidden",
+        method !== APP_CONFIG.paymentMethods.instaPay
+      );
       if (method !== APP_CONFIG.paymentMethods.instaPay && fileName) {
         fileName.textContent = "No file selected";
       }
       updateTotals();
     });
   });
+
+  const initialMethod = getSelectedPaymentMethod();
+  receiptSection?.classList.toggle(
+    "kc-hidden",
+    initialMethod !== APP_CONFIG.paymentMethods.instaPay
+  );
 }
 
 async function getReceiptUrlIfNeeded(paymentMethod) {
@@ -180,57 +229,59 @@ async function init() {
   const placeOrderBtn = document.getElementById("placeOrderBtn");
 
   placeOrderBtn?.addEventListener("click", async () => {
-    const items = getCart();
+    await withButtonLoading(placeOrderBtn, async () => {
+      const items = getCart();
 
-    if (!items.length) {
-      await showErrorPopup("Cart is empty.", "No Items");
-      return;
-    }
+      if (!items.length) {
+        await showErrorPopup("Cart is empty.", "No Items");
+        return;
+      }
 
-    if (hasMultipleRestaurants(items)) {
-      const ok = await showConfirmPopup(
-        "Your cart has multiple restaurants. Kool Click will create separate orders. Continue?",
-        "Multiple Restaurants",
-        "Yes, Continue",
-        "Cancel"
-      );
-      if (!ok) return;
-    }
+      if (hasMultipleRestaurants(items)) {
+        const ok = await showConfirmPopup(
+          "Your cart has multiple restaurants. Kool Click will create separate orders. Continue?",
+          "Multiple Restaurants",
+          "Yes, Continue",
+          "Cancel"
+        );
+        if (!ok) return;
+      }
 
-    const paymentMethod = getSelectedPaymentMethod();
+      const paymentMethod = getSelectedPaymentMethod();
 
-    try {
-      const receiptImageUrl = await getReceiptUrlIfNeeded(paymentMethod);
-      const result = await placeClickerOrders({
-        uid: state.uid,
-        fullName: state.profile.fullName,
-        phone: state.profile.phone,
-        cartItems: items,
-        paymentMethod,
-        receiptImageUrl,
-        promoCode: appliedPromo?.code || "",
-      });
+      try {
+        const receiptImageUrl = await getReceiptUrlIfNeeded(paymentMethod);
+        const result = await placeClickerOrders({
+          uid: state.uid,
+          fullName: state.profile.fullName,
+          phone: state.profile.phone,
+          cartItems: items,
+          paymentMethod,
+          receiptImageUrl,
+          promoData: appliedPromo || null,
+        });
 
-      clearCart();
-      applyPointsDeltaToProfileCache(state.uid, result.pointsGrantedNow);
-      updateCartBadge();
-      appliedPromo = null;
-      document.getElementById("promoCodeInput").value = "";
-      document.getElementById("promoSummary").textContent = "No promo applied.";
-      renderCart();
+        clearCart();
+        applyPointsDeltaToProfileCache(state.uid, result.pointsGrantedNow);
+        updateCartBadge();
+        appliedPromo = null;
+        document.getElementById("promoCodeInput").value = "";
+        document.getElementById("promoSummary").textContent = "No promo applied.";
+        renderCart();
 
-      const pointsLine =
-        paymentMethod === APP_CONFIG.paymentMethods.instaPay
-          ? `${result.pointsGrantedNow} points were added instantly.`
-          : `${result.pointsPendingOnCollection} points will be added after collection.`;
+        const pointsLine =
+          paymentMethod === APP_CONFIG.paymentMethods.instaPay
+            ? `${result.pointsGrantedNow} points were added instantly.`
+            : `${result.pointsPendingOnCollection} points will be added after collection.`;
 
-      await showSuccessPopup(
-        `Orders placed successfully (${result.createdOrderIds.length} order(s)). Final payable: ${result.finalPayable} EGP. ${pointsLine}`,
-        "Order Created"
-      );
-    } catch (error) {
-      await showErrorPopup(error.message || "Failed to place orders.", "Order Failed");
-    }
+        await showSuccessPopup(
+          `Orders placed successfully (${result.createdOrderIds.length} order(s)). Final payable: ${result.finalPayable} EGP. ${pointsLine}`,
+          "Order Created"
+        );
+      } catch (error) {
+        await showErrorPopup(error.message || "Failed to place orders.", "Order Failed");
+      }
+    }, "Placing...");
   });
 }
 

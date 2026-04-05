@@ -1,13 +1,5 @@
-import { APP_CONFIG } from "../config/app-config.js";
-
 function normalizeCode(code) {
   return (code || "").trim().toUpperCase();
-}
-
-export function findPromoByCode(code) {
-  const normalized = normalizeCode(code);
-  if (!normalized) return null;
-  return APP_CONFIG.promoCodes.find((p) => p.code === normalized) || null;
 }
 
 export function calculatePromoDiscount(subtotal, promo) {
@@ -25,10 +17,13 @@ export function calculatePromoDiscount(subtotal, promo) {
   return 0;
 }
 
-export function validatePromo(subtotal, code) {
-  const promo = findPromoByCode(code);
+export function validatePromoObject(subtotal, promo) {
   if (!promo) {
     return { valid: false, reason: "Promo code is invalid.", promo: null, discount: 0 };
+  }
+
+  if (promo.isActive === false) {
+    return { valid: false, reason: "Promo code is inactive.", promo, discount: 0 };
   }
 
   if (subtotal < (promo.minSubtotal || 0)) {
@@ -42,4 +37,8 @@ export function validatePromo(subtotal, code) {
 
   const discount = calculatePromoDiscount(subtotal, promo);
   return { valid: true, reason: "Promo applied.", promo, discount };
+}
+
+export function normalizePromoCode(code) {
+  return normalizeCode(code);
 }

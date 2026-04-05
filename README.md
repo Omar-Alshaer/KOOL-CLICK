@@ -169,4 +169,4 @@ Kool Click delivers a practical, scalable, and engaging digital ecosystem for un
 - `public/js/services/`
 - `public/js/utils/`
 - `public/js/data/`
-- `public/css/theme.css`
+- `public/css/app.css`

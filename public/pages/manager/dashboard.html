@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Manager Dashboard</title>
+    <link rel="stylesheet" href="../../css/app.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <div class="kc-inline" style="justify-content: space-between; flex-wrap: wrap;">
+          <div>
+            <h2 class="kc-title">Manager Dashboard</h2>
+            <p class="kc-subtitle">Track revenue, orders, and popular products.</p>
+          </div>
+          <div id="managerMini"></div>
+        </div>
+      </section>
+
+      <section class="kc-grid kc-section-spaced-sm">
+        <div class="kc-card">
+          <strong>Total Orders</strong>
+          <div id="mgrTotalOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Collected Orders</strong>
+          <div id="mgrCollectedOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Pending Orders</strong>
+          <div id="mgrPendingOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Preparing Orders</strong>
+          <div id="mgrPreparingOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Ready Orders</strong>
+          <div id="mgrReadyOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Total Revenue</strong>
+          <div id="mgrRevenue" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Items Sold</strong>
+          <div id="mgrItemsSold" class="kc-title">0</div>
+        </div>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Top Products</h3>
+        <div id="mgrTopItems" class="kc-inline" style="flex-wrap: wrap; gap: 0.45rem;"></div>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/manager-dashboard.js"></script>
+  </body>
+</html>

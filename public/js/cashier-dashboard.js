@@ -5,6 +5,7 @@ import {
 } from "./services/cashier-service.js";
 import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
 import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
+import { withButtonLoading } from "./utils/loading.js";
 
 let currentState = null;
 let currentOrders = [];
@@ -105,7 +106,7 @@ function renderOrders(orders) {
       const finalTotal = getOrderFinalTotal(order);
       return `
       <article class="kc-card">
-        <div class="kc-inline" style="justify-content: space-between">
+        <div class="kc-inline kc-inline-between">
           <div class="kc-order-id-wrap">
             <strong>Order ID</strong>
             <span class="kc-order-id-tag">${formatOrderId(order.id)}</span>
@@ -113,7 +114,7 @@ function renderOrders(orders) {
           <span class="kc-status ${order.status}">${order.status}</span>
         </div>
 
-        <div class="kc-order-summary-grid" style="margin-top: 0.55rem">
+        <div class="kc-order-summary-grid kc-section-spaced-xs">
           <div class="kc-item">
             <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
             <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
@@ -133,7 +134,7 @@ function renderOrders(orders) {
           </div>
         </div>
 
-        <div class="kc-inline" style="justify-content: center; margin-top: 0.7rem">
+        <div class="kc-inline kc-inline-center kc-section-spaced-xl">
           <button type="button" class="kc-btn-secondary" data-open-order="${order.id}">Open Details</button>
         </div>
       </article>
@@ -172,7 +173,7 @@ function renderOrderModal(order) {
   title.textContent = `Order ${formatOrderId(order.id)}`;
 
   body.innerHTML = `
-    <div class="kc-order-layout kc-order-layout-stack" style="margin-top: 0.55rem">
+    <div class="kc-order-layout kc-order-layout-stack kc-section-spaced-xs">
       <div class="kc-item kc-order-info">
         <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
         <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
@@ -184,7 +185,7 @@ function renderOrderModal(order) {
         ${order.collectedAt ? `<div class="kc-muted">Collected At: ${formatTimestamp(order.collectedAt)}</div>` : ""}
         <div class="kc-muted">Points: ${order.pointsEarned || 0} ${order.pointsGranted ? "(granted)" : "(pending)"}</div>
 
-        <div class="kc-checkout-totals" style="margin-top: 0.55rem">
+        <div class="kc-checkout-totals kc-section-spaced-xs">
           <div><strong>Subtotal:</strong> ${formatMoney(subtotal)}</div>
           <div><strong>Discount:</strong> ${formatMoney(discount)}</div>
           <div><strong>Total:</strong> ${formatMoney(finalTotal)}</div>
@@ -192,7 +193,7 @@ function renderOrderModal(order) {
         ${
           order.receiptImageUrl
             ? `
-          <div class="kc-receipt-preview" style="margin-top: 0.65rem">
+          <div class="kc-receipt-preview kc-section-spaced-lg">
             <div><strong>InstaPay Receipt</strong></div>
             <a class="kc-btn-secondary" href="${escapeHtml(order.receiptImageUrl)}" target="_blank" rel="noopener noreferrer">Open Receipt</a>
             <img src="${escapeHtml(order.receiptImageUrl)}" alt="InstaPay receipt for ${formatOrderId(order.id)}" />
@@ -232,46 +233,52 @@ function renderOrderModal(order) {
       </div>
     </div>
 
-    <div class="kc-list" style="margin-top: 0.7rem">
+    <div class="kc-list kc-section-spaced-xl">
       ${(order.items || [])
         .map((item) => `<div class="kc-item">${item.name} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`)
         .join("")}
     </div>
   `;
 
-  document.getElementById("orderModalSaveBtn")?.addEventListener("click", async () => {
+  document.getElementById("orderModalSaveBtn")?.addEventListener("click", async (event) => {
     const status = document.getElementById("orderModalStatus")?.value;
     const remainingTimeMinutes = Number(document.getElementById("orderModalTime")?.value || 0);
+    const btn = event.currentTarget;
 
-    try {
-      await updateOrderProgress({
-        orderId: order.id,
-        status,
-        remainingTimeMinutes,
-        cashierRestaurantId: currentState.profile.restaurantId,
-      });
-      await showSuccessPopup("Order progress updated.", "Saved");
-      await loadOrders();
-      const refreshed = getOrderById(order.id);
-      if (refreshed) renderOrderModal(refreshed);
-    } catch (error) {
-      await showErrorPopup(error.message || "Failed to update order.", "Save Failed");
-    }
+    await withButtonLoading(btn, async () => {
+      try {
+        await updateOrderProgress({
+          orderId: order.id,
+          status,
+          remainingTimeMinutes,
+          cashierRestaurantId: currentState.profile.restaurantId,
+        });
+        await showSuccessPopup("Order progress updated.", "Saved");
+        await loadOrders();
+        const refreshed = getOrderById(order.id);
+        if (refreshed) renderOrderModal(refreshed);
+      } catch (error) {
+        await showErrorPopup(error.message || "Failed to update order.", "Save Failed");
+      }
+    }, "Saving...");
   });
 
-  document.getElementById("orderModalCollectBtn")?.addEventListener("click", async () => {
-    try {
-      const result = await collectOrderByCashier({
-        orderId: order.id,
-        cashierRestaurantId: currentState.profile.restaurantId,
-      });
-      const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
-      await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
-      closeOrderModal();
-      await loadOrders();
-    } catch (error) {
-      await showErrorPopup(error.message || "Failed to collect order.", "Collect Failed");
-    }
+  document.getElementById("orderModalCollectBtn")?.addEventListener("click", async (event) => {
+    const btn = event.currentTarget;
+    await withButtonLoading(btn, async () => {
+      try {
+        const result = await collectOrderByCashier({
+          orderId: order.id,
+          cashierRestaurantId: currentState.profile.restaurantId,
+        });
+        const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
+        await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
+        closeOrderModal();
+        await loadOrders();
+      } catch (error) {
+        await showErrorPopup(error.message || "Failed to collect order.", "Collect Failed");
+      }
+    }, "Collecting...");
   });
 }
 

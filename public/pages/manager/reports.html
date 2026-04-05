@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Manager Reports</title>
+    <link rel="stylesheet" href="../../css/app.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <div class="kc-inline" style="justify-content: space-between; flex-wrap: wrap;">
+          <div>
+            <h2 class="kc-title">Reports</h2>
+            <p class="kc-subtitle">Revenue and performance overview.</p>
+          </div>
+          <div id="managerMini"></div>
+        </div>
+      </section>
+
+      <section class="kc-grid kc-section-spaced-sm">
+        <div class="kc-card">
+          <strong>Total Orders</strong>
+          <div id="reportTotalOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Collected Orders</strong>
+          <div id="reportCollected" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Pending Orders</strong>
+          <div id="reportPending" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Preparing Orders</strong>
+          <div id="reportPreparing" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Ready Orders</strong>
+          <div id="reportReady" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Cancelled Orders</strong>
+          <div id="reportCancelled" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Total Revenue</strong>
+          <div id="reportRevenue" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Avg Order Value</strong>
+          <div id="reportAvgOrder" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Cash Orders</strong>
+          <div id="reportCashOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>InstaPay Orders</strong>
+          <div id="reportInstaOrders" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Items Sold</strong>
+          <div id="reportItemsSold" class="kc-title">0</div>
+        </div>
+        <div class="kc-card">
+          <strong>Unique Clickers</strong>
+          <div id="reportUniqueClickers" class="kc-title">0</div>
+        </div>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Top Items</h3>
+        <div id="reportTopItems" class="kc-inline" style="flex-wrap: wrap; gap: 0.45rem;"></div>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/manager-reports.js"></script>
+  </body>
+</html>

@@ -5,10 +5,36 @@ import {
   watchCashierAuthState,
 } from "./services/cashier-service.js";
 
+let authSplashMounted = false;
+
+function showAuthSplash() {
+  if (authSplashMounted) return;
+  authSplashMounted = true;
+  document.body.classList.add("kc-auth-loading");
+  const splash = document.createElement("div");
+  splash.id = "kcAuthSplash";
+  splash.innerHTML = `
+    <div class="kc-auth-splash-card">
+      <img src="../../assets/brand/logo_trans.svg" alt="Kool Click Logo" />
+      <div class="kc-auth-splash-text">Loading...</div>
+    </div>
+  `;
+  document.body.appendChild(splash);
+}
+
+function hideAuthSplash() {
+  document.body.classList.remove("kc-auth-loading");
+  const splash = document.getElementById("kcAuthSplash");
+  if (splash) splash.remove();
+  authSplashMounted = false;
+}
+
 export async function guardCashierPage() {
+  showAuthSplash();
   return new Promise((resolve) => {
     watchCashierAuthState(async (user) => {
       if (!user) {
+        hideAuthSplash();
         window.location.href = "./login.html";
         resolve(null);
         return;
@@ -17,11 +43,13 @@ export async function guardCashierPage() {
       const profile = await getCurrentCashierProfile(user.uid);
       if (!profile) {
         await logoutCashier();
+        hideAuthSplash();
         window.location.href = "./login.html";
         resolve(null);
         return;
       }
 
+      hideAuthSplash();
       resolve({ uid: user.uid, profile });
     });
   });

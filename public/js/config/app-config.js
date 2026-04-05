@@ -17,10 +17,6 @@ export const APP_CONFIG = {
     cod: "CashOnDelivery",
     instaPay: "InstaPay",
   },
-  promoCodes: [
-    { code: "WELCOME10", type: "percent", value: 10, minSubtotal: 80 },
-    { code: "CAMPUS20", type: "flat", value: 20, minSubtotal: 120 },
-  ],
   cloudinary: {
     cloudName: "dnf0sdjwj",
     uploadPreset: "koolclick",

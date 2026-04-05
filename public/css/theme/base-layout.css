@@ -1,0 +1,461 @@
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+
+:root {
+  --kc-deep: #33005f;
+  --kc-neon: #6a00f4;
+  --kc-soft: #dcb2f2;
+  --kc-cream: #fff7ff;
+  --kc-ink: #211236;
+  --kc-ok: #13b66b;
+  --kc-warn: #ffb703;
+  --kc-card: rgba(255, 250, 255, 0.93);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Jersey 10", "Courier New", monospace;
+  font-size: clamp(20px, 2.1vw, 28px);
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  color: var(--kc-ink);
+  background-image: url('/public/assets/brand/back.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+body.kc-auth-loading {
+  overflow: hidden;
+}
+
+body.kc-auth-loading .kc-shell {
+  visibility: hidden;
+}
+
+#kcAuthSplash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(255, 241, 241, 0.96) 0%, rgba(233, 179, 251, 0.96) 100%);
+  color: #3b0270;
+}
+
+.kc-auth-splash-card {
+  display: grid;
+  gap: 0.5rem;
+  place-items: center;
+  padding: 1.2rem 1.4rem;
+  border: 3px solid #3b0270;
+  background: #fff7ff;
+  box-shadow: 6px 6px 0 #2b0053;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.kc-auth-splash-card img {
+  width: clamp(140px, 18vw, 200px);
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.kc-auth-splash-card .kc-auth-splash-text {
+  font-size: clamp(18px, 2vw, 24px);
+  letter-spacing: 0.05em;
+}
+
+.kc-shell {
+  width: min(1040px, 94vw);
+  margin: 0 auto;
+  padding: 1.2rem 0 2.4rem;
+}
+
+#kcHeader {
+  margin-bottom: 0.42rem;
+}
+
+#kcHeader+section {
+  margin-top: 0.2rem !important;
+}
+
+.kc-shell>header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.65rem;
+}
+
+#kcHeader .kc-topbar {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.38rem 0.48rem;
+  border: 2px solid #3b0270;
+  border-radius: 8px;
+  background: rgba(255, 241, 241, 0.92);
+  box-shadow: 3px 3px 0 #2b0053;
+}
+
+#kcHeader .kc-topbar-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: auto;
+  padding: 0.18rem 0.28rem;
+  border: 2px solid #e9b3fb;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #3b0270 0%, #28004d 100%);
+  box-shadow: 2px 2px 0 #250049;
+}
+
+#kcHeader .kc-topbar-logo {
+  width: clamp(118px, 11.5vw, 158px);
+  max-height: 34px;
+  object-fit: contain;
+}
+
+#kcHeader .kc-topbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+#kcHeader .kc-topbar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0.23rem 0.48rem;
+  border: 2px solid #3b0270;
+  background: #6f00ff;
+  color: #fff1f1;
+  box-shadow: 2px 2px 0 #33005f;
+  text-decoration: none;
+  font-family: "Jersey 10", "Courier New", monospace;
+  font-size: clamp(14px, 0.8vw, 16px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+#kcHeader .kc-topbar-link:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #33005f;
+}
+
+#kcHeader .kc-topbar-link.is-active {
+  background: #e9b3fb;
+  color: #3b0270;
+}
+
+#kcHeader .kc-topbar-link.kc-topbar-danger {
+  background: #d62828;
+  color: #fff1f1;
+  border-color: #7a0f0f;
+  box-shadow: 2px 2px 0 #7a0f0f;
+}
+
+#kcHeader .kc-topbar-link.kc-topbar-danger:hover {
+  box-shadow: 3px 3px 0 #7a0f0f;
+}
+
+.kc-cart-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin-left: 4px;
+  border-radius: 9px;
+  background: #ff2d55;
+  color: #fff;
+  font-size: 11px;
+  font-family: "Jersey 10", "Courier New", monospace;
+  font-weight: 700;
+  line-height: 1;
+  border: 1.5px solid #fff;
+  box-shadow: 1px 1px 0 #7a0f0f;
+  pointer-events: none;
+}
+
+/* Sidebar layout for authenticated student/cashier pages */
+body.kc-with-sidebar .kc-shell {
+  width: min(1280px, 98vw);
+  margin: 0 auto;
+  padding: 0.9rem 1rem 1.8rem 292px;
+  transition: padding-left 220ms ease;
+}
+
+body.kc-with-sidebar #kcHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 266px;
+  margin: 0;
+  z-index: 40;
+  transition: width 220ms ease, transform 220ms ease;
+}
+
+body.kc-with-sidebar #kcHeader+section {
+  margin-top: 0 !important;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar {
+  grid-template-columns: 1fr;
+  justify-items: stretch;
+  grid-template-rows: auto 1fr;
+  gap: 0.45rem;
+  height: 100%;
+  border-radius: 0;
+  border-right: 3px solid #3b0270;
+  box-shadow: 6px 0 0 #2b0053;
+  background: linear-gradient(180deg, #fff4ff 0%, #f1d7ff 100%);
+  padding: 0.72rem 0.58rem;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-brand {
+  justify-content: center;
+  min-height: 150px;
+  border-radius: 10px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+  border: 2px solid #e9b3fb;
+  background: linear-gradient(180deg, #3b0270 0%, #230044 100%);
+  box-shadow: 4px 4px 0 #2b0053;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-brand::after {
+  content: "◀";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 11px;
+  background: rgba(35, 0, 68, 0.95);
+  border: 1px solid #e9b3fb;
+  border-radius: 50%;
+  color: #fff1f1;
+  opacity: 0.85;
+  transform: translateX(-50%);
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-logo {
+  width: auto;
+  max-height: auto;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 0.3rem;
+  overflow-y: auto;
+  padding: 0 2px 6px 1px;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-link {
+  width: 100%;
+  min-height: 50px;
+  justify-content: flex-start;
+  gap: 0.42rem;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 400;
+  box-shadow: 3px 3px 0 #32005d;
+  padding: 0.34rem 0.54rem;
+  font-size: clamp(16px, 1.02vw, 19px);
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-danger {
+  margin-top: auto;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-link:not(.kc-topbar-danger) {
+  width: 92%;
+  align-self: center;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-nav > .kc-topbar-link:first-child {
+  margin-top: auto;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-nav > .kc-topbar-link:nth-last-child(2) {
+  margin-bottom: auto;
+}
+
+@media (min-width: 801px) {
+  body.kc-with-sidebar #kcHeader .kc-topbar-danger {
+    position: sticky;
+    bottom: 0;
+  }
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-ico {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-txt {
+  line-height: 1;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-link.is-active {
+  position: relative;
+  box-shadow: 4px 4px 0 #3b0270;
+}
+
+body.kc-with-sidebar #kcHeader .kc-topbar-link.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 5px;
+  background: #3b0270;
+  border-radius: 2px;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed .kc-shell {
+  padding-left: 120px;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader {
+  width: 92px;
+  transform: none;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-nav {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar {
+  padding-left: 0.34rem;
+  padding-right: 0.34rem;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-brand::after {
+  content: "▶";
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-link {
+  width: 50px !important;
+  min-height: 50px;
+  align-self: center;
+  justify-content: center;
+  padding: 0;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-txt {
+  display: none;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-ico {
+  width: auto;
+  font-size: 18px;
+}
+
+body.kc-with-sidebar.kc-sidebar-collapsed #kcHeader .kc-topbar-logo {
+  width: 66px;
+  max-height: 28px;
+}
+
+.kc-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  background: linear-gradient(180deg, #3b0270 0%, #28004d 100%);
+  border: 2px solid #e9b3fb;
+  box-shadow: 2px 2px 0 #250049;
+  padding: 0.22rem 0.34rem;
+  min-height: 54px;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+#kcHeader .kc-brand {
+  justify-self: center;
+}
+
+/* Login / Register page header (no sidebar) */
+.kc-login-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.4rem 0 1rem;
+}
+
+.kc-login-header .kc-brand {
+  min-height: 80px;
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  border-width: 3px;
+  box-shadow: 5px 5px 0 #250049;
+  gap: 0.7rem;
+}
+
+.kc-login-header .kc-brand img {
+  width: clamp(72px, 8vw, 110px);
+  max-height: 64px;
+  height: auto;
+  object-fit: contain;
+}
+
+.kc-brand-text {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.kc-brand-title {
+  line-height: 0.9;
+  color: #fff1f1;
+  font-size: clamp(26px, 2.4vw, 36px);
+  letter-spacing: 0.06em;
+}
+
+.kc-brand-slogan {
+  font-size: clamp(14px, 1.15vw, 18px);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  color: #f8dcff;
+}
+
+.kc-brand img {
+  width: clamp(124px, 11.5vw, 168px);
+  height: auto;
+  max-height: 40px;
+  object-fit: contain;
+}
+
+.kc-nav {
+  margin-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.45rem;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}

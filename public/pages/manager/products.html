@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Manager Products</title>
+    <link rel="stylesheet" href="../../css/app.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <div class="kc-inline" style="justify-content: space-between; flex-wrap: wrap;">
+          <div>
+            <h2 class="kc-title">Products</h2>
+            <p class="kc-subtitle">Add, edit, and control availability.</p>
+          </div>
+          <div id="managerMini"></div>
+        </div>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Add New Product</h3>
+        <form id="productForm" class="kc-form">
+          <div class="kc-two">
+            <div>
+              <label for="productName">Product Name</label>
+              <input id="productName" type="text" placeholder="Enter product name" required />
+            </div>
+            <div>
+              <label for="productCategory">Category</label>
+              <select id="productCategorySelect"></select>
+              <input id="productCategoryInput" type="text" placeholder="Write new category" class="kc-hidden" />
+            </div>
+            <div>
+              <label for="productDescription">Description</label>
+              <input id="productDescription" type="text" placeholder="Enter product description" />
+            </div>
+            <div>
+              <label for="productPrice">Price (EGP)</label>
+              <input id="productPrice" type="number" min="1" step="0.5" placeholder="Enter price" required />
+            </div>
+            <div>
+              <label for="productOldPrice">Old Price (EGP)</label>
+              <input id="productOldPrice" type="number" min="0" step="0.5" placeholder="Enter old price" />
+            </div>
+            <div>
+              <label for="productDiscount">Discount (%)</label>
+              <input id="productDiscount" type="number" min="0" max="90" step="1" placeholder="Enter discount %" />
+            </div>
+            <div>
+              <label for="productBadge">Badge</label>
+              <select id="productBadge">
+                <option value="">None</option>
+                <option value="Spicy">Spicy</option>
+                <option value="New">New</option>
+                <option value="Popular">Popular</option>
+                <option value="Best Seller">Best Seller</option>
+              </select>
+            </div>
+            <div>
+              <label for="productBestSeller">Best Seller</label>
+              <select id="productBestSeller">
+                <option value="false" selected>No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label for="productImage">Product Image</label>
+              <div class="kc-file-field">
+                <input id="productImage" type="file" accept="image/*" />
+                <button type="button" id="productImageBtn" class="kc-btn-secondary">Choose Image</button>
+                <span id="productImageName" class="kc-muted">No file selected</span>
+              </div>
+            </div>
+          </div>
+          <div class="kc-register-actions">
+            <input type="submit" value="Add Product" />
+          </div>
+        </form>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Products</h3>
+        <div id="managerCategoryTabs" class="kc-category-tabs"></div>
+        <div id="productsGrid" class="kc-section-spaced-sm"></div>
+      </section>
+    </main>
+
+    <div id="productEditModal" class="kc-modal" aria-hidden="true">
+      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-label="Edit Product">
+        <div class="kc-modal-head">
+          <h3 class="kc-title" style="margin: 0">Edit Product</h3>
+          <button id="closeProductModalBtn" type="button" class="kc-btn-secondary">Close</button>
+        </div>
+        <form id="productEditForm" class="kc-form">
+          <input type="hidden" id="editProductId" />
+          <div class="kc-two">
+            <div>
+              <label for="editProductName">Product Name</label>
+              <input id="editProductName" type="text" placeholder="Enter product name" required />
+            </div>
+            <div>
+              <label for="editProductCategory">Category</label>
+              <select id="editProductCategorySelect"></select>
+              <input id="editProductCategoryInput" type="text" placeholder="Write new category" class="kc-hidden" />
+            </div>
+            <div>
+              <label for="editProductDescription">Description</label>
+              <input id="editProductDescription" type="text" placeholder="Enter product description" />
+            </div>
+            <div>
+              <label for="editProductPrice">Price (EGP)</label>
+              <input id="editProductPrice" type="number" min="1" step="0.5" placeholder="Enter price" required />
+            </div>
+            <div>
+              <label for="editProductOldPrice">Old Price (EGP)</label>
+              <input id="editProductOldPrice" type="number" min="0" step="0.5" placeholder="Enter old price" />
+            </div>
+            <div>
+              <label for="editProductDiscount">Discount (%)</label>
+              <input id="editProductDiscount" type="number" min="0" max="90" step="1" placeholder="Enter discount %" />
+            </div>
+            <div>
+              <label for="editProductBadge">Badge</label>
+              <select id="editProductBadge">
+                <option value="">None</option>
+                <option value="Spicy">Spicy</option>
+                <option value="New">New</option>
+                <option value="Popular">Popular</option>
+                <option value="Best Seller">Best Seller</option>
+              </select>
+            </div>
+            <div>
+              <label for="editProductBestSeller">Best Seller</label>
+              <select id="editProductBestSeller">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </div>
+            <div>
+              <label for="editProductImage">Replace Image</label>
+              <div class="kc-file-field">
+                <input id="editProductImage" type="file" accept="image/*" />
+                <button type="button" id="editProductImageBtn" class="kc-btn-secondary">Choose Image</button>
+                <span id="editProductImageName" class="kc-muted">No file selected</span>
+              </div>
+            </div>
+            <div>
+              <label for="editProductActive">Status</label>
+              <select id="editProductActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div class="kc-register-actions">
+            <input type="submit" value="Save Changes" />
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+    <script type="module" src="../../js/manager-products.js"></script>
+  </body>
+</html>

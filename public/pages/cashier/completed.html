@@ -4,26 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kool Click | Completed Orders</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
   </head>
   <body>
     <main class="kc-shell">
       <header id="kcHeader"></header>
 
-      <section class="kc-card" style="margin-top: 1rem">
+      <section class="kc-card kc-section-spaced">
         <h1 class="kc-title">Completed Orders</h1>
         <div id="cashierMini"></div>
       </section>
 
-      <section class="kc-card" style="margin-top: 1rem">
-        <div class="kc-inline" style="justify-content: space-between">
-          <h2 class="kc-title" style="margin: 0">History</h2>
+      <section class="kc-card kc-section-spaced">
+        <div class="kc-inline kc-inline-between">
+          <h2 class="kc-title kc-title-no-margin">History</h2>
           <input id="completedSearch" class="kc-cashier-field" type="text" placeholder="Search by ID / student" />
         </div>
         <p class="kc-muted">Orders that were already collected and delivered.</p>
       </section>
 
-      <section id="completedRoot" class="kc-grid" style="margin-top: 1rem"></section>
+      <section id="completedRoot" class="kc-grid kc-section-spaced"></section>
     </main>
 
     <script type="module" src="../../js/cashier-completed.js"></script>

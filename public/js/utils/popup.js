@@ -1,4 +1,52 @@
 let activePopup = null;
+let toastTimerSeed = 0;
+
+function ensureToastRoot() {
+  let root = document.getElementById("kcToastRoot");
+  if (root) return root;
+
+  root = document.createElement("div");
+  root.id = "kcToastRoot";
+  root.className = "kc-toast-root";
+  root.setAttribute("aria-live", "polite");
+  root.setAttribute("aria-atomic", "true");
+  document.body.appendChild(root);
+  return root;
+}
+
+function showToast({ type = "success", title = "Done", message = "", durationMs = 2600 }) {
+  const root = ensureToastRoot();
+  const toast = document.createElement("div");
+  const toastId = `kc-toast-${Date.now()}-${++toastTimerSeed}`;
+  toast.className = `kc-toast kc-toast-${type}`;
+  toast.id = toastId;
+  toast.innerHTML = `
+    <div class="kc-toast-title">${title}</div>
+    <div class="kc-toast-msg">${message}</div>
+  `;
+
+  root.appendChild(toast);
+  // allow CSS transition after mount
+  requestAnimationFrame(() => toast.classList.add("open"));
+
+  const dismiss = () => {
+    toast.classList.remove("open");
+    toast.classList.add("closing");
+    window.setTimeout(() => {
+      const node = document.getElementById(toastId);
+      if (node) node.remove();
+      if (!root.children.length) root.remove();
+    }, 180);
+  };
+
+  const timer = window.setTimeout(dismiss, durationMs);
+  toast.addEventListener("click", () => {
+    window.clearTimeout(timer);
+    dismiss();
+  });
+
+  return Promise.resolve(true);
+}
 
 function ensurePopupRoot() {
   let root = document.getElementById("kcFeedbackModal");
@@ -46,7 +94,7 @@ function openPopup({ type, title, message, okText, cancelText, showCancel = fals
   const okBtn = document.getElementById("kcFeedbackOk");
   const cancelBtn = document.getElementById("kcFeedbackCancel");
 
-  frame.classList.remove("is-success", "is-error", "is-info", "is-warning");
+  frame.classList.remove("is-error", "is-warning");
   frame.classList.add(`is-${type}`);
 
   titleEl.textContent = title;
@@ -96,7 +144,7 @@ function openPopup({ type, title, message, okText, cancelText, showCancel = fals
 }
 
 export function showSuccessPopup(message, title = "Success") {
-  return openPopup({ type: "success", title, message, okText: "Great", cancelText: "", showCancel: false });
+  return showToast({ type: "success", title, message, durationMs: 2400 });
 }
 
 export function showErrorPopup(message, title = "Something Went Wrong") {
@@ -104,7 +152,7 @@ export function showErrorPopup(message, title = "Something Went Wrong") {
 }
 
 export function showInfoPopup(message, title = "Heads Up") {
-  return openPopup({ type: "info", title, message, okText: "OK", cancelText: "", showCancel: false });
+  return showToast({ type: "info", title, message, durationMs: 2600 });
 }
 
 export function showConfirmPopup(

@@ -4,18 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kool Click | Home</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
   </head>
   <body>
     <main class="kc-shell">
       <header id="kcHeader"></header>
 
-      <section class="kc-card" style="margin-top: 1rem">
+      <section class="kc-card kc-section-spaced">
         <h1 class="kc-title">Clicker Dashboard</h1>
         <div id="clickerMini"></div>
       </section>
 
-      <section class="kc-three" style="margin-top: 1rem">
+      <section class="kc-three kc-section-spaced">
         <article class="kc-card">
           <h2 class="kc-title">Quick Actions</h2>
           <div class="kc-list">
@@ -36,6 +36,16 @@
           <p class="kc-muted">Every 50 EGP gives 5 points.</p>
           <p class="kc-muted">Higher levels unlock larger discounts.</p>
         </article>
+      </section>
+
+      <section id="offerBanner" class="kc-card kc-section-spaced-sm kc-offer-banner">
+        <div class="kc-inline kc-inline-between kc-section-spaced-xs">
+          <div>
+            <h2 class="kc-title">Clicker Offers</h2>
+            <p class="kc-subtitle">Fresh deals for every craving.</p>
+          </div>
+        </div>
+        <div id="offerTrack" class="kc-offer-track"></div>
       </section>
     </main>
 

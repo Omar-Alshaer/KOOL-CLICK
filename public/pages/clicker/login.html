@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kool Click | Clicker Login</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
   </head>
   <body>
     <main class="kc-shell">
@@ -32,17 +32,17 @@
 
       <section class="kc-card kc-login-card">
         <h2 class="kc-title">Clicker Login</h2>
-        <p class="kc-subtitle">Use your username, phone number, or email.</p>
+        <p class="kc-subtitle">Use your email and password to sign in.</p>
 
         <form id="loginForm" class="kc-form kc-login-form">
           <div class="kc-login-field">
-            <label for="identifier">Username / Phone / Email</label>
-            <input id="identifier" name="identifier" type="text" placeholder="username, 01XXXXXXXXX, or email" autocomplete="username" required />
+            <label for="identifier">Email</label>
+            <input id="identifier" name="email" type="email" placeholder="Enter your email" autocomplete="email" required />
           </div>
 
           <div class="kc-login-field">
             <label for="password">Password</label>
-            <input id="password" name="password" type="password" minlength="6" required />
+            <input id="password" name="password" type="password" placeholder="Enter your password" minlength="6" autocomplete="current-password" required />
           </div>
 
           <div class="kc-register-actions">

@@ -33,6 +33,35 @@ function calcSubtotal(items) {
   return items.reduce((sum, item) => sum + item.price * item.qty, 0);
 }
 
+function calcItemsCount(items) {
+  return items.reduce((sum, item) => sum + (item.qty || 0), 0);
+}
+
+function buildOrderNumber(orderId) {
+  if (!orderId) return "";
+  return String(orderId).replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase();
+}
+
+function buildInitialStatusHistory() {
+  const now = new Date();
+  return [
+    { status: APP_CONFIG.orderStatuses[0], at: now },
+  ];
+}
+
+function normalizeOrderTimestamps(order) {
+  const createdAt = order.createdAt || order.updatedAt || null;
+  const updatedAt = order.updatedAt || order.createdAt || null;
+  const collectedAt = order.collectedAt || null;
+
+  return {
+    ...order,
+    createdAt,
+    updatedAt,
+    collectedAt,
+  };
+}
+
 function splitDiscountByGroup(groups, totalDiscount) {
   if (totalDiscount <= 0 || !groups.length) {
     return groups.map(() => 0);
@@ -66,16 +95,14 @@ export async function placeClickerOrders({
   cartItems,
   paymentMethod = APP_CONFIG.paymentMethods.cod,
   receiptImageUrl = "",
-  promoCode = "",
+  promoData = null,
 }) {
   const groups = splitCartByRestaurant(cartItems);
   const createdOrderIds = [];
   let totalPointsToGrantNow = 0;
   const batch = writeBatch(db);
   const totalSubtotal = calcSubtotal(cartItems);
-  const promo = promoCode
-    ? APP_CONFIG.promoCodes.find((p) => p.code === promoCode.toUpperCase())
-    : null;
+  const promo = promoData || null;
   const totalDiscount = calculatePromoDiscount(totalSubtotal, promo);
   const splitDiscounts = splitDiscountByGroup(groups, totalDiscount);
   const instantPoints = paymentMethod === APP_CONFIG.paymentMethods.instaPay;
@@ -86,13 +113,18 @@ export async function placeClickerOrders({
     const finalTotal = Math.max(0, subtotal - discountAmount);
     const pointsEarned = pointsFromAmount(finalTotal);
     const orderRef = doc(collection(db, "orders"));
+    const itemsCount = calcItemsCount(group.items);
+    const restaurantName = group.items?.[0]?.restaurantName || "";
 
     batch.set(orderRef, {
+      orderNumber: buildOrderNumber(orderRef.id),
       clickerUid: uid,
       clickerName: fullName,
       clickerPhone: phone,
       restaurantId: group.restaurantId,
+      restaurantName,
       items: group.items,
+      itemsCount,
       subtotal,
       promoCode: promo?.code || "",
       discountAmount,
@@ -100,6 +132,7 @@ export async function placeClickerOrders({
       pointsEarned,
       pointsGranted: instantPoints,
       status: APP_CONFIG.orderStatuses[0],
+      statusHistory: buildInitialStatusHistory(),
       remainingTimeMinutes: 20,
       paymentMethod,
       paymentStatus:
@@ -157,7 +190,7 @@ export async function getClickerOrders(uid) {
     );
 
     const snapshot = await getDocs(indexedQuery);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snapshot.docs.map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }));
   } catch (error) {
     // Fallback when composite index is not created yet.
     if (error?.code !== "failed-precondition") {
@@ -172,7 +205,7 @@ export async function getClickerOrders(uid) {
 
     const snapshot = await getDocs(fallbackQuery);
     return snapshot.docs
-      .map((d) => ({ id: d.id, ...d.data() }))
+      .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
       .sort((a, b) => {
         const aSec = a.createdAt?.seconds || 0;
         const bSec = b.createdAt?.seconds || 0;

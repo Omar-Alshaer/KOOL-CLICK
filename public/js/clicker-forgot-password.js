@@ -1,4 +1,6 @@
 import { showErrorPopup } from "./utils/popup.js";
+import { withButtonLoading } from "./utils/loading.js";
+import { validateEmail } from "./utils/validators.js";
 
 const form = document.getElementById("forgotForm");
 const requestSection = document.getElementById("requestSection");
@@ -6,25 +8,24 @@ const confirmSection = document.getElementById("confirmSection");
 
 form?.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const submitBtn = form.querySelector('[type="submit"]');
 
-  const identifier = document.getElementById("identifier").value.trim();
+  await withButtonLoading(submitBtn, async () => {
+    const identifier = document.getElementById("identifier").value.trim();
 
-  if (!identifier) {
-    await showErrorPopup("Please enter your username or phone number.", "Missing Input");
-    return;
-  }
+    if (!identifier) {
+      await showErrorPopup("Please enter your email address.", "Missing Input");
+      return;
+    }
 
-  // Basic phone format check
-  if (/^\d/.test(identifier) && !/^01\d{9}$/.test(identifier)) {
-    await showErrorPopup(
-      "Phone number must be in Egyptian format: 01XXXXXXXXX",
-      "Invalid Phone"
-    );
-    return;
-  }
+    if (!validateEmail(identifier)) {
+      await showErrorPopup("Please enter a valid email address.", "Invalid Email");
+      return;
+    }
 
-  // Show confirmation screen
-  requestSection.style.display = "none";
-  confirmSection.style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
+    // Show confirmation screen
+    requestSection.hidden = true;
+    confirmSection.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, "Sending...");
 });

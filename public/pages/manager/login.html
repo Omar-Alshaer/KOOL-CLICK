@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Manager Login</title>
+    <link rel="stylesheet" href="../../css/app.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader" class="kc-login-header">
+        <div class="kc-brand">
+          <img src="../../assets/brand/logo_trans.svg" alt="Kool Click" />
+        </div>
+      </header>
+
+      <section class="kc-register-hero">
+        <h1 class="kc-register-hero-title">Manager Access</h1>
+        <p class="kc-register-hero-subtitle">
+          Login to manage your restaurant products, offers, and reports.
+        </p>
+        <div class="kc-register-rules">
+          <span class="kc-chip">Products & Pricing</span>
+          <span class="kc-chip">Offers & Promo Codes</span>
+          <span class="kc-chip">Revenue Analytics</span>
+        </div>
+      </section>
+
+      <section class="kc-card kc-login-card">
+        <h2 class="kc-title">Manager Login</h2>
+        <p class="kc-subtitle">Use your phone number and password.</p>
+
+        <form id="managerLoginForm" class="kc-form kc-login-form">
+          <div class="kc-login-field">
+            <label for="phone">Phone Number</label>
+            <input id="phone" name="phone" type="tel" placeholder="Enter your phone number" autocomplete="username" required />
+          </div>
+
+          <div class="kc-login-field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="Enter your password" minlength="6" required />
+          </div>
+
+          <div class="kc-register-actions">
+            <input type="submit" value="Login" />
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/manager-login.js"></script>
+  </body>
+</html>

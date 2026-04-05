@@ -2,13 +2,9 @@ import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./click
 import { cancelClickerOrder, canClickerCancelOrder, getClickerOrders } from "./services/order-service.js";
 import { APP_CONFIG } from "./config/app-config.js";
 import { applyPointsDeltaToProfileCache } from "./services/auth-service.js";
-import { restaurants } from "./data/restaurants.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import QRCode from "https://esm.sh/qrcode@1.5.4";
-
-function getRestaurantName(restaurantId) {
-  return restaurants.find((r) => r.id === restaurantId)?.name || restaurantId;
-}
+import { withButtonLoading } from "./utils/loading.js";
 
 function formatOrderId(id) {
   return `KC-${String(id).slice(0, 8).toUpperCase()}`;
@@ -71,16 +67,16 @@ async function renderOrders(orders) {
   root.innerHTML = orders
     .map((order, idx) => `
       <article class="kc-card">
-        <div class="kc-inline" style="justify-content: space-between">
+        <div class="kc-inline kc-inline-between">
           <div class="kc-order-id-wrap">
             <strong>Order ID</strong>
-            <span class="kc-order-id-tag">${formatOrderId(order.id)}</span>
+            <span class="kc-order-id-tag">${order.orderNumber || formatOrderId(order.id)}</span>
           </div>
           <span class="kc-status ${order.status}">${order.status}</span>
         </div>
         <div class="kc-order-top">
           <div>
-            <div class="kc-muted" style="margin: 0.5rem 0">Restaurant: ${getRestaurantName(order.restaurantId)}</div>
+            <div class="kc-muted kc-summary-top">Restaurant: ${order.restaurantName || order.restaurantId}</div>
             <div class="kc-muted">Remaining time: ${order.remainingTimeMinutes ?? "--"} mins</div>
             <div class="kc-muted">Payment: ${order.paymentStatus}</div>
             <div class="kc-muted">Method: ${order.paymentMethod || "N/A"}</div>
@@ -94,12 +90,34 @@ async function renderOrders(orders) {
             <div class="kc-muted">Scan at cashier</div>
           </div>
         </div>
-        <div class="kc-inline" style="justify-content: space-between; margin-top: 0.55rem">
+        <div class="kc-inline kc-inline-between kc-section-spaced-xs">
           <div class="kc-muted">Points: ${order.pointsEarned || 0} ${order.pointsGranted ? "(granted)" : "(after collection)"}</div>
         </div>
-        <div class="kc-list" style="margin-top: 0.7rem">
+        <div class="kc-list kc-section-spaced-xl">
           ${order.items
-            .map((item) => `<div class="kc-item">${item.name} x${item.qty} - ${item.price * item.qty} EGP</div>`)
+            .map(
+              (item) => `
+                <div class="kc-item">
+                  <div><strong>${item.name}</strong> x${item.qty} - ${item.price * item.qty} EGP</div>
+                  ${
+                    item.offerId
+                      ? `
+                        <div class="kc-offer-inline">
+                          <span class="kc-badge kc-badge-offer">Offer</span>
+                          <span class="kc-muted">${item.offerTitle || "Special Offer"}</span>
+                          ${item.offerLabel ? `<span class="kc-badge kc-badge-discount">${item.offerLabel}</span>` : ""}
+                        </div>
+                      `
+                      : ""
+                  }
+                  ${
+                    item.basePrice && Number(item.basePrice) > Number(item.price)
+                      ? `<div class="kc-muted">Old price: ${Number(item.basePrice).toFixed(2)} EGP</div>`
+                      : ""
+                  }
+                </div>
+              `
+            )
             .join("")}
         </div>
         ${
@@ -130,20 +148,22 @@ async function loadAndRender(state) {
       );
       if (!ok) return;
 
-      try {
-        const result = await cancelClickerOrder({
-          orderId,
-          uid: state.uid,
-        });
-        applyPointsDeltaToProfileCache(state.uid, -result.totalDeducted);
-        await showSuccessPopup(
-          `Order cancelled. ${result.totalDeducted} points deducted (${result.penalty} cancellation penalty).`,
-          "Order Cancelled"
-        );
-        await loadAndRender(state);
-      } catch (error) {
-        await showErrorPopup(error.message || "Could not cancel order.", "Cancel Failed");
-      }
+      await withButtonLoading(btn, async () => {
+        try {
+          const result = await cancelClickerOrder({
+            orderId,
+            uid: state.uid,
+          });
+          applyPointsDeltaToProfileCache(state.uid, -result.totalDeducted);
+          await showSuccessPopup(
+            `Order cancelled. ${result.totalDeducted} points deducted (${result.penalty} cancellation penalty).`,
+            "Order Cancelled"
+          );
+          await loadAndRender(state);
+        } catch (error) {
+          await showErrorPopup(error.message || "Could not cancel order.", "Cancel Failed");
+        }
+      }, "Cancelling...");
     });
   });
 }

@@ -8,6 +8,30 @@ function getCartCount() {
   return getCart().reduce((sum, item) => sum + (item.qty || 1), 0);
 }
 
+let authSplashMounted = false;
+
+function showAuthSplash() {
+  if (authSplashMounted) return;
+  authSplashMounted = true;
+  document.body.classList.add("kc-auth-loading");
+  const splash = document.createElement("div");
+  splash.id = "kcAuthSplash";
+  splash.innerHTML = `
+    <div class="kc-auth-splash-card">
+      <img src="../../assets/brand/logo_trans.svg" alt="Kool Click Logo" />
+      <div class="kc-auth-splash-text">Loading...</div>
+    </div>
+  `;
+  document.body.appendChild(splash);
+}
+
+function hideAuthSplash() {
+  document.body.classList.remove("kc-auth-loading");
+  const splash = document.getElementById("kcAuthSplash");
+  if (splash) splash.remove();
+  authSplashMounted = false;
+}
+
 export function updateCartBadge() {
   const badge = document.getElementById("kcCartBadge");
   if (!badge) return;
@@ -17,22 +41,38 @@ export function updateCartBadge() {
 }
 
 export async function guardClickerPage() {
+  showAuthSplash();
   return new Promise((resolve) => {
     watchAuthState(async (user) => {
       if (!user) {
+        hideAuthSplash();
         window.location.href = "./login.html";
         resolve(null);
         return;
       }
 
-      const profile = await getCurrentClickerProfile(user.uid, { forceFresh: true });
+      let profile = null;
+      try {
+        profile = await getCurrentClickerProfile(user.uid, { forceFresh: false });
+        if (!profile) {
+          profile = await getCurrentClickerProfile(user.uid, { forceFresh: true });
+        }
+      } catch (error) {
+        await showErrorPopup(
+          error.message || "Could not load your session. Please try again.",
+          "Session Error"
+        );
+      }
+
       if (!profile) {
         await logoutUser();
+        hideAuthSplash();
         window.location.href = "./login.html";
         resolve(null);
         return;
       }
 
+      hideAuthSplash();
       resolve({ uid: user.uid, profile });
     });
   });
@@ -51,7 +91,7 @@ export function mountHeader({ active = "" }) {
       <nav class="kc-topbar-nav">
         <a class="kc-topbar-link ${active === "home" ? "is-active" : ""}" href="./home.html"><span class="kc-topbar-ico">🏠</span><span class="kc-topbar-txt">Home</span></a>
         <a class="kc-topbar-link ${active === "menu" ? "is-active" : ""}" href="./menu.html"><span class="kc-topbar-ico">🍽️</span><span class="kc-topbar-txt">Menu</span></a>
-        <a class="kc-topbar-link ${active === "cart" ? "is-active" : ""}" href="./cart.html"><span class="kc-topbar-ico">🛒</span><span class="kc-topbar-txt">Cart</span><span id="kcCartBadge" class="kc-cart-badge" style="display:none">0</span></a>
+        <a class="kc-topbar-link ${active === "cart" ? "is-active" : ""}" href="./cart.html"><span class="kc-topbar-ico">🛒</span><span class="kc-topbar-txt">Cart</span><span id="kcCartBadge" class="kc-cart-badge">0</span></a>
         <a class="kc-topbar-link ${active === "orders" ? "is-active" : ""}" href="./orders.html"><span class="kc-topbar-ico">📦</span><span class="kc-topbar-txt">Orders</span></a>
         <a class="kc-topbar-link ${active === "profile" ? "is-active" : ""}" href="./profile.html"><span class="kc-topbar-ico">👤</span><span class="kc-topbar-txt">Profile</span></a>
         <button id="logoutBtn" class="kc-topbar-link kc-topbar-danger" type="button"><span class="kc-topbar-ico">⏻</span><span class="kc-topbar-txt">Logout</span></button>
@@ -122,11 +162,16 @@ export function renderClickerMiniProfile(targetId, profile) {
   const points = Number(profile.points || 0);
   const level = getLevelFromPoints(points);
   const pointsClass = points < 0 ? "kc-points-negative" : "kc-points-positive";
+  const usernameText = profile.username
+    ? profile.username.includes("@")
+      ? profile.username
+      : `@${profile.username}`
+    : "";
   el.innerHTML = `
     <div class="kc-inline">
-      <img src="../../assets/Characters/${profile.avatar}" alt="Avatar" width="54" height="54" style="image-rendering: pixelated; border: 2px solid #4b067f" />
+      <img src="../../assets/Characters/${profile.avatar}" alt="Avatar" width="54" height="54" class="kc-avatar-mini" />
       <div>
-        <div><strong>${profile.fullName}</strong>${profile.username ? ` <span class="kc-muted" style="font-size:0.82em">@${profile.username}</span>` : ""}</div>
+        <div><strong>${profile.fullName}</strong>${usernameText ? ` <span class="kc-muted kc-username-inline">${usernameText}</span>` : ""}</div>
         <div class="kc-muted">Points: <span class="${pointsClass}">${points}</span> | ${level.name} (L${level.level})</div>
       </div>
     </div>

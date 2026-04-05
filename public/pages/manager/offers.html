@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kool Click | Manager Offers</title>
+    <link rel="stylesheet" href="../../css/app.css" />
+  </head>
+  <body>
+    <main class="kc-shell">
+      <header id="kcHeader"></header>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <div class="kc-inline" style="justify-content: space-between; flex-wrap: wrap;">
+          <div>
+            <h2 class="kc-title">Offers & Promo Codes</h2>
+            <p class="kc-subtitle">Manage campaigns and discount codes.</p>
+          </div>
+          <div id="managerMini"></div>
+        </div>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Create Offer</h3>
+        <form id="offerForm" class="kc-form">
+          <div class="kc-two">
+            <div>
+              <label for="offerTitle">Offer Title</label>
+              <input id="offerTitle" type="text" required />
+            </div>
+            <div>
+              <label for="offerDescription">Description</label>
+              <input id="offerDescription" type="text" />
+            </div>
+            <div>
+              <label for="offerTargetType">Target Type</label>
+              <select id="offerTargetType" required>
+                <option value="product">Product</option>
+                <option value="section">Section</option>
+              </select>
+            </div>
+            <div>
+              <label for="offerTargetValue">Target</label>
+              <select id="offerTargetValue" required></select>
+            </div>
+            <div>
+              <label for="offerType">Discount Type</label>
+              <select id="offerType">
+                <option value="percent">Percent</option>
+                <option value="flat">Flat EGP</option>
+              </select>
+            </div>
+            <div>
+              <label for="offerValue">Discount Value</label>
+              <input id="offerValue" type="number" min="1" step="1" required />
+            </div>
+            <div>
+              <label>Offer Image</label>
+              <div class="kc-file-field">
+                <input id="offerImage" type="file" accept="image/*" />
+                <button type="button" class="kc-btn-secondary" id="offerImageBtn">Choose Image</button>
+                <span id="offerImageName" class="kc-muted">No file selected</span>
+              </div>
+            </div>
+          </div>
+          <div class="kc-register-actions">
+            <input type="submit" value="Add Offer" />
+          </div>
+        </form>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Active Offers</h3>
+        <div id="offersGrid" class="kc-grid"></div>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Create Promo Code</h3>
+        <form id="promoForm" class="kc-form">
+          <div class="kc-two">
+            <div>
+              <label for="promoCode">Promo Code</label>
+              <input id="promoCode" type="text" placeholder="SAVE10" required />
+            </div>
+            <div>
+              <label for="promoType">Type</label>
+              <select id="promoType">
+                <option value="percent">Percent</option>
+                <option value="flat">Flat EGP</option>
+              </select>
+            </div>
+            <div>
+              <label for="promoValue">Value</label>
+              <input id="promoValue" type="number" min="1" step="1" required />
+            </div>
+            <div>
+              <label for="promoMin">Min Subtotal (EGP)</label>
+              <input id="promoMin" type="number" min="0" step="1" />
+            </div>
+          </div>
+          <div class="kc-register-actions">
+            <input type="submit" value="Add Promo Code" />
+          </div>
+        </form>
+      </section>
+
+      <section class="kc-card kc-section-spaced-sm">
+        <h3 class="kc-title">Promo Codes</h3>
+        <div id="promoGrid" class="kc-grid"></div>
+      </section>
+    </main>
+
+    <script type="module" src="../../js/manager-offers.js"></script>
+  </body>
+</html>

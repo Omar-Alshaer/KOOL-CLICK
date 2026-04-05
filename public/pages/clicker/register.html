@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kool Click | Clicker Register</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
   </head>
   <body>
     <main class="kc-shell">
@@ -24,7 +24,6 @@
           Your personal Kool Click account. Order food, earn points, unlock rewards.
         </p>
         <div class="kc-register-rules">
-          <span class="kc-chip">Choose a unique username</span>
           <span class="kc-chip">Phone: 01XXXXXXXXX</span>
           <span class="kc-chip">Pick your avatar</span>
           <span class="kc-chip">🎂 Birthday bonus points!</span>
@@ -39,27 +38,26 @@
               <div class="kc-two">
                 <div>
                   <label for="fullName">Full Name</label>
-                  <input id="fullName" name="fullName" type="text" required />
-                </div>
-
-                <div>
-                  <label for="username">Username</label>
-                  <input id="username" name="username" type="text" placeholder="letters, numbers, _ (3–20 chars)" autocomplete="username" required />
+                  <input id="fullName" name="fullName" type="text" placeholder="Enter your full name" required />
                 </div>
 
                 <div>
                   <label for="phone">Phone Number</label>
-                  <input id="phone" name="phone" type="tel" placeholder="01XXXXXXXXX" required />
+                  <input id="phone" name="phone" type="tel" placeholder="Enter your phone number" autocomplete="tel" required />
                 </div>
 
                 <div>
                   <label for="birthDate">Birth Date</label>
-                  <input id="birthDate" name="birthDate" type="date" required />
+                  <div class="kc-birth-grid">
+                    <select id="birthDay" name="birthDay" required></select>
+                    <select id="birthMonth" name="birthMonth" required></select>
+                    <select id="birthYear" name="birthYear" required></select>
+                  </div>
                 </div>
 
                 <div>
-                  <label for="email">Email <span class="kc-muted" style="font-size:0.75em">(optional)</span></label>
-                  <input id="email" name="email" type="email" placeholder="you@example.com" />
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" placeholder="Enter your email" autocomplete="email" required />
                 </div>
               </div>
             </section>
@@ -69,12 +67,12 @@
               <div class="kc-two">
                 <div>
                   <label for="password">Password</label>
-                  <input id="password" name="password" type="password" minlength="6" required />
+                  <input id="password" name="password" type="password" placeholder="Enter your password" minlength="6" autocomplete="new-password" required />
                 </div>
 
                 <div>
                   <label for="confirmPassword">Confirm Password</label>
-                  <input id="confirmPassword" name="confirmPassword" type="password" minlength="6" required />
+                  <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm your password" minlength="6" autocomplete="new-password" required />
                 </div>
               </div>
             </section>
@@ -108,7 +106,7 @@
     <div id="avatarModal" class="kc-modal" aria-hidden="true">
       <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-label="Avatar Gallery">
         <div class="kc-modal-head">
-          <h3 class="kc-title" style="margin: 0">Choose Your Avatar</h3>
+          <h3 class="kc-title kc-title-no-margin">Choose Your Avatar</h3>
           <button id="closeAvatarModalBtn" type="button" class="kc-btn-secondary">Close</button>
         </div>
         <p class="kc-muted" id="avatarLoadMsg">Loading avatars...</p>

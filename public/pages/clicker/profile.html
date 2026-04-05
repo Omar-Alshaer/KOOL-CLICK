@@ -4,21 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kool Click | Profile</title>
-    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/app.css" />
   </head>
   <body>
     <main class="kc-shell">
       <header id="kcHeader"></header>
 
-      <section class="kc-card" style="margin-top: 1rem">
+      <section class="kc-card kc-section-spaced">
         <h1 class="kc-title">Profile</h1>
         <div id="clickerMini"></div>
       </section>
 
-      <section class="kc-card" style="margin-top: 1rem">
+      <section class="kc-card kc-section-spaced">
         <div class="kc-two">
           <div class="kc-item"><strong>Name:</strong> <span id="fullName"></span></div>
-          <div class="kc-item"><strong>Username:</strong> <span id="username"></span></div>
+          <div class="kc-item kc-profile-username">
+            <strong>Username:</strong>
+            <span id="username"></span>
+            <button id="editUsernameBtn" type="button" class="kc-btn-secondary kc-btn-compact">Edit</button>
+          </div>
           <div class="kc-item"><strong>Phone:</strong> <span id="phone"></span></div>
           <div class="kc-item"><strong>Email:</strong> <span id="email"></span></div>
           <div class="kc-item"><strong>Birth Date:</strong> <span id="birthDate"></span></div>
@@ -27,6 +31,24 @@
         </div>
       </section>
     </main>
+
+    <div id="usernameModal" class="kc-modal" aria-hidden="true">
+      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-label="Edit Username">
+        <div class="kc-modal-head">
+          <h3 class="kc-title kc-title-no-margin">Edit Username</h3>
+          <button id="closeUsernameModalBtn" type="button" class="kc-btn-secondary">Close</button>
+        </div>
+        <form id="usernameForm" class="kc-form">
+          <div>
+            <label for="newUsername">New Username</label>
+            <input id="newUsername" type="text" placeholder="Enter new username (letters & numbers)" required />
+          </div>
+          <div class="kc-register-actions">
+            <input type="submit" value="Save Username" />
+          </div>
+        </form>
+      </div>
+    </div>
 
     <script type="module" src="../../js/clicker-profile.js"></script>
   </body>
