@@ -21,9 +21,14 @@ function showToast({ type = "success", title = "Done", message = "", durationMs 
   toast.className = `kc-toast kc-toast-${type}`;
   toast.id = toastId;
   toast.innerHTML = `
-    <div class="kc-toast-title">${title}</div>
-    <div class="kc-toast-msg">${message}</div>
+    <div class="kc-toast-title"></div>
+    <div class="kc-toast-msg"></div>
   `;
+
+  const titleNode = toast.querySelector(".kc-toast-title");
+  const msgNode = toast.querySelector(".kc-toast-msg");
+  if (titleNode) titleNode.textContent = String(title ?? "");
+  if (msgNode) msgNode.textContent = String(message ?? "");
 
   root.appendChild(toast);
   // allow CSS transition after mount

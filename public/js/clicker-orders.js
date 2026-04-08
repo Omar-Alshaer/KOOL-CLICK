@@ -5,6 +5,7 @@ import { applyPointsDeltaToProfileCache } from "./services/auth-service.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import QRCode from "https://esm.sh/qrcode@1.5.4";
 import { withButtonLoading } from "./utils/loading.js";
+import { escapeHtml, safeClass } from "./utils/dom.js";
 
 function formatOrderId(id) {
   return `KC-${String(id).slice(0, 8).toUpperCase()}`;
@@ -12,6 +13,10 @@ function formatOrderId(id) {
 
 function finalTotal(order) {
   return order.finalTotal ?? order.subtotal ?? 0;
+}
+
+function safeStatusLabel(status) {
+  return safeClass(status, APP_CONFIG.orderStatuses, APP_CONFIG.orderStatuses[0]);
 }
 
 function formatTimestamp(value) {
@@ -65,24 +70,31 @@ async function renderOrders(orders) {
   );
 
   root.innerHTML = orders
-    .map((order, idx) => `
+    .map((order, idx) => {
+      const statusLabel = safeStatusLabel(order.status);
+      const safeRestaurant = escapeHtml(order.restaurantName || order.restaurantId || "");
+      const safePaymentStatus = escapeHtml(order.paymentStatus || "N/A");
+      const safePaymentMethod = escapeHtml(order.paymentMethod || "N/A");
+      const safePromo = escapeHtml(order.promoCode || "");
+      const safeOrderId = escapeHtml(order.orderNumber || formatOrderId(order.id));
+      return `
       <article class="kc-card">
         <div class="kc-inline kc-inline-between">
           <div class="kc-order-id-wrap">
             <strong>Order ID</strong>
-            <span class="kc-order-id-tag">${order.orderNumber || formatOrderId(order.id)}</span>
+            <span class="kc-order-id-tag">${safeOrderId}</span>
           </div>
-          <span class="kc-status ${order.status}">${order.status}</span>
+          <span class="kc-status ${statusLabel}">${statusLabel}</span>
         </div>
         <div class="kc-order-top">
           <div>
-            <div class="kc-muted kc-summary-top">Restaurant: ${order.restaurantName || order.restaurantId}</div>
+            <div class="kc-muted kc-summary-top">Restaurant: ${safeRestaurant}</div>
             <div class="kc-muted">Remaining time: ${order.remainingTimeMinutes ?? "--"} mins</div>
-            <div class="kc-muted">Payment: ${order.paymentStatus}</div>
-            <div class="kc-muted">Method: ${order.paymentMethod || "N/A"}</div>
+            <div class="kc-muted">Payment: ${safePaymentStatus}</div>
+            <div class="kc-muted">Method: ${safePaymentMethod}</div>
             <div class="kc-muted">Ordered At: ${formatTimestamp(order.createdAt)}</div>
             <div class="kc-muted">Last Update: ${formatTimestamp(order.updatedAt)}</div>
-            ${order.promoCode ? `<div class="kc-muted">Promo: ${order.promoCode} (-${order.discountAmount || 0} EGP)</div>` : ""}
+            ${safePromo ? `<div class="kc-muted">Promo: ${safePromo} (-${order.discountAmount || 0} EGP)</div>` : ""}
             <div class="kc-muted">Subtotal: ${order.subtotal ?? 0} EGP | Final: ${finalTotal(order)} EGP</div>
           </div>
           <div class="kc-order-qr-box">
@@ -96,16 +108,20 @@ async function renderOrders(orders) {
         <div class="kc-list kc-section-spaced-xl">
           ${order.items
             .map(
-              (item) => `
+              (item) => {
+                const safeName = escapeHtml(item.name || "");
+                const safeOfferTitle = escapeHtml(item.offerTitle || "Special Offer");
+                const safeOfferLabel = escapeHtml(item.offerLabel || "");
+                return `
                 <div class="kc-item">
-                  <div><strong>${item.name}</strong> x${item.qty} - ${item.price * item.qty} EGP</div>
+                  <div><strong>${safeName}</strong> x${item.qty} - ${item.price * item.qty} EGP</div>
                   ${
                     item.offerId
                       ? `
                         <div class="kc-offer-inline">
                           <span class="kc-badge kc-badge-offer">Offer</span>
-                          <span class="kc-muted">${item.offerTitle || "Special Offer"}</span>
-                          ${item.offerLabel ? `<span class="kc-badge kc-badge-discount">${item.offerLabel}</span>` : ""}
+                          <span class="kc-muted">${safeOfferTitle}</span>
+                          ${safeOfferLabel ? `<span class="kc-badge kc-badge-discount">${safeOfferLabel}</span>` : ""}
                         </div>
                       `
                       : ""
@@ -117,7 +133,7 @@ async function renderOrders(orders) {
                   }
                 </div>
               `
-            )
+              ;})
             .join("")}
         </div>
         ${
@@ -127,7 +143,7 @@ async function renderOrders(orders) {
         }
       </article>
     `
-    )
+      ;})
     .join("");
 }
 
@@ -178,7 +194,8 @@ async function init() {
   try {
     await loadAndRender(state);
   } catch (error) {
-    document.getElementById("ordersRoot").innerHTML = `<div class="kc-note">${error.message || "Could not load orders."}</div>`;
+    const msg = escapeHtml(error.message || "Could not load orders.");
+    document.getElementById("ordersRoot").innerHTML = `<div class="kc-note">${msg}</div>`;
     await showErrorPopup(error.message || "Could not load orders.", "Orders Unavailable");
   }
 }

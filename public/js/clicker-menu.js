@@ -1,5 +1,6 @@
 import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./clicker-common.js";
 import { getRestaurants } from "./services/restaurant-service.js";
+import { escapeHtml, sanitizeUrl } from "./utils/dom.js";
 
 function renderStars(rating) {
   const full = Math.round(rating);
@@ -24,11 +25,15 @@ function renderRestaurants(restaurants) {
 
   root.innerHTML = restaurants
     .map(
-      (r) => `
+      (r) => {
+        const safeName = escapeHtml(r.name || "");
+        const safeZone = escapeHtml(r.campusZone || "Campus");
+        const safeLogo = sanitizeUrl(r.logoUrl) || "../../assets/brand/logo.svg";
+        return `
       <article class="kc-card kc-restaurant-card">
-        <img class="kc-restaurant-thumb" src="${r.logoUrl || "../../assets/brand/logo.svg"}" alt="${r.name}" />
+        <img class="kc-restaurant-thumb" src="${safeLogo}" alt="${safeName}" />
         <div class="kc-restaurant-body">
-          <h3 class="kc-title">${r.name}</h3>
+          <h3 class="kc-title">${safeName}</h3>
           ${
             r.rating
               ? `<div class="kc-stars" aria-label="Rating ${r.rating} out of 5">
@@ -38,13 +43,13 @@ function renderRestaurants(restaurants) {
               : `<div class="kc-muted">New restaurant • No rating yet</div>`
           }
           <div class="kc-inline kc-muted">
-            <span>${r.campusZone || "Campus"}</span>
+            <span>${safeZone}</span>
           </div>
           <a class="kc-btn" href="./restaurant.html?id=${encodeURIComponent(r.id)}">Open Restaurant</a>
         </div>
       </article>
     `
-    )
+      ;})
     .join("");
 }
 

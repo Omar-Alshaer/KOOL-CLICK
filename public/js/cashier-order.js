@@ -6,6 +6,8 @@ import {
 import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
 import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { withButtonLoading } from "./utils/loading.js";
+import { APP_CONFIG } from "./config/app-config.js";
+import { escapeHtml, safeClass, sanitizeUrl } from "./utils/dom.js";
 
 let currentState = null;
 let currentOrders = [];
@@ -34,6 +36,10 @@ function formatTimestamp(value) {
 
   if (!dateObj || Number.isNaN(dateObj.getTime())) return "N/A";
   return dateObj.toLocaleString("en-GB");
+}
+
+function safeStatusLabel(status) {
+  return safeClass(status, APP_CONFIG.orderStatuses, APP_CONFIG.orderStatuses[0]);
 }
 
 function parseSearchOrderId(raw) {
@@ -107,7 +113,9 @@ function syncPicker() {
   picker.innerHTML = currentOrders
     .map((order) => {
       const finalTotal = getOrderFinalTotal(order);
-      return `<option value="${order.id}">${formatOrderId(order.id)} | ${order.clickerName || "Clicker"} | ${formatMoney(finalTotal)} | ${order.status} | ${formatTimestamp(order.createdAt)}</option>`;
+      const safeClickerName = escapeHtml(order.clickerName || "Clicker");
+      const statusLabel = safeStatusLabel(order.status);
+      return `<option value="${order.id}">${formatOrderId(order.id)} | ${safeClickerName} | ${formatMoney(finalTotal)} | ${statusLabel} | ${formatTimestamp(order.createdAt)}</option>`;
     })
     .join("");
 
@@ -147,6 +155,13 @@ function renderSelectedOrder() {
   const discount = Number(order.discountAmount || 0);
   const finalTotal = getOrderFinalTotal(order);
 
+  const statusLabel = safeStatusLabel(order.status);
+  const safeClickerName = escapeHtml(order.clickerName || "N/A");
+  const safeClickerPhone = escapeHtml(order.clickerPhone || "N/A");
+  const safePaymentStatus = escapeHtml(order.paymentStatus || "N/A");
+  const safePaymentMethod = escapeHtml(order.paymentMethod || "N/A");
+  const safeReceiptUrl = sanitizeUrl(order.receiptImageUrl);
+
   root.innerHTML = `
     <article class="kc-card">
       <div class="kc-inline kc-inline-between">
@@ -154,15 +169,15 @@ function renderSelectedOrder() {
           <strong>Order ID</strong>
           <span class="kc-order-id-tag">${formatOrderId(order.id)}</span>
         </div>
-        <span class="kc-status ${order.status}">${order.status}</span>
+        <span class="kc-status ${statusLabel}">${statusLabel}</span>
       </div>
 
       <div class="kc-order-layout kc-order-layout-stack kc-section-spaced-lg">
         <div class="kc-item kc-order-info">
-          <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
-          <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
-          <div class="kc-muted">Method: ${order.paymentMethod || "N/A"}</div>
-          <div class="kc-muted">Payment: ${order.paymentStatus || "N/A"}</div>
+          <div><strong>Clicker:</strong> ${safeClickerName}</div>
+          <div class="kc-muted">Phone: ${safeClickerPhone}</div>
+          <div class="kc-muted">Method: ${safePaymentMethod}</div>
+          <div class="kc-muted">Payment: ${safePaymentStatus}</div>
           <div class="kc-muted">Ordered At: ${formatTimestamp(order.createdAt)}</div>
           <div class="kc-muted">Last Update: ${formatTimestamp(order.updatedAt)}</div>
           ${order.collectedAt ? `<div class="kc-muted">Collected At: ${formatTimestamp(order.collectedAt)}</div>` : ""}
@@ -175,12 +190,12 @@ function renderSelectedOrder() {
           </div>
 
           ${
-            order.receiptImageUrl
+            safeReceiptUrl
               ? `
             <div class="kc-receipt-preview kc-section-spaced-lg">
               <div><strong>InstaPay Receipt</strong></div>
-              <a class="kc-btn-secondary" href="${order.receiptImageUrl}" target="_blank" rel="noopener noreferrer">Open Receipt</a>
-              <img src="${order.receiptImageUrl}" alt="Receipt for ${formatOrderId(order.id)}" />
+              <a class="kc-btn-secondary" href="${safeReceiptUrl}" target="_blank" rel="noopener noreferrer">Open Receipt</a>
+              <img src="${safeReceiptUrl}" alt="Receipt for ${formatOrderId(order.id)}" />
             </div>
           `
               : ""
@@ -219,7 +234,7 @@ function renderSelectedOrder() {
 
       <div class="kc-list kc-section-spaced-xl">
         ${(order.items || [])
-          .map((item) => `<div class="kc-item">${item.name} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`)
+          .map((item) => `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`)
           .join("")}
       </div>
     </article>

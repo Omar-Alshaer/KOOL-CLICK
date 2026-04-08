@@ -3,6 +3,7 @@ import { getRestaurantById, getRestaurantProducts } from "./services/restaurant-
 import { getOfferById } from "./services/offers-service.js";
 import { getCart, saveCart } from "./utils/storage.js";
 import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
+import { escapeHtml, sanitizeUrl } from "./utils/dom.js";
 
 function renderStars(rating) {
   const full = Math.round(rating);
@@ -95,6 +96,10 @@ function buildItemsMarkup(category, restaurant, products) {
   return products
     .map(
       (m) => {
+        const safeName = escapeHtml(m.name || "");
+        const safeDesc = escapeHtml(m.description || "");
+        const safeBadge = escapeHtml(m.badge || "");
+        const safeRestaurantName = escapeHtml(restaurant.name || "");
         const displayPrice = m.offerApplied ? m.offerPrice : m.price;
         const displayOldPrice = m.offerApplied ? m.offerOldPrice : m.oldPrice;
         const displayDiscount = m.offerApplied
@@ -108,14 +113,15 @@ function buildItemsMarkup(category, restaurant, products) {
             : "";
         const offerBadge = m.offerApplied ? `<span class="kc-badge kc-badge-offer">Offer</span>` : "";
         const isActive = !(m.isActive === false || m.isActive === "false");
+        const safeImage = sanitizeUrl(m.imageUrl) || "../../assets/brand/logo.svg";
         return `
         <article class="kc-item kc-menu-item ${isActive ? "" : "kc-item-disabled"}">
           <div class="kc-menu-thumb">
-            <img src="${m.imageUrl || "../../assets/brand/logo.svg"}" alt="${m.name}" />
+            <img src="${safeImage}" alt="${safeName}" />
           </div>
           <div class="kc-menu-body">
-            <strong>${m.name}</strong>
-            <div class="kc-muted">${m.description || ""}</div>
+            <strong>${safeName}</strong>
+            <div class="kc-muted">${safeDesc}</div>
             <div class="kc-price-line kc-section-spaced-2xs">
               <span class="kc-price">${Number(displayPrice || 0).toFixed(2)} EGP</span>
               ${
@@ -126,7 +132,7 @@ function buildItemsMarkup(category, restaurant, products) {
               ${discountBadgeText ? `<span class="kc-badge kc-badge-discount">${discountBadgeText}</span>` : ""}
               ${offerBadge}
               ${m.isBestSeller ? `<span class="kc-badge">Best Seller</span>` : ""}
-              ${m.badge ? `<span class="kc-badge">${m.badge}</span>` : ""}
+              ${safeBadge ? `<span class="kc-badge">${safeBadge}</span>` : ""}
               ${isActive ? "" : `<span class="kc-badge kc-badge-soldout">Sold Out</span>`}
             </div>
             <div class="kc-inline kc-inline-between kc-section-spaced-xs">
@@ -134,12 +140,12 @@ function buildItemsMarkup(category, restaurant, products) {
                 type="button"
                 data-menu-id="${m.id}"
                 data-restaurant-id="${restaurant.id}"
-                data-restaurant-name="${restaurant.name}"
-                data-name="${m.name}"
+                data-restaurant-name="${encodeURIComponent(restaurant.name || "")}"
+                data-name="${encodeURIComponent(m.name || "")}"
                 data-price="${displayPrice}"
                 data-offer-id="${m.offerId || ""}"
                 data-base-price="${m.offerOldPrice || ""}"
-                data-offer-title="${m.offerTitle || ""}"
+                data-offer-title="${encodeURIComponent(m.offerTitle || "")}"
                 data-offer-label="${discountBadgeText || ""}"
                 data-active="${isActive ? "true" : "false"}"
                 ${isActive ? "" : "disabled"}
@@ -158,7 +164,7 @@ function renderRestaurantPage(restaurant, products, offer) {
   if (!products.length) {
     root.innerHTML = `
       <section class="kc-card">
-        <h2 class="kc-title">${restaurant.name}</h2>
+        <h2 class="kc-title">${escapeHtml(restaurant.name || "")}</h2>
         <p class="kc-muted">No products available yet.</p>
       </section>
     `;
@@ -166,21 +172,28 @@ function renderRestaurantPage(restaurant, products, offer) {
   }
   const categories = [...new Set(products.map((p) => p.category || "General"))]
     .map((name) => ({
-      id: name.toLowerCase().replace(/\s+/g, "-"),
-      name,
+      id: String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
+      name: escapeHtml(name || "General"),
+      rawName: String(name || "General"),
     }));
   const defaultCategory = categories[0]?.id || "";
   const offeredCategories = new Set(
     products
       .filter((p) => p.offerApplied)
-      .map((p) => (p.category || "General").toLowerCase())
+      .map((p) => String(p.category || "General").toLowerCase())
   );
+
+  const safeRestaurantName = escapeHtml(restaurant.name || "");
+  const safeRestaurantZone = escapeHtml(restaurant.campusZone || "Campus");
+  const safeRestaurantLogo = sanitizeUrl(restaurant.logoUrl) || "../../assets/brand/logo.svg";
+  const safeOfferTitle = escapeHtml(offer?.title || "Offer");
+  const safeOfferDesc = escapeHtml(offer?.description || "");
 
   root.innerHTML = `
     <section class="kc-card kc-restaurant-hero">
-      <img class="kc-restaurant-thumb" src="${restaurant.logoUrl || "../../assets/brand/logo.svg"}" alt="${restaurant.name}" />
+      <img class="kc-restaurant-thumb" src="${safeRestaurantLogo}" alt="${safeRestaurantName}" />
       <div>
-        <h1 class="kc-title">${restaurant.name}</h1>
+        <h1 class="kc-title">${safeRestaurantName}</h1>
         ${
           restaurant.rating
             ? `<div class="kc-stars">
@@ -189,7 +202,7 @@ function renderRestaurantPage(restaurant, products, offer) {
               </div>`
             : `<div class="kc-muted">New restaurant • No rating yet</div>`
         }
-        <div class="kc-inline kc-muted"><span>${restaurant.campusZone || "Campus"}</span></div>
+        <div class="kc-inline kc-muted"><span>${safeRestaurantZone}</span></div>
       </div>
     </section>
 
@@ -199,8 +212,8 @@ function renderRestaurantPage(restaurant, products, offer) {
         offer
           ? `
             <div class="kc-offer-note">
-              <strong>${offer.title || "Offer"}</strong>
-              <span class="kc-muted">${offer.description || ""}</span>
+              <strong>${safeOfferTitle}</strong>
+              <span class="kc-muted">${safeOfferDesc}</span>
               <span class="kc-badge kc-badge-discount">${offer.discountType === "flat" ? `-${Number(offer.discountValue || 0).toFixed(0)} EGP` : `-${Number(offer.discountValue || 0).toFixed(0)}%`}</span>
             </div>
           `
@@ -212,7 +225,7 @@ function renderRestaurantPage(restaurant, products, offer) {
             (c) => `
               <button type="button" class="kc-category-btn ${c.id === defaultCategory ? "active" : ""}" data-category="${c.id}">
                 ${c.name}
-                ${offeredCategories.has(c.name.toLowerCase()) ? `<span class="kc-category-badge">Offer</span>` : ""}
+                ${offeredCategories.has(c.rawName.toLowerCase()) ? `<span class="kc-category-badge">Offer</span>` : ""}
               </button>
             `
           )
@@ -232,7 +245,7 @@ function renderRestaurantPage(restaurant, products, offer) {
       return;
     }
 
-    const categoryProducts = products.filter((p) => (p.category || "General") === category.name);
+    const categoryProducts = products.filter((p) => (p.category || "General") === category.rawName);
     itemsRoot.innerHTML = `
       <h3 class="kc-title kc-title-no-margin">${category.name}</h3>
       <div class="kc-grid kc-menu-items-grid">${buildItemsMarkup(category, restaurant, categoryProducts)}</div>
@@ -247,11 +260,11 @@ function renderRestaurantPage(restaurant, products, offer) {
         upsertItemToCart({
           menuId: btn.dataset.menuId,
           restaurantId: btn.dataset.restaurantId,
-          restaurantName: btn.dataset.restaurantName,
-          name: btn.dataset.name,
+          restaurantName: decodeURIComponent(btn.dataset.restaurantName || ""),
+          name: decodeURIComponent(btn.dataset.name || ""),
           price: Number(btn.dataset.price),
           offerId: btn.dataset.offerId || "",
-          offerTitle: btn.dataset.offerTitle || "",
+          offerTitle: decodeURIComponent(btn.dataset.offerTitle || ""),
           offerLabel: btn.dataset.offerLabel || "",
           basePrice: btn.dataset.basePrice ? Number(btn.dataset.basePrice) : null,
         });

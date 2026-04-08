@@ -251,8 +251,8 @@ export async function updateClickerUsername({ uid, newUsername }) {
   if (!normalized) {
     throw new Error("Username is required.");
   }
-  if (!/^[a-z0-9]{3,20}$/.test(normalized)) {
-    throw new Error("Username must be letters and numbers only.");
+  if (!/^[a-z0-9_]{3,20}$/.test(normalized)) {
+    throw new Error("Username must be letters, numbers, or underscore only.");
   }
 
   const clickerRef = doc(db, "clickers", uid);

@@ -13,6 +13,7 @@ import {
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { uploadImageToCloudinary } from "./services/upload-service.js";
 import { withButtonLoading } from "./utils/loading.js";
+import { escapeHtml } from "./utils/dom.js";
 
 const offerForm = document.getElementById("offerForm");
 const promoForm = document.getElementById("promoForm");
@@ -35,11 +36,15 @@ function renderOffers(offers) {
   }
   offersGrid.innerHTML = offers
     .map(
-      (offer) => `
+      (offer) => {
+        const safeTitle = escapeHtml(offer.title || "");
+        const safeDesc = escapeHtml(offer.description || "No description");
+        const safeTarget = escapeHtml(offer.targetLabel || offer.targetValue || "All");
+        return `
       <div class="kc-card">
-        <strong>${offer.title}</strong>
-        <div class="kc-muted">${offer.description || "No description"}</div>
-        <div class="kc-muted">Target: ${offer.targetLabel || offer.targetValue || "All"}</div>
+        <strong>${safeTitle}</strong>
+        <div class="kc-muted">${safeDesc}</div>
+        <div class="kc-muted">Target: ${safeTarget}</div>
         <div class="kc-muted">Discount: ${offer.discountValue}${offer.discountType === "percent" ? "%" : " EGP"}</div>
         <div class="kc-inline" style="gap:0.4rem;">
           <button class="kc-btn-secondary" data-action="toggle-offer" data-id="${offer.id}">
@@ -49,7 +54,7 @@ function renderOffers(offers) {
         </div>
       </div>
     `
-    )
+      ;})
     .join("");
 }
 
@@ -61,9 +66,11 @@ function renderPromoCodes(codes) {
   }
   promoGrid.innerHTML = codes
     .map(
-      (code) => `
+      (code) => {
+        const safeCode = escapeHtml(code.code || "");
+        return `
       <div class="kc-card">
-        <strong>${code.code}</strong>
+        <strong>${safeCode}</strong>
         <div class="kc-muted">Type: ${code.type}</div>
         <div class="kc-muted">Value: ${code.value}${code.type === "percent" ? "%" : " EGP"}</div>
         <div class="kc-muted">Min Subtotal: ${Number(code.minSubtotal || 0).toFixed(0)} EGP</div>
@@ -75,20 +82,28 @@ function renderPromoCodes(codes) {
         </div>
       </div>
     `
-    )
+      ;})
     .join("");
 }
 
 async function loadOffers() {
   if (!managerProfile) return;
-  const offers = await getOffers(managerProfile.restaurantId, 160);
-  renderOffers(offers);
+  try {
+    const offers = await getOffers(managerProfile.restaurantId, 160);
+    renderOffers(offers);
+  } catch (error) {
+    await showErrorPopup(error.message || "Could not load offers.", "Offers Error");
+  }
 }
 
 async function loadPromoCodes() {
   if (!managerProfile) return;
-  const codes = await getPromoCodes(managerProfile.restaurantId, 160);
-  renderPromoCodes(codes);
+  try {
+    const codes = await getPromoCodes(managerProfile.restaurantId, 160);
+    renderPromoCodes(codes);
+  } catch (error) {
+    await showErrorPopup(error.message || "Could not load promo codes.", "Promo Error");
+  }
 }
 
 offerForm?.addEventListener("submit", async (event) => {
@@ -117,27 +132,36 @@ offerForm?.addEventListener("submit", async (event) => {
   let imageUrl = "";
   const imageFile = offerImageInput?.files?.[0];
   if (imageFile) {
-    imageUrl = await uploadImageToCloudinary(imageFile, { folder: "offers" });
+    try {
+      imageUrl = await uploadImageToCloudinary(imageFile, { folder: "offers" });
+    } catch (error) {
+      await showErrorPopup(error.message || "Image upload failed.", "Upload Failed");
+      return;
+    }
   }
 
   await withButtonLoading(submitBtn, async () => {
-    await addOffer({
-      restaurantId: managerProfile.restaurantId,
-      restaurantName: managerProfile.restaurantName || "",
-      title,
-      description,
-      discountType,
-      discountValue,
-      targetType,
-      targetValue,
-      targetLabel,
-      imageUrl,
-    });
+    try {
+      await addOffer({
+        restaurantId: managerProfile.restaurantId,
+        restaurantName: managerProfile.restaurantName || "",
+        title,
+        description,
+        discountType,
+        discountValue,
+        targetType,
+        targetValue,
+        targetLabel,
+        imageUrl,
+      });
 
-    offerForm.reset();
-    if (offerImageName) offerImageName.textContent = "No file selected";
-    await showSuccessPopup("Offer added.", "Saved");
-    loadOffers();
+      offerForm.reset();
+      if (offerImageName) offerImageName.textContent = "No file selected";
+      await showSuccessPopup("Offer added.", "Saved");
+      loadOffers();
+    } catch (error) {
+      await showErrorPopup(error.message || "Could not add offer.", "Save Failed");
+    }
   }, "Saving...");
 });
 
@@ -157,17 +181,21 @@ promoForm?.addEventListener("submit", async (event) => {
   }
 
   await withButtonLoading(submitBtn, async () => {
-    await addPromoCode({
-      restaurantId: managerProfile.restaurantId,
-      code,
-      type,
-      value,
-      minSubtotal,
-    });
+    try {
+      await addPromoCode({
+        restaurantId: managerProfile.restaurantId,
+        code,
+        type,
+        value,
+        minSubtotal,
+      });
 
-    promoForm.reset();
-    await showSuccessPopup("Promo code added.", "Saved");
-    loadPromoCodes();
+      promoForm.reset();
+      await showSuccessPopup("Promo code added.", "Saved");
+      loadPromoCodes();
+    } catch (error) {
+      await showErrorPopup(error.message || "Could not add promo code.", "Save Failed");
+    }
   }, "Saving...");
 });
 
@@ -236,7 +264,7 @@ function refreshOfferTargetOptions() {
   if (type === "section") {
     const categories = [...new Set(managerProducts.map((p) => p.category || "General"))];
     const list = categories.length ? categories : ["General"];
-    offerTargetValue.innerHTML = list.map((name) => `<option value="${name}">${name}</option>`).join("");
+    offerTargetValue.innerHTML = list.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
     return;
   }
 
@@ -246,7 +274,7 @@ function refreshOfferTargetOptions() {
   }
 
   offerTargetValue.innerHTML = managerProducts
-    .map((product) => `<option value="${product.id}">${product.name}</option>`)
+    .map((product) => `<option value="${product.id}">${escapeHtml(product.name || "")}</option>`)
     .join("");
 }
 

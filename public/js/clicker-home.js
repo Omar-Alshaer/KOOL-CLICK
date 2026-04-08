@@ -2,6 +2,7 @@ import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./click
 import { APP_CONFIG } from "./config/app-config.js";
 import { getActiveOffers } from "./services/offers-service.js";
 import { getRestaurants } from "./services/restaurant-service.js";
+import { escapeHtml, sanitizeUrl } from "./utils/dom.js";
 
 function formatOfferDiscount(offer) {
   if (!offer) return "";
@@ -26,30 +27,31 @@ function renderOfferBanner(offers, restaurants) {
   track.innerHTML = offers
     .map((offer) => {
       const restaurant = restaurantMap.get(offer.restaurantId) || {};
-      const imageUrl = offer.imageUrl || restaurant.logoUrl || "../../assets/brand/logo.svg";
-      const restaurantName = offer.restaurantName || restaurant.name || "Restaurant";
-      const targetLabel = offer.targetLabel || offer.targetValue || "Offer";
+      const imageUrl = sanitizeUrl(offer.imageUrl) || sanitizeUrl(restaurant.logoUrl) || "../../assets/brand/logo.svg";
+      const restaurantName = escapeHtml(offer.restaurantName || restaurant.name || "Restaurant");
+      const targetLabel = escapeHtml(offer.targetLabel || offer.targetValue || "Offer");
       const targetLine =
         offer.targetType === "section"
           ? `Section: ${targetLabel}`
           : offer.targetType === "product"
             ? `Product: ${targetLabel}`
             : targetLabel;
-      const detail = offer.description || targetLine;
+      const detail = escapeHtml(offer.description || targetLine);
+      const safeTitle = escapeHtml(offer.title || "Offer");
 
       return `
         <article class="kc-offer-card">
           <div class="kc-offer-thumb">
-            <img src="${imageUrl}" alt="${offer.title || "Offer"}" />
+            <img src="${imageUrl}" alt="${safeTitle}" />
           </div>
           <div class="kc-offer-body">
             <div class="kc-offer-top">
-              <strong>${offer.title || "Offer"}</strong>
+              <strong>${safeTitle}</strong>
               <span class="kc-badge kc-badge-discount">${formatOfferDiscount(offer)}</span>
             </div>
             <div class="kc-muted">${detail}</div>
             <div class="kc-muted">Restaurant: ${restaurantName}</div>
-            <a class="kc-btn" href="./restaurant.html?id=${offer.restaurantId}&offer=${offer.id}">
+            <a class="kc-btn" href="./restaurant.html?id=${encodeURIComponent(offer.restaurantId || "")}&offer=${encodeURIComponent(offer.id || "")}">
               Get Offer
             </a>
           </div>

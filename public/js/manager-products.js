@@ -8,6 +8,7 @@ import {
 import { uploadImageToCloudinary } from "./services/upload-service.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { withButtonLoading } from "./utils/loading.js";
+import { escapeHtml, sanitizeUrl } from "./utils/dom.js";
 
 const form = document.getElementById("productForm");
 const productsGrid = document.getElementById("productsGrid");
@@ -44,7 +45,7 @@ function updateCategorySelect(items) {
   const categories = [...new Set(items.map((i) => i.category || "General"))];
   const options = [
     `<option value="">Select category</option>`,
-    ...categories.map((c) => `<option value="${c}">${c}</option>`),
+    ...categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`),
     `<option value="__other__">Other...</option>`,
   ].join("");
   categorySelect.innerHTML = options;
@@ -56,8 +57,8 @@ function renderCategoryTabs(categories, activeKey) {
   categoryTabs.innerHTML = categories
     .map(
       (name) => `
-      <button type="button" class="kc-category-btn ${name === activeKey ? "active" : ""}" data-category="${name}">
-        ${name}
+      <button type="button" class="kc-category-btn ${name === activeKey ? "active" : ""}" data-category="${escapeHtml(name)}">
+        ${escapeHtml(name)}
       </button>
     `
     )
@@ -76,15 +77,19 @@ function renderCategoryItems(items) {
       ${items
         .map(
           (item) => {
+            const safeName = escapeHtml(item.name || "");
+            const safeCategory = escapeHtml(item.category || "General");
+            const safeBadge = escapeHtml(item.badge || "");
+            const safeImage = sanitizeUrl(item.imageUrl);
             const isActive = !(item.isActive === false || item.isActive === "false");
             return `
         <div class="kc-card kc-product-card ${isActive ? "" : "kc-card-disabled"}">
           <div class="kc-product-thumb">
-            ${item.imageUrl ? `<img src="${item.imageUrl}" alt="${item.name}" />` : `<div class="kc-muted">No Image</div>`}
+            ${safeImage ? `<img src="${safeImage}" alt="${safeName}" />` : `<div class="kc-muted">No Image</div>`}
           </div>
           <div class="kc-product-body">
-            <strong>${item.name}</strong>
-            <div class="kc-muted">Category: ${item.category || "General"}</div>
+            <strong>${safeName}</strong>
+            <div class="kc-muted">Category: ${safeCategory}</div>
             <div class="kc-price-line">
               <span class="kc-price">${Number(item.price || 0).toFixed(2)} EGP</span>
               ${item.oldPrice && Number(item.oldPrice) > Number(item.price) ? `<span class="kc-old-price">${Number(item.oldPrice).toFixed(2)} EGP</span>` : ""}
@@ -93,7 +98,7 @@ function renderCategoryItems(items) {
             </div>
             <div class="kc-inline" style="gap:0.35rem;">
               ${item.isBestSeller ? `<span class="kc-badge">Best Seller</span>` : ""}
-              ${item.badge ? `<span class="kc-badge">${item.badge}</span>` : ""}
+              ${safeBadge ? `<span class="kc-badge">${safeBadge}</span>` : ""}
             </div>
             <div class="kc-inline" style="gap:0.4rem;">
               <button class="kc-btn-secondary" data-action="edit" data-id="${item.id}" data-active="${isActive}">Edit</button>

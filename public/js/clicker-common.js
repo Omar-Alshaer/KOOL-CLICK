@@ -3,6 +3,7 @@ import { getCurrentClickerProfile, logoutUser, watchAuthState } from "./services
 import { getLevelFromPoints } from "./utils/levels.js";
 import { showConfirmPopup, showErrorPopup } from "./utils/popup.js";
 import { getCart } from "./utils/storage.js";
+import { escapeHtml } from "./utils/dom.js";
 
 function getCartCount() {
   return getCart().reduce((sum, item) => sum + (item.qty || 1), 0);
@@ -167,11 +168,14 @@ export function renderClickerMiniProfile(targetId, profile) {
       ? profile.username
       : `@${profile.username}`
     : "";
+  const safeFullName = escapeHtml(profile.fullName || "");
+  const safeUsername = escapeHtml(usernameText);
+  const safeAvatar = escapeHtml(profile.avatar || "");
   el.innerHTML = `
     <div class="kc-inline">
-      <img src="../../assets/Characters/${profile.avatar}" alt="Avatar" width="54" height="54" class="kc-avatar-mini" />
+      <img src="../../assets/Characters/${safeAvatar}" alt="Avatar" width="54" height="54" class="kc-avatar-mini" />
       <div>
-        <div><strong>${profile.fullName}</strong>${usernameText ? ` <span class="kc-muted kc-username-inline">${usernameText}</span>` : ""}</div>
+        <div><strong>${safeFullName}</strong>${safeUsername ? ` <span class="kc-muted kc-username-inline">${safeUsername}</span>` : ""}</div>
         <div class="kc-muted">Points: <span class="${pointsClass}">${points}</span> | ${level.name} (L${level.level})</div>
       </div>
     </div>

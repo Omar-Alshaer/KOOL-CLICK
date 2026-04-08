@@ -31,7 +31,7 @@ function closeUsernameModal() {
 }
 
 function isValidUsername(value) {
-  return /^[a-z0-9]{3,20}$/.test(value);
+  return /^[a-z0-9_]{3,20}$/.test(value);
 }
 
 async function init() {
@@ -85,7 +85,7 @@ async function init() {
     }
 
     if (!isValidUsername(normalized)) {
-      await showErrorPopup("Username must be letters and numbers only.", "Invalid Username");
+      await showErrorPopup("Username must be letters, numbers, or underscore only.", "Invalid Username");
       return;
     }
 

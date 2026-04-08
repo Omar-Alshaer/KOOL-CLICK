@@ -9,6 +9,7 @@ import { getPromoByCode } from "./services/promo-service.js";
 import { pointsFromAmount } from "./utils/levels.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { withButtonLoading } from "./utils/loading.js";
+import { escapeHtml } from "./utils/dom.js";
 
 let appliedPromo = null;
 
@@ -80,17 +81,22 @@ function renderCart() {
 
   root.innerHTML = items
     .map(
-      (item, index) => `
+      (item, index) => {
+        const safeName = escapeHtml(item.name || "");
+        const safeRestaurant = escapeHtml(item.restaurantName || "");
+        const safeOfferTitle = escapeHtml(item.offerTitle || "Special Offer");
+        const safeOfferLabel = escapeHtml(item.offerLabel || "");
+        return `
       <div class="kc-item">
-        <div><strong>${item.name}</strong> x${item.qty}</div>
-        <div class="kc-muted">Restaurant: ${item.restaurantName}</div>
+        <div><strong>${safeName}</strong> x${item.qty}</div>
+        <div class="kc-muted">Restaurant: ${safeRestaurant}</div>
         ${
           item.offerId
             ? `
               <div class="kc-offer-inline">
                 <span class="kc-badge kc-badge-offer">Offer</span>
-                <span class="kc-muted">${item.offerTitle || "Special Offer"}</span>
-                ${item.offerLabel ? `<span class="kc-badge kc-badge-discount">${item.offerLabel}</span>` : ""}
+                <span class="kc-muted">${safeOfferTitle}</span>
+                ${safeOfferLabel ? `<span class="kc-badge kc-badge-discount">${safeOfferLabel}</span>` : ""}
               </div>
             `
             : ""
@@ -106,7 +112,7 @@ function renderCart() {
         </div>
       </div>
     `
-    )
+      ;})
     .join("");
 
   root.querySelectorAll("button[data-remove]").forEach((btn) => {

@@ -1,6 +1,7 @@
 import { getCashierCollectedOrders } from "./services/cashier-service.js";
 import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
 import { showErrorPopup } from "./utils/popup.js";
+import { escapeHtml } from "./utils/dom.js";
 
 let currentState = null;
 let completedOrders = [];
@@ -39,7 +40,12 @@ function renderCompleted(orders) {
 
   root.innerHTML = orders
     .map(
-      (order) => `
+      (order) => {
+        const safeClickerName = escapeHtml(order.clickerName || "N/A");
+        const safeClickerPhone = escapeHtml(order.clickerPhone || "N/A");
+        const safePaymentStatus = escapeHtml(order.paymentStatus || "N/A");
+        const safePaymentMethod = escapeHtml(order.paymentMethod || "N/A");
+        return `
       <article class="kc-card">
         <div class="kc-inline kc-inline-between">
           <div class="kc-order-id-wrap">
@@ -51,13 +57,13 @@ function renderCompleted(orders) {
 
         <div class="kc-two kc-section-spaced-xs">
           <div class="kc-item">
-            <div><strong>Clicker:</strong> ${order.clickerName || "N/A"}</div>
-            <div class="kc-muted">Phone: ${order.clickerPhone || "N/A"}</div>
-            <div class="kc-muted">Payment: ${order.paymentStatus || "N/A"}</div>
+            <div><strong>Clicker:</strong> ${safeClickerName}</div>
+            <div class="kc-muted">Phone: ${safeClickerPhone}</div>
+            <div class="kc-muted">Payment: ${safePaymentStatus}</div>
             <div class="kc-muted">Ordered At: ${formatTimestamp(order.createdAt)}</div>
           </div>
           <div class="kc-item">
-            <div class="kc-muted">Method: ${order.paymentMethod || "N/A"}</div>
+            <div class="kc-muted">Method: ${safePaymentMethod}</div>
             <div class="kc-muted">Final Total: ${finalTotal(order)} EGP</div>
             <div class="kc-muted">Collected At: ${formatTimestamp(order.collectedAt)}</div>
             <div class="kc-muted">Points: ${order.pointsEarned || 0} ${order.pointsGranted ? "(granted)" : "(pending)"}</div>
@@ -66,12 +72,12 @@ function renderCompleted(orders) {
 
         <div class="kc-list kc-section-spaced-lg">
           ${(order.items || [])
-            .map((item) => `<div class="kc-item">${item.name} x${item.qty} - ${item.price * item.qty} EGP</div>`)
+            .map((item) => `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${item.price * item.qty} EGP</div>`)
             .join("")}
         </div>
       </article>
     `
-    )
+      ;})
     .join("");
 }
 

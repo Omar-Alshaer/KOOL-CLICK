@@ -1,4 +1,5 @@
-import { showConfirmPopup } from "./utils/popup.js";
+import { showConfirmPopup, showErrorPopup } from "./utils/popup.js";
+import { escapeHtml } from "./utils/dom.js";
 import {
   getCurrentManagerProfile,
   logoutManager,
@@ -39,7 +40,15 @@ export async function guardManagerPage() {
         return;
       }
 
-      const profile = await getCurrentManagerProfile(user.uid);
+      let profile = null;
+      try {
+        profile = await getCurrentManagerProfile(user.uid);
+      } catch (error) {
+        await showErrorPopup(
+          error.message || "Could not load manager session.",
+          "Session Error"
+        );
+      }
       if (!profile) {
         await logoutManager();
         window.location.href = "./login.html";
@@ -126,11 +135,14 @@ export function renderManagerMiniProfile(targetId, profile) {
   const el = document.getElementById(targetId);
   if (!el) return;
 
+  const safeName = escapeHtml(profile.displayName || "Manager");
+  const safeRestaurant = escapeHtml(profile.restaurantName || profile.restaurantId || "");
+
   el.innerHTML = `
     <div class="kc-inline">
       <div>
-        <div><strong>${profile.displayName || "Manager"}</strong></div>
-        <div class="kc-muted">Restaurant: ${profile.restaurantName || profile.restaurantId}</div>
+        <div><strong>${safeName}</strong></div>
+        <div class="kc-muted">Restaurant: ${safeRestaurant}</div>
       </div>
     </div>
   `;

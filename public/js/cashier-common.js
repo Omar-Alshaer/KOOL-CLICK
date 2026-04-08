@@ -1,4 +1,5 @@
 import { showConfirmPopup, showErrorPopup } from "./utils/popup.js";
+import { escapeHtml } from "./utils/dom.js";
 import {
   getCurrentCashierProfile,
   logoutCashier,
@@ -40,7 +41,15 @@ export async function guardCashierPage() {
         return;
       }
 
-      const profile = await getCurrentCashierProfile(user.uid);
+      let profile = null;
+      try {
+        profile = await getCurrentCashierProfile(user.uid);
+      } catch (error) {
+        await showErrorPopup(
+          error.message || "Could not load cashier session.",
+          "Session Error"
+        );
+      }
       if (!profile) {
         await logoutCashier();
         hideAuthSplash();
@@ -126,11 +135,14 @@ export function renderCashierMiniProfile(targetId, profile) {
   const el = document.getElementById(targetId);
   if (!el) return;
 
+  const safeName = escapeHtml(profile.displayName || "Cashier");
+  const safeRestaurant = escapeHtml(profile.restaurantName || profile.restaurantId || "");
+
   el.innerHTML = `
     <div class="kc-inline">
       <div>
-        <div><strong>${profile.displayName || "Cashier"}</strong></div>
-        <div class="kc-muted">Restaurant: ${profile.restaurantName || profile.restaurantId}</div>
+        <div><strong>${safeName}</strong></div>
+        <div class="kc-muted">Restaurant: ${safeRestaurant}</div>
       </div>
     </div>
   `;

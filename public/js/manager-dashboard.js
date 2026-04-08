@@ -1,5 +1,6 @@
 import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
 import { db, collection, query, where, orderBy, limit, onSnapshot } from "./config/firebase.js";
+import { escapeHtml } from "./utils/dom.js";
 
 let unsubscribeOrders = null;
 
@@ -94,7 +95,7 @@ function renderTopItems(orders) {
   }
 
   list.innerHTML = top
-    .map(([name, qty]) => `<div class="kc-chip">${name}: ${qty}</div>`)
+    .map(([name, qty]) => `<div class="kc-chip">${escapeHtml(name)}: ${qty}</div>`)
     .join("");
 }
 

@@ -6,6 +6,7 @@ import {
 import { APP_CONFIG } from "./config/app-config.js";
 import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { withButtonLoading } from "./utils/loading.js";
+import { escapeHtml } from "./utils/dom.js";
 
 const form = document.getElementById("registerForm");
 const selectedAvatarInput = document.getElementById("selectedAvatar");
@@ -43,13 +44,16 @@ function setSelectedAvatar(file) {
 function renderAvatarOptions() {
   avatarModalGrid.innerHTML = avatarFiles
     .map(
-      (file) => `
-      <button type="button" class="kc-avatar-btn" data-avatar="${file}">
-        <img src="../../assets/Characters/${file}" alt="${prettifyAvatarName(file)}" />
-        <div class="kc-avatar-name">${prettifyAvatarName(file)}</div>
+      (file) => {
+        const safeFile = escapeHtml(file);
+        const safeName = escapeHtml(prettifyAvatarName(file));
+        return `
+      <button type="button" class="kc-avatar-btn" data-avatar="${safeFile}">
+        <img src="../../assets/Characters/${safeFile}" alt="${safeName}" />
+        <div class="kc-avatar-name">${safeName}</div>
       </button>
     `
-    )
+      ;})
     .join("");
 
   avatarModalGrid.querySelectorAll(".kc-avatar-btn").forEach((btn) => {

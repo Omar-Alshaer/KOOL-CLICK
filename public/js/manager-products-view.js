@@ -3,6 +3,7 @@ import { getRestaurantProducts, updateProduct, deleteProduct } from "./services/
 import { uploadImageToCloudinary } from "./services/upload-service.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { withButtonLoading } from "./utils/loading.js";
+import { escapeHtml, sanitizeUrl } from "./utils/dom.js";
 
 const root = document.getElementById("catalogRoot");
 const tabs = document.getElementById("catalogTabs");
@@ -33,7 +34,7 @@ function updateCategorySelect(items) {
   const categories = [...new Set(items.map((i) => i.category || "General"))];
   const options = [
     `<option value="">Select category</option>`,
-    ...categories.map((c) => `<option value="${c}">${c}</option>`),
+    ...categories.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`),
     `<option value="__other__">Other...</option>`,
   ].join("");
   editCategorySelect.innerHTML = options;
@@ -44,8 +45,8 @@ function renderCategoryTabs(categories, activeKey) {
   tabs.innerHTML = categories
     .map(
       (name) => `
-      <button type="button" class="kc-category-btn ${name === activeKey ? "active" : ""}" data-category="${name}">
-        ${name}
+      <button type="button" class="kc-category-btn ${name === activeKey ? "active" : ""}" data-category="${escapeHtml(name)}">
+        ${escapeHtml(name)}
       </button>
     `
     )
@@ -64,15 +65,19 @@ function renderCategoryItems(items) {
       ${items
         .map(
           (m) => {
+            const safeName = escapeHtml(m.name || "");
+            const safeDesc = escapeHtml(m.description || "");
+            const safeBadge = escapeHtml(m.badge || "");
+            const safeImage = sanitizeUrl(m.imageUrl) || "../../assets/brand/logo.svg";
             const isActive = !(m.isActive === false || m.isActive === "false");
             return `
           <article class="kc-item kc-menu-item ${isActive ? "" : "kc-item-disabled"}">
             <div class="kc-menu-thumb">
-              <img src="${m.imageUrl || "../../assets/brand/logo.svg"}" alt="${m.name}" />
+              <img src="${safeImage}" alt="${safeName}" />
             </div>
             <div class="kc-menu-body">
-              <strong>${m.name}</strong>
-              <div class="kc-muted">${m.description || ""}</div>
+              <strong>${safeName}</strong>
+              <div class="kc-muted">${safeDesc}</div>
               <div class="kc-price-line kc-section-spaced-2xs">
                 <span class="kc-price">${Number(m.price || 0).toFixed(2)} EGP</span>
                 ${
@@ -82,7 +87,7 @@ function renderCategoryItems(items) {
                 }
                 ${m.discountPercent ? `<span class="kc-badge kc-badge-discount">-${m.discountPercent}%</span>` : ""}
                 ${m.isBestSeller ? `<span class="kc-badge kc-badge-best">Best Seller</span>` : ""}
-                ${m.badge ? `<span class="kc-badge">${m.badge}</span>` : ""}
+                ${safeBadge ? `<span class="kc-badge">${safeBadge}</span>` : ""}
                 ${isActive ? "" : `<span class="kc-badge kc-badge-soldout">Sold Out</span>`}
               </div>
               <div class="kc-inline" style="gap:0.4rem; margin-top:0.35rem;">

@@ -43,10 +43,7 @@ function buildOrderNumber(orderId) {
 }
 
 function buildInitialStatusHistory() {
-  const now = new Date();
-  return [
-    { status: APP_CONFIG.orderStatuses[0], at: now },
-  ];
+  return [{ status: APP_CONFIG.orderStatuses[0], at: serverTimestamp() }];
 }
 
 function normalizeOrderTimestamps(order) {
@@ -216,7 +213,7 @@ export async function getClickerOrders(uid) {
 }
 
 export function canClickerCancelOrder(order) {
-  return order.status !== "Collected";
+  return order.status !== "Collected" && order.status !== "Cancelled";
 }
 
 export async function cancelClickerOrder({ orderId, uid }) {
@@ -252,7 +249,15 @@ export async function cancelClickerOrder({ orderId, uid }) {
     const newPoints = currentPoints - totalPenalty;
     const level = getLevelFromPoints(newPoints);
 
-    transaction.delete(orderRef);
+    const newStatusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
+    newStatusHistory.push({ status: "Cancelled", at: serverTimestamp() });
+
+    transaction.update(orderRef, {
+      status: "Cancelled",
+      statusHistory: newStatusHistory,
+      cancelledAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
 
     transaction.update(clickerRef, {
       points: newPoints,

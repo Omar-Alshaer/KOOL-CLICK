@@ -1,4 +1,5 @@
-import { showErrorPopup } from "./utils/popup.js";
+import { auth, sendPasswordResetEmail } from "./config/firebase.js";
+import { showErrorPopup, showSuccessPopup } from "./utils/popup.js";
 import { withButtonLoading } from "./utils/loading.js";
 import { validateEmail } from "./utils/validators.js";
 
@@ -23,9 +24,22 @@ form?.addEventListener("submit", async (event) => {
       return;
     }
 
-    // Show confirmation screen
-    requestSection.hidden = true;
-    confirmSection.hidden = false;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!auth?.app?.options?.apiKey) {
+      await showErrorPopup(
+        "Please add Firebase config first in /public/js/config/firebase.js.",
+        "Firebase Config Missing"
+      );
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, identifier);
+      requestSection.hidden = true;
+      confirmSection.hidden = false;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      await showSuccessPopup("Password reset email sent.", "Check Your Inbox");
+    } catch (error) {
+      await showErrorPopup(error.message || "Could not send reset email.", "Reset Failed");
+    }
   }, "Sending...");
 });
