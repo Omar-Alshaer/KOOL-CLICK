@@ -20,5 +20,8 @@ export const APP_CONFIG = {
   cloudinary: {
     cloudName: "dnf0sdjwj",
     uploadPreset: "koolclick",
+    maxFileSizeBytes: 5 * 1024 * 1024,
+    allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+    allowedFolders: ["receipts", "products", "offers"],
   },
 };

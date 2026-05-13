@@ -24,7 +24,12 @@ import {
   updateDoc,
   limit,
   writeBatch,
+  startAfter,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+  getFunctions,
+  httpsCallable,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDloCZn8x3ztqg3rLHw0HjuE8SXmz5ZMRc",
@@ -38,10 +43,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app, "us-central1");
 
 export {
   auth,
   db,
+  functions,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -62,4 +69,6 @@ export {
   updateDoc,
   limit,
   writeBatch,
+  startAfter,
+  httpsCallable,
 };

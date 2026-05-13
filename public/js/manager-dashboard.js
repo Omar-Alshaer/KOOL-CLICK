@@ -1,6 +1,7 @@
 import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
 import { db, collection, query, where, orderBy, limit, onSnapshot } from "./config/firebase.js";
 import { escapeHtml } from "./utils/dom.js";
+import { logError, logWarn } from "./utils/logger.js";
 
 let unsubscribeOrders = null;
 
@@ -130,17 +131,19 @@ function subscribeOrders(restaurantId) {
       },
       (error) => {
         if (error?.code === "failed-precondition") {
+          logWarn("manager.dashboard.indexMissing", { restaurantId });
           subscribeOrdersFallback(restaurantId);
           return;
         }
-        console.error("Manager orders listener error:", error);
+        logError("manager.dashboard.listener.failed", error, { restaurantId });
       }
     );
   } catch (error) {
     if (error?.code === "failed-precondition") {
+      logWarn("manager.dashboard.indexMissing", { restaurantId });
       subscribeOrdersFallback(restaurantId);
     } else {
-      console.error("Manager orders listener error:", error);
+      logError("manager.dashboard.listener.failed", error, { restaurantId });
     }
   }
 }
@@ -167,7 +170,7 @@ function subscribeOrdersFallback(restaurantId) {
       renderDashboard(orders);
     },
     (error) => {
-      console.error("Manager orders fallback listener error:", error);
+      logError("manager.dashboard.fallback.failed", error, { restaurantId });
     }
   );
 }

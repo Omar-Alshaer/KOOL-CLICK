@@ -1,10 +1,15 @@
-import { getCashierCollectedOrders } from "./services/cashier-service.js";
+import { getCashierCollectedOrdersPage } from "./services/cashier-service.js";
 import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
 import { showErrorPopup } from "./utils/popup.js";
 import { escapeHtml } from "./utils/dom.js";
+import { logError, logInfo } from "./utils/logger.js";
 
 let currentState = null;
 let completedOrders = [];
+let completedCursor = null;
+let hasMoreCompleted = false;
+let isLoadingCompleted = false;
+const COMPLETED_PAGE_SIZE = 60;
 
 function formatOrderId(id) {
   return `KC-${String(id).slice(0, 8).toUpperCase()}`;
@@ -104,14 +109,48 @@ async function init() {
 
   renderCashierMiniProfile("cashierMini", currentState.profile);
 
-  try {
-    completedOrders = await getCashierCollectedOrders(currentState.profile.restaurantId);
-    applyFilter();
-  } catch (error) {
-    await showErrorPopup(error.message || "Could not load completed orders.", "Load Failed");
-  }
+  await loadCompletedPage({ reset: true });
 
   document.getElementById("completedSearch")?.addEventListener("input", applyFilter);
+  window.addEventListener("scroll", handleCompletedScroll, { passive: true });
 }
 
 init();
+
+async function loadCompletedPage({ reset = false } = {}) {
+  if (!currentState?.profile?.restaurantId || isLoadingCompleted) return;
+  isLoadingCompleted = true;
+  const startedAt = performance.now();
+
+  try {
+    const page = await getCashierCollectedOrdersPage({
+      restaurantId: currentState.profile.restaurantId,
+      pageSize: COMPLETED_PAGE_SIZE,
+      cursor: reset ? null : completedCursor,
+    });
+
+    completedOrders = reset ? page.orders : [...completedOrders, ...page.orders];
+    completedCursor = page.nextCursor;
+    hasMoreCompleted = page.hasMore;
+    applyFilter();
+    logInfo("cashier.completed.loaded", {
+      count: page.orders.length,
+      total: completedOrders.length,
+      hasMore: hasMoreCompleted,
+      durationMs: Math.round(performance.now() - startedAt),
+    });
+  } catch (error) {
+    logError("cashier.completed.load.failed", error);
+    await showErrorPopup(error.message || "Could not load completed orders.", "Load Failed");
+  } finally {
+    isLoadingCompleted = false;
+  }
+}
+
+function handleCompletedScroll() {
+  if (!hasMoreCompleted || isLoadingCompleted) return;
+  const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 400;
+  if (nearBottom) {
+    loadCompletedPage();
+  }
+}

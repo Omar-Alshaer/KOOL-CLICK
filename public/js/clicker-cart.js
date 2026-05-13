@@ -258,9 +258,6 @@ async function init() {
       try {
         const receiptImageUrl = await getReceiptUrlIfNeeded(paymentMethod);
         const result = await placeClickerOrders({
-          uid: state.uid,
-          fullName: state.profile.fullName,
-          phone: state.profile.phone,
           cartItems: items,
           paymentMethod,
           receiptImageUrl,

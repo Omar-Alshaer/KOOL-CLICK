@@ -1,0 +1,17 @@
+{
+  "name": "kool-click",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "smoke:syntax": "node --check functions/index.js && node --check public/js/services/order-service.js && node --check public/js/services/upload-service.js && node --check public/js/services/auth-service.js && node --check public/js/services/cashier-service.js && node --check public/js/services/manager-service.js && node --check public/js/services/admin-service.js && node --check public/js/admin-common.js && node --check public/js/admin-login.js && node --check public/js/admin-system.js && node --check public/js/clicker-cart.js && node --check public/js/clicker-restaurant.js && node --check public/js/cashier-dashboard.js && node --check public/js/cashier-order.js && node --check public/js/manager-products.js && node --check public/js/manager-offers.js",
+    "lint": "eslint public/js/**/*.js",
+    "format": "prettier --write \"**/*.{html,css,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{html,css,js,json,md}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "eslint": "9.39.1",
+    "prettier": "3.6.2"
+  }
+}

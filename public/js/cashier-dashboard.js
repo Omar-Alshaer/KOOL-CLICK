@@ -20,6 +20,7 @@ let jsQrDecoder = null;
 let scanCanvas = null;
 let scanContext = null;
 let refreshIntervalId = null;
+let isLoadingOrders = false;
 
 function formatOrderId(id) {
   return `KC-${String(id).slice(0, 8).toUpperCase()}`;
@@ -517,7 +518,8 @@ function applyFiltersAndRender() {
 }
 
 async function loadOrders() {
-  if (!currentState?.profile?.restaurantId) return;
+  if (!currentState?.profile?.restaurantId || isLoadingOrders) return;
+  isLoadingOrders = true;
 
   try {
     currentOrders = await getCashierOrders(currentState.profile.restaurantId);
@@ -533,7 +535,24 @@ async function loadOrders() {
     }
   } catch (error) {
     await showErrorPopup(error.message || "Could not load orders.", "Orders Error");
+  } finally {
+    isLoadingOrders = false;
   }
+}
+
+function startRefreshLoop() {
+  if (refreshIntervalId) return;
+  refreshIntervalId = window.setInterval(() => {
+    if (document.visibilityState === "visible") {
+      loadOrders();
+    }
+  }, 20000);
+}
+
+function stopRefreshLoop() {
+  if (!refreshIntervalId) return;
+  clearInterval(refreshIntervalId);
+  refreshIntervalId = null;
 }
 
 function wireScanSection() {
@@ -599,17 +618,21 @@ async function init() {
   closeScanModal();
   stopCameraScan();
   await loadOrders();
-  refreshIntervalId = window.setInterval(() => {
-    loadOrders();
-  }, 20000);
+  startRefreshLoop();
 }
 
 init();
 
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    loadOrders();
+    startRefreshLoop();
+  } else {
+    stopRefreshLoop();
+  }
+});
+
 window.addEventListener("beforeunload", () => {
   stopCameraScan();
-  if (refreshIntervalId) {
-    clearInterval(refreshIntervalId);
-    refreshIntervalId = null;
-  }
+  stopRefreshLoop();
 });

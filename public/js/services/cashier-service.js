@@ -11,12 +11,15 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
   getDocs,
   runTransaction,
   serverTimestamp,
+  functions,
+  httpsCallable,
 } from "../config/firebase.js";
 import { APP_CONFIG } from "../config/app-config.js";
-import { getLevelFromPoints } from "../utils/levels.js";
+import { logError, logInfo } from "../utils/logger.js";
 
 function normalizeOrderTimestamps(order) {
   const createdAt = order.createdAt || order.updatedAt || null;
@@ -111,17 +114,31 @@ export async function getCashierOrders(restaurantId) {
 }
 
 export async function getCashierCollectedOrders(restaurantId) {
+  const page = await getCashierCollectedOrdersPage({ restaurantId, pageSize: 120 });
+  return page.orders;
+}
+
+export async function getCashierCollectedOrdersPage({ restaurantId, pageSize = 60, cursor = null }) {
   try {
-    const indexedQuery = query(
-      collection(db, "orders"),
+    const constraints = [
       where("restaurantId", "==", restaurantId),
       where("status", "==", "Collected"),
       orderBy("collectedAt", "desc"),
-      limit(120)
+    ];
+    if (cursor) constraints.push(startAfter(cursor));
+    constraints.push(limit(pageSize));
+
+    const indexedQuery = query(
+      collection(db, "orders"),
+      ...constraints
     );
 
     const snapshot = await getDocs(indexedQuery);
-    return snapshot.docs.map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }));
+    return {
+      orders: snapshot.docs.map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() })),
+      nextCursor: snapshot.docs[snapshot.docs.length - 1] || null,
+      hasMore: snapshot.docs.length === pageSize,
+    };
   } catch (error) {
     if (error?.code !== "failed-precondition") throw error;
 
@@ -129,14 +146,19 @@ export async function getCashierCollectedOrders(restaurantId) {
       collection(db, "orders"),
       where("restaurantId", "==", restaurantId),
       where("status", "==", "Collected"),
-      limit(150)
+      limit(pageSize + 30)
     );
 
     const snapshot = await getDocs(fallbackQuery);
-    return snapshot.docs
+    const docs = snapshot.docs
       .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.collectedAt?.seconds || b.updatedAt?.seconds || 0) - (a.collectedAt?.seconds || a.updatedAt?.seconds || 0))
-      .slice(0, 120);
+      .slice(0, pageSize);
+    return {
+      orders: docs,
+      nextCursor: null,
+      hasMore: false,
+    };
   }
 }
 
@@ -196,66 +218,19 @@ export async function confirmOrderPayment({ orderId, cashierRestaurantId }) {
 }
 
 export async function collectOrderByCashier({ orderId, cashierRestaurantId }) {
-  return runTransaction(db, async (transaction) => {
-    const orderRef = doc(db, "orders", orderId);
-    const orderSnap = await transaction.get(orderRef);
-
-    if (!orderSnap.exists()) throw new Error("Order not found.");
-    const order = orderSnap.data();
-    if (cashierRestaurantId && order.restaurantId !== cashierRestaurantId) {
-      throw new Error("This order does not belong to your restaurant.");
-    }
-
-    if (order.status === "Collected") {
-      throw new Error("Order already collected.");
-    }
-
-    const newStatusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
-    if (order.status !== "Collected") {
-      newStatusHistory.push({ status: "Collected", at: serverTimestamp() });
-    }
-
-    const isCod = order.paymentMethod === APP_CONFIG.paymentMethods.cod;
-    const shouldGrantPointsNow = order.pointsGranted !== true;
-    let clickerSnap = null;
-    let clickerRef = null;
-
-    if (shouldGrantPointsNow) {
-      const clickerUid = order.clickerUid;
-      if (!clickerUid) throw new Error("Clicker profile not linked to this order.");
-
-      clickerRef = doc(db, "clickers", clickerUid);
-      clickerSnap = await transaction.get(clickerRef);
-
-      if (!clickerSnap.exists()) {
-        throw new Error("Clicker profile not found, points could not be added.");
-      }
-    }
-
-    transaction.update(orderRef, {
-      status: "Collected",
-      statusHistory: newStatusHistory,
-      paymentStatus: isCod ? "PaidOnPickup" : (order.paymentStatus || "Confirmed"),
-      pointsGranted: true,
-      collectedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+  const callable = httpsCallable(functions, "collectOrderByCashier");
+  try {
+    const response = await callable({ orderId, cashierRestaurantId });
+    logInfo("cashier.collect.success", {
+      orderId: String(orderId || "").slice(0, 8),
+      restaurantId: cashierRestaurantId || "",
     });
-
-    if (shouldGrantPointsNow && clickerRef && clickerSnap?.exists()) {
-      const currentPoints = clickerSnap.data().points || 0;
-      const newPoints = currentPoints + (order.pointsEarned || 0);
-      const level = getLevelFromPoints(newPoints);
-
-      transaction.update(clickerRef, {
-        points: newPoints,
-        level: level.level,
-        updatedAt: serverTimestamp(),
-      });
-    }
-
-    return {
-      pointsAdded: shouldGrantPointsNow ? (order.pointsEarned || 0) : 0,
-      paymentStatus: isCod ? "PaidOnPickup" : (order.paymentStatus || "Confirmed"),
-    };
-  });
+    return response.data;
+  } catch (error) {
+    logError("cashier.collect.failed", error, {
+      orderId: String(orderId || "").slice(0, 8),
+      restaurantId: cashierRestaurantId || "",
+    });
+    throw error;
+  }
 }

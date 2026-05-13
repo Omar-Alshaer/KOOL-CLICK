@@ -1,0 +1,223 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function currentRole() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : signedIn()
+        && exists(/databases/$(database)/documents/userAuthIndex/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/userAuthIndex/$(request.auth.uid)).data.role
+        : null;
+    }
+
+    function isClicker() {
+      return currentRole() == "clicker"
+        || exists(/databases/$(database)/documents/clickers/$(request.auth.uid));
+    }
+
+    function isCashier() {
+      return currentRole() == "cashier";
+    }
+
+    function isManager() {
+      return currentRole() == "manager";
+    }
+
+    function isSuperAdmin() {
+      return currentRole() == "superAdmin";
+    }
+
+    function cashierRestaurantId() {
+      return isCashier()
+        && exists(/databases/$(database)/documents/cashiers/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/cashiers/$(request.auth.uid)).data.restaurantId
+        : null;
+    }
+
+    function managerRestaurantId() {
+      return isManager()
+        && exists(/databases/$(database)/documents/managers/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/managers/$(request.auth.uid)).data.restaurantId
+        : null;
+    }
+
+    function onlyChanged(allowedKeys) {
+      return request.resource.data.diff(resource.data).changedKeys().hasOnly(allowedKeys);
+    }
+
+    function validOrderStatus(status) {
+      return status in ["Pending", "Preparing", "Ready", "Collected", "Cancelled"];
+    }
+
+    function validCashierProgressStatus(status) {
+      return status in ["Pending", "Preparing", "Ready"];
+    }
+
+    function validPaymentMethod(method) {
+      return method in ["CashOnDelivery", "InstaPay"];
+    }
+
+    match /userAuthIndex/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSuperAdmin());
+      allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSuperAdmin());
+      allow write: if false;
+    }
+
+    match /clickers/{uid} {
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == "clicker"
+        && request.resource.data.authUid == uid;
+      allow read: if signedIn() && (request.auth.uid == uid || isManager() || isSuperAdmin());
+      allow update: if signedIn()
+        && (
+          (request.auth.uid == uid
+            && resource.data.authUid == uid
+            && request.resource.data.authUid == resource.data.authUid
+            && request.resource.data.role == "clicker"
+            && onlyChanged(["username", "updatedAt"]))
+        );
+      allow delete: if false;
+    }
+
+    match /clickerIndex/{key} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if
+        (!signedIn()
+          && request.resource.data.keys().hasOnly(["reserved", "reservedAt"])
+          && request.resource.data.reserved == true)
+        || (signedIn()
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.keys().hasOnly(["uid", "authEmail", "linkedAt"]));
+      allow update: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(["uid", "authEmail", "linkedAt"]);
+      allow delete: if signedIn()
+        && resource.data.uid == request.auth.uid;
+    }
+
+    match /cashiers/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isManager() || isSuperAdmin());
+      allow write: if false;
+    }
+
+    match /managers/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isSuperAdmin());
+      allow write: if false;
+    }
+
+    match /kc_restaurants/{restaurantId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isManager()
+        && request.resource.data.restaurantId == managerRestaurantId();
+      allow update: if isManager()
+        && resource.data.restaurantId == managerRestaurantId()
+        && request.resource.data.restaurantId == resource.data.restaurantId;
+      allow delete: if isManager()
+        && resource.data.restaurantId == managerRestaurantId();
+    }
+
+    match /offers/{offerId} {
+      allow read: if true;
+      allow create: if isManager()
+        && request.resource.data.restaurantId == managerRestaurantId();
+      allow update: if isManager()
+        && resource.data.restaurantId == managerRestaurantId()
+        && request.resource.data.restaurantId == resource.data.restaurantId;
+      allow delete: if isManager()
+        && resource.data.restaurantId == managerRestaurantId();
+    }
+
+    match /promoCodes/{promoId} {
+      allow read: if signedIn();
+      allow create: if isManager()
+        && request.resource.data.restaurantId == managerRestaurantId();
+      allow update: if isManager()
+        && resource.data.restaurantId == managerRestaurantId()
+        && request.resource.data.restaurantId == resource.data.restaurantId;
+      allow delete: if isManager()
+        && resource.data.restaurantId == managerRestaurantId();
+    }
+
+    match /orders/{orderId} {
+      allow read: if signedIn()
+        && (
+          (isClicker() && resource.data.clickerUid == request.auth.uid)
+          || (isCashier() && resource.data.restaurantId == cashierRestaurantId())
+          || (isManager() && resource.data.restaurantId == managerRestaurantId())
+          || isSuperAdmin()
+        );
+
+      allow create: if false;
+
+      allow update: if signedIn()
+        && isCashier()
+        && resource.data.restaurantId == cashierRestaurantId()
+        && (
+          (validCashierProgressStatus(resource.data.status)
+            && validCashierProgressStatus(request.resource.data.status)
+            && onlyChanged(["status", "statusHistory", "remainingTimeMinutes", "updatedAt"]))
+          || (resource.data.status != "Cancelled"
+            && request.resource.data.paymentStatus == "Confirmed"
+            && onlyChanged(["paymentStatus", "updatedAt"]))
+        );
+
+      allow delete: if false;
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /deletedUsers/{uid} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /orderRequests/{requestId} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /orderRateLimits/{uid} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /adminRateLimits/{rateId} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /opsMetrics/{metricId} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /systemHealth/{healthId} {
+      allow read: if isSuperAdmin();
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

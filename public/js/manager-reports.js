@@ -1,8 +1,10 @@
 import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
-import { db, collection, query, where, orderBy, limit, onSnapshot } from "./config/firebase.js";
+import { db, collection, query, where, orderBy, limit, getDocs } from "./config/firebase.js";
 import { escapeHtml } from "./utils/dom.js";
+import { logError, logInfo, logWarn } from "./utils/logger.js";
 
-let unsubscribeOrders = null;
+let currentRestaurantId = "";
+let isLoadingReport = false;
 
 function formatMoney(value) {
   return `${Number(value || 0).toFixed(2)} EGP`;
@@ -114,12 +116,10 @@ function renderReport(report) {
   renderTopItems(report.topItems);
 }
 
-function subscribeOrders(restaurantId) {
-  if (unsubscribeOrders) {
-    unsubscribeOrders();
-    unsubscribeOrders = null;
-  }
-
+async function loadReport(restaurantId) {
+  if (!restaurantId || isLoadingReport) return;
+  isLoadingReport = true;
+  const startedAt = performance.now();
   try {
     const q = query(
       collection(db, "orders"),
@@ -127,58 +127,50 @@ function subscribeOrders(restaurantId) {
       orderBy("createdAt", "desc"),
       limit(320)
     );
-    unsubscribeOrders = onSnapshot(
-      q,
-      (snapshot) => {
-        const orders = snapshot.docs.map((d) =>
-          normalizeOrderTimestamps({ id: d.id, ...d.data() })
-        );
-        const report = buildReport(orders);
-        renderReport(report);
-      },
-      (error) => {
-        if (error?.code === "failed-precondition") {
-          subscribeOrdersFallback(restaurantId);
-          return;
-        }
-        console.error("Reports listener error:", error);
-      }
+    const snapshot = await getDocs(q);
+    const orders = snapshot.docs.map((d) =>
+      normalizeOrderTimestamps({ id: d.id, ...d.data() })
     );
+    renderReport(buildReport(orders));
+    logInfo("manager.reports.loaded", {
+      restaurantId,
+      count: orders.length,
+      durationMs: Math.round(performance.now() - startedAt),
+    });
   } catch (error) {
     if (error?.code === "failed-precondition") {
-      subscribeOrdersFallback(restaurantId);
+      logWarn("manager.reports.indexMissing", { restaurantId });
+      await loadReportFallback(restaurantId, startedAt);
     } else {
-      console.error("Reports listener error:", error);
+      logError("manager.reports.load.failed", error, { restaurantId });
     }
+  } finally {
+    isLoadingReport = false;
   }
 }
 
-function subscribeOrdersFallback(restaurantId) {
-  if (unsubscribeOrders) {
-    unsubscribeOrders();
-    unsubscribeOrders = null;
-  }
-
+async function loadReportFallback(restaurantId, startedAt = performance.now()) {
   const q = query(
     collection(db, "orders"),
     where("restaurantId", "==", restaurantId),
     limit(360)
   );
 
-  unsubscribeOrders = onSnapshot(
-    q,
-    (snapshot) => {
-      const orders = snapshot.docs
-        .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-        .slice(0, 320);
-      const report = buildReport(orders);
-      renderReport(report);
-    },
-    (error) => {
-      console.error("Reports fallback listener error:", error);
-    }
-  );
+  try {
+    const snapshot = await getDocs(q);
+    const orders = snapshot.docs
+      .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+      .slice(0, 320);
+    renderReport(buildReport(orders));
+    logInfo("manager.reports.fallbackLoaded", {
+      restaurantId,
+      count: orders.length,
+      durationMs: Math.round(performance.now() - startedAt),
+    });
+  } catch (error) {
+    logError("manager.reports.fallback.failed", error, { restaurantId });
+  }
 }
 
 async function init() {
@@ -186,15 +178,15 @@ async function init() {
   const state = await guardManagerPage();
   if (!state) return;
   renderManagerMiniProfile("managerMini", state.profile);
+  currentRestaurantId = state.profile.restaurantId;
 
-  subscribeOrders(state.profile.restaurantId);
+  await loadReport(currentRestaurantId);
 }
 
 init();
 
-window.addEventListener("beforeunload", () => {
-  if (unsubscribeOrders) {
-    unsubscribeOrders();
-    unsubscribeOrders = null;
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && currentRestaurantId) {
+    loadReport(currentRestaurantId);
   }
 });
