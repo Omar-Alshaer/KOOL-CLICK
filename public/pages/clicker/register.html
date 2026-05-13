@@ -38,12 +38,25 @@
               <div class="kc-two">
                 <div>
                   <label for="fullName">Full Name</label>
-                  <input id="fullName" name="fullName" type="text" placeholder="Enter your full name" required />
+                  <input
+                    id="fullName"
+                    name="fullName"
+                    type="text"
+                    placeholder="Enter your full name"
+                    required
+                  />
                 </div>
 
                 <div>
                   <label for="phone">Phone Number</label>
-                  <input id="phone" name="phone" type="tel" placeholder="Enter your phone number" autocomplete="tel" required />
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    autocomplete="tel"
+                    required
+                  />
                 </div>
 
                 <div>
@@ -57,7 +70,14 @@
 
                 <div>
                   <label for="email">Email</label>
-                  <input id="email" name="email" type="email" placeholder="Enter your email" autocomplete="email" required />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                  />
                 </div>
               </div>
             </section>
@@ -67,12 +87,28 @@
               <div class="kc-two">
                 <div>
                   <label for="password">Password</label>
-                  <input id="password" name="password" type="password" placeholder="Enter your password" minlength="6" autocomplete="new-password" required />
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                  />
                 </div>
 
                 <div>
                   <label for="confirmPassword">Confirm Password</label>
-                  <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm your password" minlength="6" autocomplete="new-password" required />
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    minlength="6"
+                    autocomplete="new-password"
+                    required
+                  />
                 </div>
               </div>
             </section>
@@ -82,14 +118,20 @@
 
           <section class="kc-note kc-avatar-panel">
             <div class="kc-avatar-head">
-              <strong class="kc-avatar-title">Choose Avatar</strong>
+              <strong class="kc-avatar-title">Choose Character</strong>
               <span class="kc-chip">Selected: <span id="selectedAvatarName">none</span></span>
             </div>
             <p class="kc-muted kc-avatar-help">Pick a character style for your Clicker profile.</p>
 
-            <div class="kc-avatar-picked">
-              <img id="selectedAvatarPreview" src="" alt="Selected avatar" />
-              <button id="openAvatarModalBtn" class="kc-avatar-open-btn" type="button">Open Avatar Gallery</button>
+            <div class="kc-avatar-selection">
+              <div class="kc-avatar-picked" aria-live="polite">
+                <img id="selectedAvatarPreview" src="" alt="Selected avatar" />
+                <span class="kc-muted">Your selected character will appear here.</span>
+              </div>
+
+              <button id="openAvatarModalBtn" class="kc-btn kc-btn-secondary" type="button">
+                Choose Character
+              </button>
             </div>
           </section>
 
@@ -104,16 +146,21 @@
     </main>
 
     <div id="avatarModal" class="kc-modal" aria-hidden="true">
-      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-label="Avatar Gallery">
+      <div
+        class="kc-modal-frame kc-avatar-modal-frame"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Choose Character"
+      >
         <div class="kc-modal-head">
-          <h3 class="kc-title kc-title-no-margin">Choose Your Avatar</h3>
+          <h3 class="kc-title kc-title-no-margin">Choose Your Character</h3>
           <button id="closeAvatarModalBtn" type="button" class="kc-btn-secondary">Close</button>
         </div>
         <p class="kc-muted" id="avatarLoadMsg">Loading avatars...</p>
-        <div id="avatarModalGrid" class="kc-avatar-grid"></div>
+        <div id="avatarModalGrid" class="kc-avatar-grid kc-avatar-modal-grid"></div>
       </div>
     </div>
 
-    <script type="module" src="../../js/clicker-register.js"></script>
+    <script type="module" src="../../app/features/clicker/ui/clicker-register.js"></script>
   </body>
 </html>

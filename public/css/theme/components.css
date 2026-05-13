@@ -14,7 +14,9 @@ input[type="submit"] {
   padding: 0.5rem 0.9rem;
   box-shadow: 4px 4px 0 var(--kc-deep);
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .kc-nav a:hover,
@@ -438,7 +440,7 @@ button.kc-btn-loading::after {
   grid-template-columns: repeat(2, minmax(160px, 1fr));
 }
 
-.kc-order-action-grid>button {
+.kc-order-action-grid > button {
   width: 100%;
   min-height: 62px;
   text-align: center;
@@ -538,7 +540,7 @@ button.kc-btn-loading::after {
     gap: 0.6rem;
   }
 
-  .kc-order-action-grid>button {
+  .kc-order-action-grid > button {
     min-height: 64px;
   }
 
@@ -730,7 +732,9 @@ button.kc-btn-loading::after {
   font-size: clamp(20px, 1.9vw, 28px);
   line-height: 0.9;
   letter-spacing: 0.03em;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.45), 3px 3px 0 #350066;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.45),
+    3px 3px 0 #350066;
 }
 
 .kc-form input::placeholder,
@@ -764,7 +768,9 @@ button.kc-btn-loading::after {
 .kc-form textarea:focus {
   outline: none;
   border-color: #3b0270;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55), 4px 4px 0 #2b0053;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55),
+    4px 4px 0 #2b0053;
 }
 
 .kc-form input:disabled,
@@ -925,8 +931,13 @@ button.kc-btn-loading::after {
 }
 
 @keyframes kc-empty-bounce {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .kc-avatar-grid {
@@ -1201,8 +1212,7 @@ button.kc-btn-loading::after {
 .kc-register-hero {
   margin-top: 1rem;
   border: 3px solid var(--kc-deep);
-  background:
-    linear-gradient(90deg, rgba(111, 0, 255, 0.95), rgba(59, 2, 112, 0.96));
+  background: linear-gradient(90deg, rgba(111, 0, 255, 0.95), rgba(59, 2, 112, 0.96));
   box-shadow: 8px 8px 0 #250049;
   color: var(--kc-cream);
   padding: 0.9rem;
@@ -1263,7 +1273,10 @@ button.kc-btn-loading::after {
   font-weight: 600;
   text-decoration: none;
   letter-spacing: 0.01em;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .kc-forgot-link:hover {
@@ -1358,8 +1371,7 @@ button.kc-btn-loading::after {
 .kc-avatar-panel {
   border: 3px solid var(--kc-deep);
   box-shadow: 6px 6px 0 #3b0270;
-  background:
-    linear-gradient(180deg, #ffeefe 0%, #f6dfff 100%);
+  background: linear-gradient(180deg, #ffeefe 0%, #f6dfff 100%);
   padding: 0.75rem;
 }
 
@@ -1403,10 +1415,6 @@ button.kc-btn-loading::after {
   object-fit: cover;
   display: none;
   box-shadow: 4px 4px 0 #cf7eff;
-}
-
-.kc-avatar-open-btn {
-  min-width: 260px;
 }
 
 .kc-modal {

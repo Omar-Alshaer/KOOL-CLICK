@@ -86,7 +86,9 @@
   padding: 0.55rem 0.65rem;
   transform: translateY(10px);
   opacity: 0;
-  transition: transform 160ms ease, opacity 160ms ease;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease;
   cursor: pointer;
 }
 
@@ -138,8 +140,8 @@
   width: min(360px, 100%);
 }
 
-.kc-register-actions>input[type="submit"],
-.kc-register-actions>.kc-btn {
+.kc-register-actions > input[type="submit"],
+.kc-register-actions > .kc-btn {
   width: 100%;
   min-height: 58px;
   display: inline-flex;
@@ -151,12 +153,12 @@
   box-shadow: 5px 5px 0 var(--kc-deep);
 }
 
-.kc-register-actions>input[type="submit"] {
+.kc-register-actions > input[type="submit"] {
   background: var(--kc-neon);
   color: var(--kc-cream);
 }
 
-.kc-register-actions>.kc-btn-secondary {
+.kc-register-actions > .kc-btn-secondary {
   background: var(--kc-soft);
   color: var(--kc-deep);
 }
@@ -246,7 +248,9 @@
     height: auto;
     overflow: hidden;
     max-height: 0;
-    transition: max-height 300ms ease, padding 300ms ease;
+    transition:
+      max-height 300ms ease,
+      padding 300ms ease;
   }
 
   /* When NOT collapsed: slide nav down */
@@ -377,7 +381,7 @@
     width: 100%;
   }
 
-  .kc-cashier-toolbar .kc-inline>* {
+  .kc-cashier-toolbar .kc-inline > * {
     width: 100%;
   }
 
@@ -418,10 +422,6 @@
   .kc-register-actions {
     grid-template-columns: 1fr;
   }
-
-  .kc-avatar-open-btn {
-    min-width: 100%;
-  }
 }
 
 @media (max-width: 520px) {
@@ -449,5 +449,4 @@
   input[type="submit"] {
     font-size: clamp(20px, 6vw, 26px);
   }
-
 }

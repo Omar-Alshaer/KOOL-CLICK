@@ -53,55 +53,55 @@ Kool Click نظام طلبات أكل داخل الحرم الجامعي، يق�
 الكود مقسم حسب الدور + خدمات مشتركة:
 
 ### A) ملفات Clicker
-- `public/js/clicker-common.js`: حماية الصفحات + الهيدر + البيانات المصغرة للمستخدم.
-- `public/js/clicker-login.js`: تسجيل الدخول.
-- `public/js/clicker-register.js`: التسجيل واختيار الصورة.
-- `public/js/clicker-home.js`: الصفحة الرئيسية + عرض العروض.
-- `public/js/clicker-menu.js`: قائمة المطاعم.
-- `public/js/clicker-restaurant.js`: قائمة منتجات مطعم محدد.
-- `public/js/clicker-cart.js`: السلة + الدفع + البروموكود.
-- `public/js/clicker-orders.js`: متابعة الطلبات وعرض QR.
-- `public/js/clicker-profile.js`: بيانات المستخدم وتعديل اسم المستخدم.
-- `public/js/clicker-forgot-password.js`: إعادة تعيين كلمة المرور.
+- `public/app/clicker-common.js`: حماية الصفحات + الهيدر + البيانات المصغرة للمستخدم.
+- `public/app/clicker-login.js`: تسجيل الدخول.
+- `public/app/clicker-register.js`: التسجيل واختيار الصورة.
+- `public/app/clicker-home.js`: الصفحة الرئيسية + عرض العروض.
+- `public/app/clicker-menu.js`: قائمة المطاعم.
+- `public/app/clicker-restaurant.js`: قائمة منتجات مطعم محدد.
+- `public/app/clicker-cart.js`: السلة + الدفع + البروموكود.
+- `public/app/clicker-orders.js`: متابعة الطلبات وعرض QR.
+- `public/app/clicker-profile.js`: بيانات المستخدم وتعديل اسم المستخدم.
+- `public/app/clicker-forgot-password.js`: إعادة تعيين كلمة المرور.
 
 ### B) ملفات Cashier
-- `public/js/cashier-common.js`: حماية الصفحات + الهيدر.
-- `public/js/cashier-login.js`: تسجيل دخول الكاشير.
-- `public/js/cashier-dashboard.js`: عرض الطلبات + QR scanning + تحديث الحالة.
-- `public/js/cashier-order.js`: صفحة طلب واحد بالتفاصيل.
-- `public/js/cashier-completed.js`: الطلبات المكتملة.
+- `public/app/cashier-common.js`: حماية الصفحات + الهيدر.
+- `public/app/cashier-login.js`: تسجيل دخول الكاشير.
+- `public/app/cashier-dashboard.js`: عرض الطلبات + QR scanning + تحديث الحالة.
+- `public/app/cashier-order.js`: صفحة طلب واحد بالتفاصيل.
+- `public/app/cashier-completed.js`: الطلبات المكتملة.
 
 ### C) ملفات Manager
-- `public/js/manager-common.js`: حماية الصفحات + الهيدر.
-- `public/js/manager-login.js`: تسجيل دخول المدير.
-- `public/js/manager-dashboard.js`: مؤشرات سريعة عن الطلبات.
-- `public/js/manager-products.js`: إضافة/تعديل/حذف منتجات.
-- `public/js/manager-products-view.js`: عرض كتالوج المنتجات.
-- `public/js/manager-offers.js`: إدارة العروض والبروموكود.
-- `public/js/manager-reports.js`: تقارير مبيعات شاملة.
+- `public/app/manager-common.js`: حماية الصفحات + الهيدر.
+- `public/app/manager-login.js`: تسجيل دخول المدير.
+- `public/app/manager-dashboard.js`: مؤشرات سريعة عن الطلبات.
+- `public/app/manager-products.js`: إضافة/تعديل/حذف منتجات.
+- `public/app/manager-products-view.js`: عرض كتالوج المنتجات.
+- `public/app/manager-offers.js`: إدارة العروض والبروموكود.
+- `public/app/manager-reports.js`: تقارير مبيعات شاملة.
 
 ### D) خدمات (Services)
-- `public/js/services/auth-service.js`: تسجيل/دخول المستخدمين (Clicker).
-- `public/js/services/cashier-service.js`: خدمات خاصة بالكاشير.
-- `public/js/services/manager-service.js`: خدمات الإدارة.
-- `public/js/services/order-service.js`: إنشاء الطلبات، الإلغاء، الحسابات.
-- `public/js/services/restaurant-service.js`: بيانات المطاعم.
-- `public/js/services/offers-service.js`: العروض النشطة.
-- `public/js/services/promo-service.js`: التحقق من البروموكود.
-- `public/js/services/upload-service.js`: رفع الصور لـ Cloudinary.
+- `public/app/services/auth-service.js`: تسجيل/دخول المستخدمين (Clicker).
+- `public/app/services/cashier-service.js`: خدمات خاصة بالكاشير.
+- `public/app/services/manager-service.js`: خدمات الإدارة.
+- `public/app/services/order-service.js`: إنشاء الطلبات، الإلغاء، الحسابات.
+- `public/app/services/restaurant-service.js`: بيانات المطاعم.
+- `public/app/services/offers-service.js`: العروض النشطة.
+- `public/app/services/promo-service.js`: التحقق من البروموكود.
+- `public/app/services/upload-service.js`: رفع الصور لـ Cloudinary.
 
 ### E) Utilities
-- `public/js/utils/validators.js`: التحقق من البريد/الهاتف.
-- `public/js/utils/storage.js`: تخزين السلة في LocalStorage.
-- `public/js/utils/promo.js`: حساب خصم البروموكود.
-- `public/js/utils/popup.js`: رسائل وتنبيهات.
-- `public/js/utils/loading.js`: Loading states للأزرار.
-- `public/js/utils/levels.js`: حساب نقاط ومستوى المستخدم.
-- `public/js/utils/dom.js`: حماية من XSS + sanitize.
+- `public/app/utils/validators.js`: التحقق من البريد/الهاتف.
+- `public/app/utils/storage.js`: تخزين السلة في LocalStorage.
+- `public/app/utils/promo.js`: حساب خصم البروموكود.
+- `public/app/utils/popup.js`: رسائل وتنبيهات.
+- `public/app/utils/loading.js`: Loading states للأزرار.
+- `public/app/utils/levels.js`: حساب نقاط ومستوى المستخدم.
+- `public/app/utils/dom.js`: حماية من XSS + sanitize.
 
 ## 6) قواعد الحالة والطلب
 حالات الطلب موجودة في:
-- `public/js/config/app-config.js`
+- `public/app/config/app-config.js`
 
 المسار الأساسي للطلب:
 `Pending → Preparing → Ready → Collected`
@@ -115,11 +115,11 @@ Kool Click نظام طلبات أكل داخل الحرم الجامعي، يق�
 ## 8) إعدادات خارجية
 ### Firebase
 الإعدادات موجودة في:
-- `public/js/config/firebase.js`
+- `public/app/config/firebase.js`
 
 ### Cloudinary
 الإعدادات موجودة في:
-- `public/js/config/app-config.js`
+- `public/app/config/app-config.js`
 
 ## 9) ملاحظات مهمة للفريق
 - أي بيانات قادمة من Firestore يتم تعقيمها قبل العرض لحماية الواجهة.

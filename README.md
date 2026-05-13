@@ -165,8 +165,8 @@ Kool Click delivers a practical, scalable, and engaging digital ecosystem for un
 - `index.html`
 - `public/pages/student/`
 - `public/pages/cashier/`
-- `public/js/config/`
-- `public/js/services/`
-- `public/js/utils/`
-- `public/js/data/`
+- `public/app/config/`
+- `public/app/services/`
+- `public/app/utils/`
+- `public/app/data/`
 - `public/css/app.css`
