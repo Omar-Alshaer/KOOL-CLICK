@@ -212,10 +212,10 @@ function openEditModal(productId) {
   }
   if (editCategoryInput) {
     if (category && (!editCategorySelect || editCategorySelect.value === "__other__")) {
-      editCategoryInput.classList.remove("kc-hidden");
+      editCategoryInput.style.display = "block";
       editCategoryInput.value = category;
     } else {
-      editCategoryInput.classList.add("kc-hidden");
+      editCategoryInput.style.display = "none";
       editCategoryInput.value = "";
     }
   }
@@ -262,25 +262,43 @@ editImageInput?.addEventListener("change", () => {
   if (editImageName) editImageName.textContent = file ? file.name : "No file selected";
 });
 
+// معالج تغيير الكاتيجوري في نموذج الإضافة
 categorySelect?.addEventListener("change", () => {
   if (!categoryInput) return;
   if (categorySelect.value === "__other__") {
-    categoryInput.classList.remove("kc-hidden");
+    categoryInput.style.display = "block";
     categoryInput.value = "";
+    categoryInput.focus();
   } else {
-    categoryInput.classList.add("kc-hidden");
+    categoryInput.style.display = "none";
     categoryInput.value = categorySelect.value || "";
   }
 });
 
+// معالج الكتابة في حقل الفئة الجديدة
+categoryInput?.addEventListener("input", () => {
+  if (categoryInput.value.trim()) {
+    categorySelect.value = "__other__";
+  }
+});
+
+// معالج تغيير الكاتيجوري في نموذج التحرير
 editCategorySelect?.addEventListener("change", () => {
   if (!editCategoryInput) return;
   if (editCategorySelect.value === "__other__") {
-    editCategoryInput.classList.remove("kc-hidden");
+    editCategoryInput.style.display = "block";
     editCategoryInput.value = "";
+    editCategoryInput.focus();
   } else {
-    editCategoryInput.classList.add("kc-hidden");
+    editCategoryInput.style.display = "none";
     editCategoryInput.value = editCategorySelect.value || "";
+  }
+});
+
+// معالج الكتابة في حقل الفئة الجديدة في التحرير
+editCategoryInput?.addEventListener("input", () => {
+  if (editCategoryInput.value.trim()) {
+    editCategorySelect.value = "__other__";
   }
 });
 
