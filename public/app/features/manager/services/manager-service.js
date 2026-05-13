@@ -245,13 +245,7 @@ export async function getPromoCodes(restaurantId, limitCount = 120) {
   }
 }
 
-export async function addPromoCode({
-  restaurantId,
-  code,
-  type,
-  value,
-  minSubtotal,
-}) {
+export async function addPromoCode({ restaurantId, code, type, value, minSubtotal }) {
   const ref = doc(collection(db, "promoCodes"));
   await setDoc(ref, {
     restaurantId,

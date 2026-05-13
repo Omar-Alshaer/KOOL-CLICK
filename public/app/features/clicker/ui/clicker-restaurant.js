@@ -1,5 +1,13 @@
-import { guardClickerPage, mountHeader, renderClickerMiniProfile, updateCartBadge } from "./clicker-common.js";
-import { getRestaurantById, getRestaurantProducts } from "../../../shared/services/restaurant-service.js";
+import {
+  guardClickerPage,
+  mountHeader,
+  renderClickerMiniProfile,
+  updateCartBadge,
+} from "./clicker-common.js";
+import {
+  getRestaurantById,
+  getRestaurantProducts,
+} from "../../../shared/services/restaurant-service.js";
 import { getOfferById } from "../../../shared/services/offers-service.js";
 import { getCart, saveCart } from "../../../core/utils/storage.js";
 import { showErrorPopup, showSuccessPopup } from "../../../core/utils/popup.js";
@@ -68,15 +76,16 @@ function applyOfferToProducts(products, offer) {
       offerOldPrice: basePrice,
       offerDiscountPercent:
         offer.discountType === "percent" ? Number(offer.discountValue || 0) : null,
-      offerDiscountFlat:
-        offer.discountType === "flat" ? Number(offer.discountValue || 0) : null,
+      offerDiscountFlat: offer.discountType === "flat" ? Number(offer.discountValue || 0) : null,
     };
   });
 }
 
 function upsertItemToCart(item) {
   const cart = getCart();
-  const existing = cart.find((x) => x.menuId === item.menuId && x.restaurantId === item.restaurantId);
+  const existing = cart.find(
+    (x) => x.menuId === item.menuId && x.restaurantId === item.restaurantId
+  );
 
   if (existing) {
     existing.qty += 1;
@@ -94,27 +103,24 @@ function upsertItemToCart(item) {
 
 function buildItemsMarkup(category, restaurant, products) {
   return products
-    .map(
-      (m) => {
-        const safeName = escapeHtml(m.name || "");
-        const safeDesc = escapeHtml(m.description || "");
-        const safeBadge = escapeHtml(m.badge || "");
-        const safeRestaurantName = escapeHtml(restaurant.name || "");
-        const displayPrice = m.offerApplied ? m.offerPrice : m.price;
-        const displayOldPrice = m.offerApplied ? m.offerOldPrice : m.oldPrice;
-        const displayDiscount = m.offerApplied
-          ? m.offerDiscountPercent
-          : m.discountPercent;
-        const displayFlatDiscount = m.offerApplied ? m.offerDiscountFlat : null;
-        const discountBadgeText = displayDiscount
-          ? `-${displayDiscount}%`
-          : displayFlatDiscount
-            ? `-${Number(displayFlatDiscount).toFixed(0)} EGP`
-            : "";
-        const offerBadge = m.offerApplied ? `<span class="kc-badge kc-badge-offer">Offer</span>` : "";
-        const isActive = !(m.isActive === false || m.isActive === "false");
-        const safeImage = sanitizeUrl(m.imageUrl) || "../../assets/brand/logo.svg";
-        return `
+    .map((m) => {
+      const safeName = escapeHtml(m.name || "");
+      const safeDesc = escapeHtml(m.description || "");
+      const safeBadge = escapeHtml(m.badge || "");
+      const safeRestaurantName = escapeHtml(restaurant.name || "");
+      const displayPrice = m.offerApplied ? m.offerPrice : m.price;
+      const displayOldPrice = m.offerApplied ? m.offerOldPrice : m.oldPrice;
+      const displayDiscount = m.offerApplied ? m.offerDiscountPercent : m.discountPercent;
+      const displayFlatDiscount = m.offerApplied ? m.offerDiscountFlat : null;
+      const discountBadgeText = displayDiscount
+        ? `-${displayDiscount}%`
+        : displayFlatDiscount
+          ? `-${Number(displayFlatDiscount).toFixed(0)} EGP`
+          : "";
+      const offerBadge = m.offerApplied ? `<span class="kc-badge kc-badge-offer">Offer</span>` : "";
+      const isActive = !(m.isActive === false || m.isActive === "false");
+      const safeImage = sanitizeUrl(m.imageUrl) || "../../assets/brand/logo.svg";
+      return `
         <article class="kc-item kc-menu-item ${isActive ? "" : "kc-item-disabled"}">
           <div class="kc-menu-thumb">
             <img src="${safeImage}" alt="${safeName}" />
@@ -154,8 +160,7 @@ function buildItemsMarkup(category, restaurant, products) {
           </div>
         </article>
       `;
-      }
-    )
+    })
     .join("");
 }
 
@@ -170,17 +175,17 @@ function renderRestaurantPage(restaurant, products, offer) {
     `;
     return;
   }
-  const categories = [...new Set(products.map((p) => p.category || "General"))]
-    .map((name) => ({
-      id: String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""),
-      name: escapeHtml(name || "General"),
-      rawName: String(name || "General"),
-    }));
+  const categories = [...new Set(products.map((p) => p.category || "General"))].map((name) => ({
+    id: String(name || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, ""),
+    name: escapeHtml(name || "General"),
+    rawName: String(name || "General"),
+  }));
   const defaultCategory = categories[0]?.id || "";
   const offeredCategories = new Set(
-    products
-      .filter((p) => p.offerApplied)
-      .map((p) => String(p.category || "General").toLowerCase())
+    products.filter((p) => p.offerApplied).map((p) => String(p.category || "General").toLowerCase())
   );
 
   const safeRestaurantName = escapeHtml(restaurant.name || "");

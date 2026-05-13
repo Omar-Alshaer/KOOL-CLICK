@@ -45,10 +45,7 @@ export async function guardCashierPage() {
       try {
         profile = await getCurrentCashierProfile(user.uid);
       } catch (error) {
-        await showErrorPopup(
-          error.message || "Could not load cashier session.",
-          "Session Error"
-        );
+        await showErrorPopup(error.message || "Could not load cashier session.", "Session Error");
       }
       if (!profile) {
         await logoutCashier();

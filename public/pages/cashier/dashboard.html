@@ -3,6 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A pixel art food ordering platform for clickers, cashiers, managers, and system owners."
+    />
+    <meta name="application-name" content="Kool Click" />
+    <meta name="theme-color" content="#3d005f" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:site_name" content="Kool Click" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Kool Click | Cashier Dashboard" />
+    <meta
+      property="og:description"
+      content="A pixel art food ordering platform for clickers, cashiers, managers, and system owners."
+    />
+    <meta property="og:image" content="/public/assets/brand/logo.svg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Kool Click | Cashier Dashboard" />
+    <meta
+      name="twitter:description"
+      content="A pixel art food ordering platform for clickers, cashiers, managers, and system owners."
+    />
+    <meta name="twitter:image" content="/public/assets/brand/logo.svg" />
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo.svg" />
+    <link rel="apple-touch-icon" href="/public/assets/brand/logo.svg" />
+    <link rel="manifest" href="/public/site.webmanifest" />
     <title>Kool Click | Cashier Dashboard</title>
     <link rel="stylesheet" href="../../css/app.css" />
   </head>
@@ -22,7 +47,12 @@
           <div class="kc-item">
             <h3 class="kc-title kc-title-tight-sm">Scan QR / Find Order</h3>
             <div class="kc-inline">
-              <input id="scanInput" class="kc-cashier-field" type="text" placeholder="Scan QR payload or enter Order ID" />
+              <input
+                id="scanInput"
+                class="kc-cashier-field"
+                type="text"
+                placeholder="Scan QR payload or enter Order ID"
+              />
               <button id="scanFindBtn" type="button">Find</button>
               <button id="scanOpenBtn" type="button" class="kc-btn-secondary">Open Camera</button>
             </div>
@@ -31,7 +61,12 @@
           <div class="kc-item">
             <h3 class="kc-title kc-title-tight-sm">Manual Filter</h3>
             <div class="kc-inline">
-              <input id="orderSearch" class="kc-cashier-field" type="text" placeholder="Search by ID / student" />
+              <input
+                id="orderSearch"
+                class="kc-cashier-field"
+                type="text"
+                placeholder="Search by ID / student"
+              />
               <select id="sortBy" class="kc-cashier-field">
                 <option value="time">Sort by time</option>
                 <option value="name">Sort by student name</option>
@@ -49,7 +84,12 @@
     </main>
 
     <div id="cashierOrderModal" class="kc-modal-backdrop" hidden>
-      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-labelledby="cashierOrderModalTitle">
+      <div
+        class="kc-modal-frame"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cashierOrderModalTitle"
+      >
         <div class="kc-inline kc-inline-between">
           <h3 id="cashierOrderModalTitle" class="kc-title kc-title-no-margin">Order Details</h3>
           <button id="orderModalCloseBtn" type="button" class="kc-btn-danger">Close</button>
@@ -59,7 +99,12 @@
     </div>
 
     <div id="cashierScanModal" class="kc-modal-backdrop" hidden>
-      <div class="kc-modal-frame" role="dialog" aria-modal="true" aria-labelledby="cashierScanModalTitle">
+      <div
+        class="kc-modal-frame"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cashierScanModalTitle"
+      >
         <div class="kc-inline kc-inline-between">
           <h3 id="cashierScanModalTitle" class="kc-title kc-title-no-margin">Scan QR</h3>
           <button id="scanCloseBtn" type="button" class="kc-btn-danger">Close Camera</button>

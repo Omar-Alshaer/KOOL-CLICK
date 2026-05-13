@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Jersey+10&display=swap");
 
 :root {
   --kc-deep: #33005f;
@@ -23,7 +23,7 @@ body {
   line-height: 1.05;
   letter-spacing: 0.03em;
   color: var(--kc-ink);
-  background-image: url('/public/assets/brand/back.jpg');
+  background-image: url("/public/assets/brand/back.jpg");
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -79,11 +79,11 @@ body.kc-auth-loading .kc-shell {
   margin-bottom: 0.42rem;
 }
 
-#kcHeader+section {
+#kcHeader + section {
   margin-top: 0.2rem !important;
 }
 
-.kc-shell>header {
+.kc-shell > header {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -146,7 +146,9 @@ body.kc-auth-loading .kc-shell {
   letter-spacing: 0.01em;
   white-space: nowrap;
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 #kcHeader .kc-topbar-link:hover {
@@ -206,10 +208,12 @@ body.kc-with-sidebar #kcHeader {
   width: 266px;
   margin: 0;
   z-index: 40;
-  transition: width 220ms ease, transform 220ms ease;
+  transition:
+    width 220ms ease,
+    transform 220ms ease;
 }
 
-body.kc-with-sidebar #kcHeader+section {
+body.kc-with-sidebar #kcHeader + section {
   margin-top: 0 !important;
 }
 

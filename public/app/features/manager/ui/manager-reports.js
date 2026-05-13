@@ -1,4 +1,8 @@
-import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
+import {
+  guardManagerPage,
+  mountManagerHeader,
+  renderManagerMiniProfile,
+} from "./manager-common.js";
 import { db, collection, query, where, orderBy, limit, getDocs } from "../../../config/firebase.js";
 import { escapeHtml } from "../../../core/utils/dom.js";
 import { logError, logInfo, logWarn } from "../../../core/utils/logger.js";
@@ -82,9 +86,7 @@ function buildReport(orders) {
 
   report.uniqueClickers = clickers.size;
   report.avgOrderValue = report.collected ? report.revenue / report.collected : 0;
-  report.topItems = [...itemTally.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+  report.topItems = [...itemTally.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
   return report;
 }
 
@@ -128,9 +130,7 @@ async function loadReport(restaurantId) {
       limit(320)
     );
     const snapshot = await getDocs(q);
-    const orders = snapshot.docs.map((d) =>
-      normalizeOrderTimestamps({ id: d.id, ...d.data() })
-    );
+    const orders = snapshot.docs.map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }));
     renderReport(buildReport(orders));
     logInfo("manager.reports.loaded", {
       restaurantId,
@@ -150,11 +150,7 @@ async function loadReport(restaurantId) {
 }
 
 async function loadReportFallback(restaurantId, startedAt = performance.now()) {
-  const q = query(
-    collection(db, "orders"),
-    where("restaurantId", "==", restaurantId),
-    limit(360)
-  );
+  const q = query(collection(db, "orders"), where("restaurantId", "==", restaurantId), limit(360));
 
   try {
     const snapshot = await getDocs(q);

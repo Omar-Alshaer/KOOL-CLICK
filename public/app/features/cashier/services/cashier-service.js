@@ -118,7 +118,11 @@ export async function getCashierCollectedOrders(restaurantId) {
   return page.orders;
 }
 
-export async function getCashierCollectedOrdersPage({ restaurantId, pageSize = 60, cursor = null }) {
+export async function getCashierCollectedOrdersPage({
+  restaurantId,
+  pageSize = 60,
+  cursor = null,
+}) {
   try {
     const constraints = [
       where("restaurantId", "==", restaurantId),
@@ -128,10 +132,7 @@ export async function getCashierCollectedOrdersPage({ restaurantId, pageSize = 6
     if (cursor) constraints.push(startAfter(cursor));
     constraints.push(limit(pageSize));
 
-    const indexedQuery = query(
-      collection(db, "orders"),
-      ...constraints
-    );
+    const indexedQuery = query(collection(db, "orders"), ...constraints);
 
     const snapshot = await getDocs(indexedQuery);
     return {
@@ -152,7 +153,11 @@ export async function getCashierCollectedOrdersPage({ restaurantId, pageSize = 6
     const snapshot = await getDocs(fallbackQuery);
     const docs = snapshot.docs
       .map((d) => normalizeOrderTimestamps({ id: d.id, ...d.data() }))
-      .sort((a, b) => (b.collectedAt?.seconds || b.updatedAt?.seconds || 0) - (a.collectedAt?.seconds || a.updatedAt?.seconds || 0))
+      .sort(
+        (a, b) =>
+          (b.collectedAt?.seconds || b.updatedAt?.seconds || 0) -
+          (a.collectedAt?.seconds || a.updatedAt?.seconds || 0)
+      )
       .slice(0, pageSize);
     return {
       orders: docs,
@@ -162,7 +167,12 @@ export async function getCashierCollectedOrdersPage({ restaurantId, pageSize = 6
   }
 }
 
-export async function updateOrderProgress({ orderId, status, remainingTimeMinutes, cashierRestaurantId }) {
+export async function updateOrderProgress({
+  orderId,
+  status,
+  remainingTimeMinutes,
+  cashierRestaurantId,
+}) {
   if (!APP_CONFIG.orderStatuses.includes(status)) {
     throw new Error("Invalid order status.");
   }

@@ -1,4 +1,8 @@
-import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
+import {
+  guardManagerPage,
+  mountManagerHeader,
+  renderManagerMiniProfile,
+} from "./manager-common.js";
 import {
   addOffer,
   deleteOffer,
@@ -35,12 +39,11 @@ function renderOffers(offers) {
     return;
   }
   offersGrid.innerHTML = offers
-    .map(
-      (offer) => {
-        const safeTitle = escapeHtml(offer.title || "");
-        const safeDesc = escapeHtml(offer.description || "No description");
-        const safeTarget = escapeHtml(offer.targetLabel || offer.targetValue || "All");
-        return `
+    .map((offer) => {
+      const safeTitle = escapeHtml(offer.title || "");
+      const safeDesc = escapeHtml(offer.description || "No description");
+      const safeTarget = escapeHtml(offer.targetLabel || offer.targetValue || "All");
+      return `
       <div class="kc-card">
         <strong>${safeTitle}</strong>
         <div class="kc-muted">${safeDesc}</div>
@@ -53,8 +56,8 @@ function renderOffers(offers) {
           <button class="kc-btn-danger" data-action="delete-offer" data-id="${offer.id}">Delete</button>
         </div>
       </div>
-    `
-      ;})
+    `;
+    })
     .join("");
 }
 
@@ -65,10 +68,9 @@ function renderPromoCodes(codes) {
     return;
   }
   promoGrid.innerHTML = codes
-    .map(
-      (code) => {
-        const safeCode = escapeHtml(code.code || "");
-        return `
+    .map((code) => {
+      const safeCode = escapeHtml(code.code || "");
+      return `
       <div class="kc-card">
         <strong>${safeCode}</strong>
         <div class="kc-muted">Type: ${code.type}</div>
@@ -81,8 +83,8 @@ function renderPromoCodes(codes) {
           <button class="kc-btn-danger" data-action="delete-promo" data-id="${code.id}">Delete</button>
         </div>
       </div>
-    `
-      ;})
+    `;
+    })
     .join("");
 }
 
@@ -140,29 +142,33 @@ offerForm?.addEventListener("submit", async (event) => {
     }
   }
 
-  await withButtonLoading(submitBtn, async () => {
-    try {
-      await addOffer({
-        restaurantId: managerProfile.restaurantId,
-        restaurantName: managerProfile.restaurantName || "",
-        title,
-        description,
-        discountType,
-        discountValue,
-        targetType,
-        targetValue,
-        targetLabel,
-        imageUrl,
-      });
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      try {
+        await addOffer({
+          restaurantId: managerProfile.restaurantId,
+          restaurantName: managerProfile.restaurantName || "",
+          title,
+          description,
+          discountType,
+          discountValue,
+          targetType,
+          targetValue,
+          targetLabel,
+          imageUrl,
+        });
 
-      offerForm.reset();
-      if (offerImageName) offerImageName.textContent = "No file selected";
-      await showSuccessPopup("Offer added.", "Saved");
-      loadOffers();
-    } catch (error) {
-      await showErrorPopup(error.message || "Could not add offer.", "Save Failed");
-    }
-  }, "Saving...");
+        offerForm.reset();
+        if (offerImageName) offerImageName.textContent = "No file selected";
+        await showSuccessPopup("Offer added.", "Saved");
+        loadOffers();
+      } catch (error) {
+        await showErrorPopup(error.message || "Could not add offer.", "Save Failed");
+      }
+    },
+    "Saving..."
+  );
 });
 
 promoForm?.addEventListener("submit", async (event) => {
@@ -180,23 +186,27 @@ promoForm?.addEventListener("submit", async (event) => {
     return;
   }
 
-  await withButtonLoading(submitBtn, async () => {
-    try {
-      await addPromoCode({
-        restaurantId: managerProfile.restaurantId,
-        code,
-        type,
-        value,
-        minSubtotal,
-      });
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      try {
+        await addPromoCode({
+          restaurantId: managerProfile.restaurantId,
+          code,
+          type,
+          value,
+          minSubtotal,
+        });
 
-      promoForm.reset();
-      await showSuccessPopup("Promo code added.", "Saved");
-      loadPromoCodes();
-    } catch (error) {
-      await showErrorPopup(error.message || "Could not add promo code.", "Save Failed");
-    }
-  }, "Saving...");
+        promoForm.reset();
+        await showSuccessPopup("Promo code added.", "Saved");
+        loadPromoCodes();
+      } catch (error) {
+        await showErrorPopup(error.message || "Could not add promo code.", "Save Failed");
+      }
+    },
+    "Saving..."
+  );
 });
 
 document.addEventListener("click", async (event) => {
@@ -205,41 +215,69 @@ document.addEventListener("click", async (event) => {
   const id = btn.dataset.id;
 
   if (btn.dataset.action === "delete-offer") {
-    const confirmed = await showConfirmPopup("Delete this offer?", "Confirm Delete", "Delete", "Cancel", { dangerous: true });
+    const confirmed = await showConfirmPopup(
+      "Delete this offer?",
+      "Confirm Delete",
+      "Delete",
+      "Cancel",
+      { dangerous: true }
+    );
     if (!confirmed) return;
-    await withButtonLoading(btn, async () => {
-      await deleteOffer(id);
-      await showSuccessPopup("Offer deleted.", "Removed");
-      loadOffers();
-    }, "Deleting...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        await deleteOffer(id);
+        await showSuccessPopup("Offer deleted.", "Removed");
+        loadOffers();
+      },
+      "Deleting..."
+    );
   }
 
   if (btn.dataset.action === "toggle-offer") {
-    await withButtonLoading(btn, async () => {
-      const shouldDisable = btn.textContent.trim() === "Disable";
-      await updateOffer(id, { isActive: !shouldDisable });
-      await showSuccessPopup("Offer updated.", "Saved");
-      loadOffers();
-    }, "Saving...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        const shouldDisable = btn.textContent.trim() === "Disable";
+        await updateOffer(id, { isActive: !shouldDisable });
+        await showSuccessPopup("Offer updated.", "Saved");
+        loadOffers();
+      },
+      "Saving..."
+    );
   }
 
   if (btn.dataset.action === "delete-promo") {
-    const confirmed = await showConfirmPopup("Delete this promo code?", "Confirm Delete", "Delete", "Cancel", { dangerous: true });
+    const confirmed = await showConfirmPopup(
+      "Delete this promo code?",
+      "Confirm Delete",
+      "Delete",
+      "Cancel",
+      { dangerous: true }
+    );
     if (!confirmed) return;
-    await withButtonLoading(btn, async () => {
-      await deletePromoCode(id);
-      await showSuccessPopup("Promo code deleted.", "Removed");
-      loadPromoCodes();
-    }, "Deleting...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        await deletePromoCode(id);
+        await showSuccessPopup("Promo code deleted.", "Removed");
+        loadPromoCodes();
+      },
+      "Deleting..."
+    );
   }
 
   if (btn.dataset.action === "toggle-promo") {
-    await withButtonLoading(btn, async () => {
-      const shouldDisable = btn.textContent.trim() === "Disable";
-      await updatePromoCode(id, { isActive: !shouldDisable });
-      await showSuccessPopup("Promo code updated.", "Saved");
-      loadPromoCodes();
-    }, "Saving...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        const shouldDisable = btn.textContent.trim() === "Disable";
+        await updatePromoCode(id, { isActive: !shouldDisable });
+        await showSuccessPopup("Promo code updated.", "Saved");
+        loadPromoCodes();
+      },
+      "Saving..."
+    );
   }
 });
 
@@ -264,7 +302,9 @@ function refreshOfferTargetOptions() {
   if (type === "section") {
     const categories = [...new Set(managerProducts.map((p) => p.category || "General"))];
     const list = categories.length ? categories : ["General"];
-    offerTargetValue.innerHTML = list.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join("");
+    offerTargetValue.innerHTML = list
+      .map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+      .join("");
     return;
   }
 

@@ -1,4 +1,8 @@
-import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
+import {
+  guardManagerPage,
+  mountManagerHeader,
+  renderManagerMiniProfile,
+} from "./manager-common.js";
 import {
   addProduct,
   deleteProduct,
@@ -75,14 +79,13 @@ function renderCategoryItems(items) {
   productsGrid.innerHTML = `
     <div class="kc-grid kc-menu-items-grid">
       ${items
-        .map(
-          (item) => {
-            const safeName = escapeHtml(item.name || "");
-            const safeCategory = escapeHtml(item.category || "General");
-            const safeBadge = escapeHtml(item.badge || "");
-            const safeImage = sanitizeUrl(item.imageUrl);
-            const isActive = !(item.isActive === false || item.isActive === "false");
-            return `
+        .map((item) => {
+          const safeName = escapeHtml(item.name || "");
+          const safeCategory = escapeHtml(item.category || "General");
+          const safeBadge = escapeHtml(item.badge || "");
+          const safeImage = sanitizeUrl(item.imageUrl);
+          const isActive = !(item.isActive === false || item.isActive === "false");
+          return `
         <div class="kc-card kc-product-card ${isActive ? "" : "kc-card-disabled"}">
           <div class="kc-product-thumb">
             ${safeImage ? `<img src="${safeImage}" alt="${safeName}" />` : `<div class="kc-muted">No Image</div>`}
@@ -109,10 +112,8 @@ function renderCategoryItems(items) {
             </div>
           </div>
         </div>
-      `
-            ;
-          }
-        )
+      `;
+        })
         .join("")}
     </div>
   `;
@@ -136,7 +137,9 @@ function renderProducts(products) {
   categoryTabs?.querySelectorAll(".kc-category-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const name = btn.dataset.category;
-      categoryTabs.querySelectorAll(".kc-category-btn").forEach((b) => b.classList.remove("active"));
+      categoryTabs
+        .querySelectorAll(".kc-category-btn")
+        .forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       const items = grouped.find(([cat]) => cat === name)?.[1] || [];
       renderCategoryItems(items);
@@ -151,16 +154,20 @@ function renderProducts(products) {
         openEditModal(id);
       }
       if (action === "toggle") {
-        await withButtonLoading(btn, async () => {
-          try {
-            const currentActive = btn.dataset.active === "true";
-            await updateProduct(id, { isActive: !currentActive });
-            await showSuccessPopup("Product status updated.", "Saved");
-            loadProducts();
-          } catch (error) {
-            await showErrorPopup(error.message || "Failed to update product.", "Update Failed");
-          }
-        }, "Saving...");
+        await withButtonLoading(
+          btn,
+          async () => {
+            try {
+              const currentActive = btn.dataset.active === "true";
+              await updateProduct(id, { isActive: !currentActive });
+              await showSuccessPopup("Product status updated.", "Saved");
+              loadProducts();
+            } catch (error) {
+              await showErrorPopup(error.message || "Failed to update product.", "Update Failed");
+            }
+          },
+          "Saving..."
+        );
       }
       if (action === "delete") {
         const confirmed = await showConfirmPopup(
@@ -171,11 +178,15 @@ function renderProducts(products) {
           { dangerous: true }
         );
         if (!confirmed) return;
-        await withButtonLoading(btn, async () => {
-          await deleteProduct(id);
-          await showSuccessPopup("Product deleted.", "Removed");
-          loadProducts();
-        }, "Deleting...");
+        await withButtonLoading(
+          btn,
+          async () => {
+            await deleteProduct(id);
+            await showSuccessPopup("Product deleted.", "Removed");
+            loadProducts();
+          },
+          "Deleting..."
+        );
       }
     });
   });
@@ -280,9 +291,10 @@ editForm?.addEventListener("submit", async (event) => {
   if (!productId) return;
 
   const name = document.getElementById("editProductName").value.trim();
-  const category = (editCategorySelect?.value === "__other__"
-    ? editCategoryInput?.value
-    : editCategorySelect?.value) || "";
+  const category =
+    (editCategorySelect?.value === "__other__"
+      ? editCategoryInput?.value
+      : editCategorySelect?.value) || "";
   const description = document.getElementById("editProductDescription").value.trim();
   const price = document.getElementById("editProductPrice").value;
   const oldPrice = document.getElementById("editProductOldPrice").value;
@@ -325,12 +337,16 @@ editForm?.addEventListener("submit", async (event) => {
   };
   if (imageUrl) patch.imageUrl = imageUrl;
 
-  await withButtonLoading(submitBtn, async () => {
-    await updateProduct(productId, patch);
-    await showSuccessPopup("Product updated.", "Saved");
-    closeEditModal();
-    loadProducts();
-  }, "Saving...");
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      await updateProduct(productId, patch);
+      await showSuccessPopup("Product updated.", "Saved");
+      closeEditModal();
+      loadProducts();
+    },
+    "Saving..."
+  );
 });
 
 form?.addEventListener("submit", async (event) => {
@@ -339,9 +355,8 @@ form?.addEventListener("submit", async (event) => {
   const submitBtn = form.querySelector('[type="submit"]');
 
   const name = document.getElementById("productName").value.trim();
-  const category = (categorySelect?.value === "__other__"
-    ? categoryInput?.value
-    : categorySelect?.value) || "";
+  const category =
+    (categorySelect?.value === "__other__" ? categoryInput?.value : categorySelect?.value) || "";
   const description = document.getElementById("productDescription").value.trim();
   const price = document.getElementById("productPrice").value;
   const oldPrice = document.getElementById("productOldPrice").value;
@@ -370,25 +385,29 @@ form?.addEventListener("submit", async (event) => {
     return;
   }
 
-  await withButtonLoading(submitBtn, async () => {
-    await addProduct({
-      restaurantId: managerProfile.restaurantId,
-      restaurantName: managerProfile.restaurantName || "",
-      name,
-      category,
-      description,
-      price,
-      oldPrice,
-      discountPercent,
-      badge,
-      isBestSeller,
-      imageUrl,
-    });
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      await addProduct({
+        restaurantId: managerProfile.restaurantId,
+        restaurantName: managerProfile.restaurantName || "",
+        name,
+        category,
+        description,
+        price,
+        oldPrice,
+        discountPercent,
+        badge,
+        isBestSeller,
+        imageUrl,
+      });
 
-    form.reset();
-    await showSuccessPopup("Product added successfully.", "Saved");
-    loadProducts();
-  }, "Saving...");
+      form.reset();
+      await showSuccessPopup("Product added successfully.", "Saved");
+      loadProducts();
+    },
+    "Saving..."
+  );
 });
 
 async function init() {

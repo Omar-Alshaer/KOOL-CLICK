@@ -1,5 +1,13 @@
-import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
-import { getRestaurantProducts, updateProduct, deleteProduct } from "../services/manager-service.js";
+import {
+  guardManagerPage,
+  mountManagerHeader,
+  renderManagerMiniProfile,
+} from "./manager-common.js";
+import {
+  getRestaurantProducts,
+  updateProduct,
+  deleteProduct,
+} from "../services/manager-service.js";
 import { uploadImageToCloudinary } from "../../../shared/services/upload-service.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "../../../core/utils/popup.js";
 import { withButtonLoading } from "../../../core/utils/loading.js";
@@ -63,14 +71,13 @@ function renderCategoryItems(items) {
   root.innerHTML = `
     <div class="kc-grid kc-menu-items-grid">
       ${items
-        .map(
-          (m) => {
-            const safeName = escapeHtml(m.name || "");
-            const safeDesc = escapeHtml(m.description || "");
-            const safeBadge = escapeHtml(m.badge || "");
-            const safeImage = sanitizeUrl(m.imageUrl) || "../../assets/brand/logo.svg";
-            const isActive = !(m.isActive === false || m.isActive === "false");
-            return `
+        .map((m) => {
+          const safeName = escapeHtml(m.name || "");
+          const safeDesc = escapeHtml(m.description || "");
+          const safeBadge = escapeHtml(m.badge || "");
+          const safeImage = sanitizeUrl(m.imageUrl) || "../../assets/brand/logo.svg";
+          const isActive = !(m.isActive === false || m.isActive === "false");
+          return `
           <article class="kc-item kc-menu-item ${isActive ? "" : "kc-item-disabled"}">
             <div class="kc-menu-thumb">
               <img src="${safeImage}" alt="${safeName}" />
@@ -99,10 +106,8 @@ function renderCategoryItems(items) {
               </div>
             </div>
           </article>
-        `
-            ;
-          }
-        )
+        `;
+        })
         .join("")}
     </div>
   `;
@@ -115,16 +120,20 @@ function renderCategoryItems(items) {
         openEditModal(id);
       }
       if (action === "toggle") {
-        await withButtonLoading(btn, async () => {
-          try {
-            const currentActive = btn.dataset.active === "true";
-            await updateProduct(id, { isActive: !currentActive });
-            await showSuccessPopup("Product status updated.", "Saved");
-            await loadProducts();
-          } catch (error) {
-            await showErrorPopup(error.message || "Failed to update product.", "Update Failed");
-          }
-        }, "Saving...");
+        await withButtonLoading(
+          btn,
+          async () => {
+            try {
+              const currentActive = btn.dataset.active === "true";
+              await updateProduct(id, { isActive: !currentActive });
+              await showSuccessPopup("Product status updated.", "Saved");
+              await loadProducts();
+            } catch (error) {
+              await showErrorPopup(error.message || "Failed to update product.", "Update Failed");
+            }
+          },
+          "Saving..."
+        );
       }
       if (action === "delete") {
         const ok = await showConfirmPopup(
@@ -135,11 +144,15 @@ function renderCategoryItems(items) {
           { dangerous: true }
         );
         if (!ok) return;
-        await withButtonLoading(btn, async () => {
-          await deleteProduct(id);
-          await showSuccessPopup("Product deleted.", "Removed");
-          await loadProducts();
-        }, "Deleting...");
+        await withButtonLoading(
+          btn,
+          async () => {
+            await deleteProduct(id);
+            await showSuccessPopup("Product deleted.", "Removed");
+            await loadProducts();
+          },
+          "Deleting..."
+        );
       }
     });
   });
@@ -247,9 +260,10 @@ editForm?.addEventListener("submit", async (event) => {
   if (!productId) return;
 
   const name = document.getElementById("catalogEditName").value.trim();
-  const category = (editCategorySelect?.value === "__other__"
-    ? editCategoryInput?.value
-    : editCategorySelect?.value) || "";
+  const category =
+    (editCategorySelect?.value === "__other__"
+      ? editCategoryInput?.value
+      : editCategorySelect?.value) || "";
   const description = document.getElementById("catalogEditDescription").value.trim();
   const price = document.getElementById("catalogEditPrice").value;
   const oldPrice = document.getElementById("catalogEditOldPrice").value;
@@ -292,12 +306,16 @@ editForm?.addEventListener("submit", async (event) => {
   };
   if (imageUrl) patch.imageUrl = imageUrl;
 
-  await withButtonLoading(submitBtn, async () => {
-    await updateProduct(productId, patch);
-    await showSuccessPopup("Product updated.", "Saved");
-    closeEditModal();
-    await loadProducts();
-  }, "Saving...");
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      await updateProduct(productId, patch);
+      await showSuccessPopup("Product updated.", "Saved");
+      closeEditModal();
+      await loadProducts();
+    },
+    "Saving..."
+  );
 });
 
 async function loadProducts() {

@@ -24,8 +24,8 @@ export default [
         clearInterval: "readonly",
         setTimeout: "readonly",
         clearTimeout: "readonly",
-        console: "readonly"
-      }
-    }
-  }
+        console: "readonly",
+      },
+    },
+  },
 ];

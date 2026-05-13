@@ -44,10 +44,7 @@ export async function guardManagerPage() {
       try {
         profile = await getCurrentManagerProfile(user.uid);
       } catch (error) {
-        await showErrorPopup(
-          error.message || "Could not load manager session.",
-          "Session Error"
-        );
+        await showErrorPopup(error.message || "Could not load manager session.", "Session Error");
       }
       if (!profile) {
         await logoutManager();

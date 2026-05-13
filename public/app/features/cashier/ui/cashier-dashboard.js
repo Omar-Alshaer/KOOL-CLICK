@@ -3,7 +3,11 @@ import {
   getCashierOrders,
   updateOrderProgress,
 } from "../services/cashier-service.js";
-import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
+import {
+  guardCashierPage,
+  mountCashierHeader,
+  renderCashierMiniProfile,
+} from "./cashier-common.js";
 import { showErrorPopup, showSuccessPopup } from "../../../core/utils/popup.js";
 import { withButtonLoading } from "../../../core/utils/loading.js";
 import { APP_CONFIG } from "../../../config/app-config.js";
@@ -244,7 +248,10 @@ function renderOrderModal(order) {
 
     <div class="kc-list kc-section-spaced-xl">
       ${(order.items || [])
-        .map((item) => `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`)
+        .map(
+          (item) =>
+            `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`
+        )
         .join("")}
     </div>
   `;
@@ -254,40 +261,49 @@ function renderOrderModal(order) {
     const remainingTimeMinutes = Number(document.getElementById("orderModalTime")?.value || 0);
     const btn = event.currentTarget;
 
-    await withButtonLoading(btn, async () => {
-      try {
-        await updateOrderProgress({
-          orderId: order.id,
-          status,
-          remainingTimeMinutes,
-          cashierRestaurantId: currentState.profile.restaurantId,
-        });
-        await showSuccessPopup("Order progress updated.", "Saved");
-        await loadOrders();
-        const refreshed = getOrderById(order.id);
-        if (refreshed) renderOrderModal(refreshed);
-      } catch (error) {
-        await showErrorPopup(error.message || "Failed to update order.", "Save Failed");
-      }
-    }, "Saving...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        try {
+          await updateOrderProgress({
+            orderId: order.id,
+            status,
+            remainingTimeMinutes,
+            cashierRestaurantId: currentState.profile.restaurantId,
+          });
+          await showSuccessPopup("Order progress updated.", "Saved");
+          await loadOrders();
+          const refreshed = getOrderById(order.id);
+          if (refreshed) renderOrderModal(refreshed);
+        } catch (error) {
+          await showErrorPopup(error.message || "Failed to update order.", "Save Failed");
+        }
+      },
+      "Saving..."
+    );
   });
 
   document.getElementById("orderModalCollectBtn")?.addEventListener("click", async (event) => {
     const btn = event.currentTarget;
-    await withButtonLoading(btn, async () => {
-      try {
-        const result = await collectOrderByCashier({
-          orderId: order.id,
-          cashierRestaurantId: currentState.profile.restaurantId,
-        });
-        const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
-        await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
-        closeOrderModal();
-        await loadOrders();
-      } catch (error) {
-        await showErrorPopup(error.message || "Failed to collect order.", "Collect Failed");
-      }
-    }, "Collecting...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        try {
+          const result = await collectOrderByCashier({
+            orderId: order.id,
+            cashierRestaurantId: currentState.profile.restaurantId,
+          });
+          const pointsNote =
+            result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
+          await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
+          closeOrderModal();
+          await loadOrders();
+        } catch (error) {
+          await showErrorPopup(error.message || "Failed to collect order.", "Collect Failed");
+        }
+      },
+      "Collecting..."
+    );
   });
 }
 
@@ -407,7 +423,10 @@ async function startCameraScan() {
   const detector = await ensureQrDetector();
   const qrFallback = detector ? null : await ensureJsQrDecoder();
   if (!detector && !qrFallback) {
-    await showErrorPopup("QR scan is not supported here. Please paste the Order ID manually.", "Scanner Unsupported");
+    await showErrorPopup(
+      "QR scan is not supported here. Please paste the Order ID manually.",
+      "Scanner Unsupported"
+    );
     return;
   }
 
@@ -454,7 +473,9 @@ async function startCameraScan() {
             }
           } else if (qrFallback) {
             const frame = scanContext.getImageData(0, 0, width, height);
-            const found = qrFallback(frame.data, width, height, { inversionAttempts: "dontInvert" });
+            const found = qrFallback(frame.data, width, height, {
+              inversionAttempts: "dontInvert",
+            });
             scannedValue = String(found?.data || "").trim();
           }
 

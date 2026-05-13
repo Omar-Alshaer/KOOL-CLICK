@@ -9,17 +9,21 @@ form?.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const submitBtn = form.querySelector('[type="submit"]');
-  await withButtonLoading(submitBtn, async () => {
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      const phone = document.getElementById("phone").value.trim();
+      const password = document.getElementById("password").value;
 
-    if (!ensureCashierCredentials(phone, password)) return;
+      if (!ensureCashierCredentials(phone, password)) return;
 
-    try {
-      await loginCashier({ phone, password });
-      window.location.href = "./dashboard.html";
-    } catch (error) {
-      await showErrorPopup(error.message || "Cashier login failed.", "Login Failed");
-    }
-  }, "Logging in...");
+      try {
+        await loginCashier({ phone, password });
+        window.location.href = "./dashboard.html";
+      } catch (error) {
+        await showErrorPopup(error.message || "Cashier login failed.", "Login Failed");
+      }
+    },
+    "Logging in..."
+  );
 });

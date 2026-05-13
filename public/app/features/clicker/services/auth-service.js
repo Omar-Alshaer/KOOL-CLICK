@@ -25,11 +25,10 @@ function makeAuthEmail(phone) {
 
 function writeProfileCache({ uid, profile }) {
   try {
-    localStorage.setItem(
-      PROFILE_CACHE_KEY,
-      JSON.stringify({ uid, profile, ts: Date.now() })
-    );
-  } catch { /* ignore */ }
+    localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ uid, profile, ts: Date.now() }));
+  } catch {
+    /* ignore */
+  }
 }
 
 function readProfileCache(uid) {
@@ -40,11 +39,17 @@ function readProfileCache(uid) {
     if (!parsed || parsed.uid !== uid || !parsed.profile) return null;
     if (Date.now() - parsed.ts > PROFILE_CACHE_TTL_MS) return null;
     return parsed;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function clearProfileCache() {
-  try { localStorage.removeItem(PROFILE_CACHE_KEY); } catch { /* ignore */ }
+  try {
+    localStorage.removeItem(PROFILE_CACHE_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function updateProfileCache(uid, patch) {
@@ -92,7 +97,10 @@ function getBirthStampMMDD(birthDate) {
 }
 
 function buildUsernameCandidate(fullName, birthDate, suffixNumber = null) {
-  const firstName = String(fullName || "").trim().split(/\s+/)[0] || fullName;
+  const firstName =
+    String(fullName || "")
+      .trim()
+      .split(/\s+/)[0] || fullName;
   const base = generateUsernameBase(firstName);
   const birthStamp = getBirthStampMMDD(birthDate);
   const core = birthStamp
@@ -102,9 +110,21 @@ function buildUsernameCandidate(fullName, birthDate, suffixNumber = null) {
   return `${core}${suffixNumber}`;
 }
 
-export async function registerClicker({ fullName, username, phone, email, password, birthDate, avatar }) {
-  const authEmail = String(email || "").toLowerCase().trim();
-  let normalizedUsername = String(username || "").toLowerCase().trim();
+export async function registerClicker({
+  fullName,
+  username,
+  phone,
+  email,
+  password,
+  birthDate,
+  avatar,
+}) {
+  const authEmail = String(email || "")
+    .toLowerCase()
+    .trim();
+  let normalizedUsername = String(username || "")
+    .toLowerCase()
+    .trim();
   if (!normalizedUsername) {
     normalizedUsername = buildUsernameCandidate(fullName, birthDate);
   }
@@ -120,10 +140,7 @@ export async function registerClicker({ fullName, username, phone, email, passwo
     try {
       await runTransaction(db, async (tx) => {
         const nowMs = Date.now();
-        const [uSnap, pSnap] = await Promise.all([
-          tx.get(usernameRef),
-          tx.get(phoneRef),
-        ]);
+        const [uSnap, pSnap] = await Promise.all([tx.get(usernameRef), tx.get(phoneRef)]);
         if (uSnap.exists()) {
           const data = uSnap.data() || {};
           if (data.uid) throw new Error("USERNAME_TAKEN");
@@ -166,15 +183,12 @@ export async function registerClicker({ fullName, username, phone, email, passwo
     cred = await createUserWithEmailAndPassword(auth, authEmail, password);
   } catch (err) {
     // Rollback reservations on auth failure
-    await Promise.allSettled([
-      deleteDoc(usernameRef),
-      deleteDoc(phoneRef),
-    ]);
+    await Promise.allSettled([deleteDoc(usernameRef), deleteDoc(phoneRef)]);
     throw err;
   }
 
   const signupPoints = APP_CONFIG.signupBonusPoints || 0;
-  const signupLevel  = getLevelFromPoints(signupPoints);
+  const signupLevel = getLevelFromPoints(signupPoints);
   const profile = {
     role: "clicker",
     authUid: cred.user.uid,
@@ -193,7 +207,7 @@ export async function registerClicker({ fullName, username, phone, email, passwo
   await Promise.all([
     setDoc(doc(db, "clickers", cred.user.uid), profile),
     setDoc(usernameRef, { uid: cred.user.uid, authEmail, linkedAt: serverTimestamp() }),
-    setDoc(phoneRef,    { uid: cred.user.uid, authEmail, linkedAt: serverTimestamp() }),
+    setDoc(phoneRef, { uid: cred.user.uid, authEmail, linkedAt: serverTimestamp() }),
   ]);
 
   writeProfileCache({ uid: cred.user.uid, profile: { ...profile, createdAt: null } });
@@ -202,7 +216,9 @@ export async function registerClicker({ fullName, username, phone, email, passwo
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 export async function loginClicker({ identifier, password }) {
-  const authEmail = String(identifier || "").toLowerCase().trim();
+  const authEmail = String(identifier || "")
+    .toLowerCase()
+    .trim();
 
   const cred = await signInWithEmailAndPassword(auth, authEmail, password);
 
@@ -247,7 +263,10 @@ export function watchAuthState(callback) {
 
 // ─── Username update ─────────────────────────────────────────────────────────
 export async function updateClickerUsername({ uid, newUsername }) {
-  const normalized = String(newUsername || "").toLowerCase().trim().replace(/^@+/, "");
+  const normalized = String(newUsername || "")
+    .toLowerCase()
+    .trim()
+    .replace(/^@+/, "");
   if (!normalized) {
     throw new Error("Username is required.");
   }

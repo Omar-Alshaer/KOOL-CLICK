@@ -3,6 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A pixel art food ordering platform for clickers, cashiers, managers, and system owners."
+    />
+    <meta name="application-name" content="Kool Click" />
+    <meta name="theme-color" content="#3d005f" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:site_name" content="Kool Click" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Kool Click | Cart" />
+    <meta
+      property="og:description"
+      content="A pixel art food ordering platform for clickers, cashiers, managers, and system owners."
+    />
+    <meta property="og:image" content="/public/assets/brand/logo.svg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Kool Click | Cart" />
+    <meta
+      name="twitter:description"
+      content="A pixel art food ordering platform for clickers, cashiers, managers, and system owners."
+    />
+    <meta name="twitter:image" content="/public/assets/brand/logo.svg" />
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo.svg" />
+    <link rel="apple-touch-icon" href="/public/assets/brand/logo.svg" />
+    <link rel="manifest" href="/public/site.webmanifest" />
     <title>Kool Click | Cart</title>
     <link rel="stylesheet" href="../../css/app.css" />
   </head>
@@ -36,8 +61,12 @@
               <label for="receiptFile">Upload InstaPay Receipt</label>
               <div class="kc-inline kc-inline-top-sm">
                 <input id="receiptFile" class="kc-receipt-input" type="file" accept="image/*" />
-                <button id="receiptChooseBtn" type="button" class="kc-btn-secondary">Choose Receipt Image</button>
-                <span id="receiptFileName" class="kc-muted kc-receipt-file-name">No file selected</span>
+                <button id="receiptChooseBtn" type="button" class="kc-btn-secondary">
+                  Choose Receipt Image
+                </button>
+                <span id="receiptFileName" class="kc-muted kc-receipt-file-name"
+                  >No file selected</span
+                >
               </div>
               <p class="kc-muted">Receipt is required for InstaPay orders.</p>
             </div>
@@ -46,7 +75,12 @@
           <div class="kc-item">
             <strong>Promo Code</strong>
             <div class="kc-inline kc-inline-top-md">
-              <input id="promoCodeInput" class="kc-input-compact" type="text" placeholder="e.g. WELCOME10" />
+              <input
+                id="promoCodeInput"
+                class="kc-input-compact"
+                type="text"
+                placeholder="e.g. WELCOME10"
+              />
               <button id="applyPromoBtn" type="button">Apply</button>
               <button id="clearPromoBtn" type="button" class="kc-btn-secondary">Clear</button>
             </div>
@@ -55,10 +89,18 @@
         </div>
 
         <div class="kc-checkout-totals kc-section-spaced-md">
-          <div class="kc-inline kc-inline-between"><span>Subtotal</span><strong id="subtotal">0 EGP</strong></div>
-          <div class="kc-inline kc-inline-between"><span>Promo Discount</span><strong id="discount">0 EGP</strong></div>
-          <div class="kc-inline kc-inline-between"><span>Offer Applied</span><strong id="offerSummary">No offer applied</strong></div>
-          <div class="kc-inline kc-inline-between"><span>Final Payable</span><strong id="total">0 EGP</strong></div>
+          <div class="kc-inline kc-inline-between">
+            <span>Subtotal</span><strong id="subtotal">0 EGP</strong>
+          </div>
+          <div class="kc-inline kc-inline-between">
+            <span>Promo Discount</span><strong id="discount">0 EGP</strong>
+          </div>
+          <div class="kc-inline kc-inline-between">
+            <span>Offer Applied</span><strong id="offerSummary">No offer applied</strong>
+          </div>
+          <div class="kc-inline kc-inline-between">
+            <span>Final Payable</span><strong id="total">0 EGP</strong>
+          </div>
           <div id="pointsInfo" class="kc-muted">Points info will appear here.</div>
         </div>
 

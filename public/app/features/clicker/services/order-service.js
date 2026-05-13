@@ -34,8 +34,7 @@ export async function placeClickerOrders({
 }) {
   const callable = httpsCallable(functions, "createClickerOrders");
   const clientRequestId =
-    globalThis.crypto?.randomUUID?.() ||
-    `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    globalThis.crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
   const payload = {
     clientRequestId,

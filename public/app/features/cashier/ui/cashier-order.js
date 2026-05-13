@@ -3,7 +3,11 @@ import {
   getCashierOrders,
   updateOrderProgress,
 } from "../services/cashier-service.js";
-import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
+import {
+  guardCashierPage,
+  mountCashierHeader,
+  renderCashierMiniProfile,
+} from "./cashier-common.js";
 import { showErrorPopup, showSuccessPopup } from "../../../core/utils/popup.js";
 import { withButtonLoading } from "../../../core/utils/loading.js";
 import { APP_CONFIG } from "../../../config/app-config.js";
@@ -235,7 +239,10 @@ function renderSelectedOrder() {
 
       <div class="kc-list kc-section-spaced-xl">
         ${(order.items || [])
-          .map((item) => `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`)
+          .map(
+            (item) =>
+              `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${formatMoney(item.price * item.qty)}</div>`
+          )
           .join("")}
       </div>
     </article>
@@ -243,37 +250,46 @@ function renderSelectedOrder() {
 
   document.getElementById("orderSaveBtn")?.addEventListener("click", async (event) => {
     const btn = event.currentTarget;
-    await withButtonLoading(btn, async () => {
-      try {
-        await updateOrderProgress({
-          orderId: order.id,
-          status: document.getElementById("orderStatus")?.value,
-          remainingTimeMinutes: Number(document.getElementById("orderEta")?.value || 0),
-          cashierRestaurantId: currentState.profile.restaurantId,
-        });
-        await showSuccessPopup("Order progress updated.", "Saved");
-        await loadOrders();
-      } catch (error) {
-        await showErrorPopup(error.message || "Failed to update order.", "Save Failed");
-      }
-    }, "Saving...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        try {
+          await updateOrderProgress({
+            orderId: order.id,
+            status: document.getElementById("orderStatus")?.value,
+            remainingTimeMinutes: Number(document.getElementById("orderEta")?.value || 0),
+            cashierRestaurantId: currentState.profile.restaurantId,
+          });
+          await showSuccessPopup("Order progress updated.", "Saved");
+          await loadOrders();
+        } catch (error) {
+          await showErrorPopup(error.message || "Failed to update order.", "Save Failed");
+        }
+      },
+      "Saving..."
+    );
   });
 
   document.getElementById("orderCollectBtn")?.addEventListener("click", async (event) => {
     const btn = event.currentTarget;
-    await withButtonLoading(btn, async () => {
-      try {
-        const result = await collectOrderByCashier({
-          orderId: order.id,
-          cashierRestaurantId: currentState.profile.restaurantId,
-        });
-        const pointsNote = result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
-        await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
-        await loadOrders();
-      } catch (error) {
-        await showErrorPopup(error.message || "Failed to collect order.", "Collect Failed");
-      }
-    }, "Collecting...");
+    await withButtonLoading(
+      btn,
+      async () => {
+        try {
+          const result = await collectOrderByCashier({
+            orderId: order.id,
+            cashierRestaurantId: currentState.profile.restaurantId,
+          });
+          const pointsNote =
+            result.pointsAdded > 0 ? ` ${result.pointsAdded} points added to clicker.` : "";
+          await showSuccessPopup(`Order marked as collected.${pointsNote}`, "Collected");
+          await loadOrders();
+        } catch (error) {
+          await showErrorPopup(error.message || "Failed to collect order.", "Collect Failed");
+        }
+      },
+      "Collecting..."
+    );
   });
 }
 

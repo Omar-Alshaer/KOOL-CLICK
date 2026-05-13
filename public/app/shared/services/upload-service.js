@@ -13,7 +13,9 @@ function validateUploadFile(file, { folder = "" } = {}) {
   const allowedFolders = APP_CONFIG.cloudinary.allowedFolders || [];
 
   if (file.size > maxFileSize) {
-    throw new Error(`Image is too large. Maximum size is ${Math.floor(maxFileSize / 1024 / 1024)} MB.`);
+    throw new Error(
+      `Image is too large. Maximum size is ${Math.floor(maxFileSize / 1024 / 1024)} MB.`
+    );
   }
 
   if (allowedMimeTypes.length && !allowedMimeTypes.includes(file.type)) {

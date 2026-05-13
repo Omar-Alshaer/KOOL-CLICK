@@ -86,7 +86,15 @@ function hidePopup() {
   activePopup = null;
 }
 
-function openPopup({ type, title, message, okText, cancelText, showCancel = false, dangerous = false }) {
+function openPopup({
+  type,
+  title,
+  message,
+  okText,
+  cancelText,
+  showCancel = false,
+  dangerous = false,
+}) {
   if (activePopup) {
     activePopup.reject?.(new Error("Popup replaced by a new one."));
     hidePopup();
@@ -153,7 +161,14 @@ export function showSuccessPopup(message, title = "Success") {
 }
 
 export function showErrorPopup(message, title = "Something Went Wrong") {
-  return openPopup({ type: "error", title, message, okText: "Got It", cancelText: "", showCancel: false });
+  return openPopup({
+    type: "error",
+    title,
+    message,
+    okText: "Got It",
+    cancelText: "",
+    showCancel: false,
+  });
 }
 
 export function showInfoPopup(message, title = "Heads Up") {

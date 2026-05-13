@@ -1,14 +1,9 @@
-import {
-  db,
-  collection,
-  query,
-  where,
-  limit,
-  getDocs,
-} from "../../config/firebase.js";
+import { db, collection, query, where, limit, getDocs } from "../../config/firebase.js";
 
 export async function getPromoByCode(code, restaurantId = "") {
-  const normalized = String(code || "").trim().toUpperCase();
+  const normalized = String(code || "")
+    .trim()
+    .toUpperCase();
   if (!normalized) return null;
 
   const constraints = [where("code", "==", normalized)];

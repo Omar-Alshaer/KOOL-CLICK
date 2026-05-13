@@ -15,7 +15,9 @@ function requireCallableResult(result) {
 }
 
 export async function loginSuperAdmin({ email, password }) {
-  const authEmail = String(email || "").trim().toLowerCase();
+  const authEmail = String(email || "")
+    .trim()
+    .toLowerCase();
   const cred = await signInWithEmailAndPassword(auth, authEmail, password);
   const profile = await getCurrentSuperAdminProfile(cred.user.uid);
 

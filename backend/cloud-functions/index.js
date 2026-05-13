@@ -38,6 +38,7 @@ const ROLE_PROFILE_COLLECTIONS = {
   clicker: "clickers",
   cashier: "cashiers",
   manager: "managers",
+  admin: "admins"
 };
 
 let coldStartPending = true;
@@ -72,8 +73,14 @@ function normalizeOptionalText(value, fieldName, max = 160) {
 }
 
 function normalizeEmail(value, fieldName = "email") {
-  const normalized = String(value || "").trim().toLowerCase();
-  assert(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized), "invalid-argument", `${fieldName} is invalid.`);
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  assert(
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized),
+    "invalid-argument",
+    `${fieldName} is invalid.`
+  );
   assert(normalized.length <= 254, "invalid-argument", `${fieldName} is too long.`);
   return normalized;
 }
@@ -86,19 +93,31 @@ function normalizePhone(value, fieldName = "phone") {
 
 function normalizePassword(value) {
   const password = String(value || "");
-  assert(password.length >= 8 && password.length <= 128, "invalid-argument", "Password must be between 8 and 128 characters.");
+  assert(
+    password.length >= 8 && password.length <= 128,
+    "invalid-argument",
+    "Password must be between 8 and 128 characters."
+  );
   return password;
 }
 
 function normalizeAdminManagedRole(value) {
   const role = String(value || "").trim();
-  assert(ADMIN_MANAGED_ROLES.has(role), "invalid-argument", "Role is not allowed for this operation.");
+  assert(
+    ADMIN_MANAGED_ROLES.has(role),
+    "invalid-argument",
+    "Role is not allowed for this operation."
+  );
   return role;
 }
 
 function normalizeAdminLimit(value, fallback) {
   const limit = Number(value || fallback);
-  assert(Number.isInteger(limit) && limit >= 1 && limit <= fallback, "invalid-argument", "Invalid limit.");
+  assert(
+    Number.isInteger(limit) && limit >= 1 && limit <= fallback,
+    "invalid-argument",
+    "Invalid limit."
+  );
   return limit;
 }
 
@@ -136,7 +155,7 @@ function windowKey(windowMs, nowMs = Date.now()) {
 }
 
 function errorCode(error) {
-  return error instanceof HttpsError ? error.code : (error?.code || "internal");
+  return error instanceof HttpsError ? error.code : error?.code || "internal";
 }
 
 function assertRecentAuth(request, action) {
@@ -168,20 +187,27 @@ async function enforceAdminRateLimit(adminUid, action) {
       `Admin ${action} limit reached for this ${config.label}.`
     );
 
-    transaction.set(ref, {
-      adminUid,
-      action,
-      bucket,
-      count: FieldValue.increment(1),
-      limit: config.max,
-      windowMs: config.windowMs,
-      updatedAt: FieldValue.serverTimestamp(),
-      expiresAt: new Date(nowMs + config.windowMs * 2),
-    }, { merge: true });
+    transaction.set(
+      ref,
+      {
+        adminUid,
+        action,
+        bucket,
+        count: FieldValue.increment(1),
+        limit: config.max,
+        windowMs: config.windowMs,
+        updatedAt: FieldValue.serverTimestamp(),
+        expiresAt: new Date(nowMs + config.windowMs * 2),
+      },
+      { merge: true }
+    );
   });
 }
 
-async function recordOperationalMetric(functionName, { status, latencyMs, code = "", metadata = {} } = {}) {
+async function recordOperationalMetric(
+  functionName,
+  { status, latencyMs, code = "", metadata = {} } = {}
+) {
   const dateKey = dayKey();
   const metricRef = db.collection("opsMetrics").doc(dateKey);
   const healthRef = db.collection("systemHealth").doc("current");
@@ -189,7 +215,9 @@ async function recordOperationalMetric(functionName, { status, latencyMs, code =
   const fields = {
     [`functions.${functionName}.calls`]: FieldValue.increment(1),
     [`functions.${functionName}.${status}`]: FieldValue.increment(1),
-    [`functions.${functionName}.latencyMsTotal`]: FieldValue.increment(Math.max(0, Math.round(latencyMs || 0))),
+    [`functions.${functionName}.latencyMsTotal`]: FieldValue.increment(
+      Math.max(0, Math.round(latencyMs || 0))
+    ),
     [`functions.${functionName}.lastCode`]: code || status,
     [`functions.${functionName}.lastSeenAt`]: FieldValue.serverTimestamp(),
     updatedAt: FieldValue.serverTimestamp(),
@@ -203,14 +231,17 @@ async function recordOperationalMetric(functionName, { status, latencyMs, code =
 
   await Promise.allSettled([
     metricRef.set(fields, { merge: true }),
-    healthRef.set({
-      lastFunctionName: functionName,
-      lastStatus: status,
-      lastCode: code || status,
-      lastLatencyMs: Math.max(0, Math.round(latencyMs || 0)),
-      lastMetadata: safe,
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true }),
+    healthRef.set(
+      {
+        lastFunctionName: functionName,
+        lastStatus: status,
+        lastCode: code || status,
+        lastLatencyMs: Math.max(0, Math.round(latencyMs || 0)),
+        lastMetadata: safe,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    ),
   ]);
 }
 
@@ -258,7 +289,11 @@ async function assertSuperAdmin(uid) {
   assert(uid, "unauthenticated", "Authentication is required.");
   const userSnap = await db.collection("users").doc(uid).get();
   const user = userSnap.exists ? userSnap.data() : null;
-  assert(user?.role === "superAdmin" && user.disabled !== true, "permission-denied", "Super admin access is required.");
+  assert(
+    user?.role === "superAdmin" && user.disabled !== true,
+    "permission-denied",
+    "Super admin access is required."
+  );
   return { uid, ...user };
 }
 
@@ -305,7 +340,11 @@ async function assertClickerIndexAvailable(payload, uid = "") {
   snaps.forEach((snap) => {
     if (!snap.exists) return;
     const ownerUid = snap.data()?.uid || "";
-    assert(!ownerUid || ownerUid === uid, "already-exists", "Clicker username or phone is already linked.");
+    assert(
+      !ownerUid || ownerUid === uid,
+      "already-exists",
+      "Clicker username or phone is already linked."
+    );
   });
 }
 
@@ -329,22 +368,27 @@ function writeClickerIndexEntries(batch, payload, uid) {
 function normalizeAdminUserPayload(data, { requirePassword = false } = {}) {
   assert(isPlainObject(data), "invalid-argument", "Request payload must be an object.");
   const role = normalizeAdminManagedRole(data.role);
-  const displayName = normalizeText(data.displayName || data.fullName, "displayName", { min: 2, max: 120 });
-  const phone = role === "cashier" || role === "manager"
-    ? normalizePhone(data.phone)
-    : normalizeOptionalText(data.phone, "phone", 24);
-  const email = role === "cashier" || role === "manager"
-    ? normalizeOptionalText(data.email, "email", 254)
-    : normalizeEmail(data.email);
+  const displayName = normalizeText(data.displayName || data.fullName, "displayName", {
+    min: 2,
+    max: 120,
+  });
+  const phone =
+    role === "cashier" || role === "manager"
+      ? normalizePhone(data.phone)
+      : normalizeOptionalText(data.phone, "phone", 24);
+  const email =
+    role === "cashier" || role === "manager"
+      ? normalizeOptionalText(data.email, "email", 254)
+      : normalizeEmail(data.email);
   if (email) normalizeEmail(email);
   const password = requirePassword ? normalizePassword(data.password) : "";
-  const restaurantId = role === "cashier" || role === "manager"
-    ? normalizeId(data.restaurantId, "restaurantId")
-    : normalizeOptionalText(data.restaurantId, "restaurantId", 160);
+  const restaurantId =
+    role === "cashier" || role === "manager"
+      ? normalizeId(data.restaurantId, "restaurantId")
+      : normalizeOptionalText(data.restaurantId, "restaurantId", 160);
   const restaurantName = normalizeOptionalText(data.restaurantName, "restaurantName", 160);
-  const username = role === "clicker"
-    ? normalizeOptionalText(data.username, "username", 40).toLowerCase()
-    : "";
+  const username =
+    role === "clicker" ? normalizeOptionalText(data.username, "username", 40).toLowerCase() : "";
 
   return {
     role,
@@ -471,7 +515,10 @@ function auditLogRef() {
   return db.collection("auditLogs").doc();
 }
 
-function writeAuditInBatch(batch, { adminUid, action, targetUid = "", status = "success", metadata = {} }) {
+function writeAuditInBatch(
+  batch,
+  { adminUid, action, targetUid = "", status = "success", metadata = {} }
+) {
   batch.set(auditLogRef(), {
     adminUid,
     action,
@@ -503,7 +550,9 @@ function normalizePaymentMethod(value) {
 }
 
 function normalizePromoCode(value) {
-  const code = String(value || "").trim().toUpperCase();
+  const code = String(value || "")
+    .trim()
+    .toUpperCase();
   assert(code.length <= 40, "invalid-argument", "Promo code is too long.");
   return code;
 }
@@ -523,7 +572,11 @@ function normalizeReceiptUrl(value, paymentMethod) {
   }
 
   assert(parsed.protocol === "https:", "invalid-argument", "Receipt URL must use HTTPS.");
-  assert(parsed.hostname === "res.cloudinary.com", "invalid-argument", "Receipt URL host is not allowed.");
+  assert(
+    parsed.hostname === "res.cloudinary.com",
+    "invalid-argument",
+    "Receipt URL host is not allowed."
+  );
   return parsed.href;
 }
 
@@ -572,7 +625,10 @@ function offerTargetsProduct(offer, product) {
   const targetValue = normalizeOfferValue(offer.targetValue);
 
   if (targetType === "product") {
-    return normalizeOfferValue(product.id) === targetValue || normalizeOfferValue(product.name) === targetValue;
+    return (
+      normalizeOfferValue(product.id) === targetValue ||
+      normalizeOfferValue(product.name) === targetValue
+    );
   }
 
   if (targetType === "section") {
@@ -626,7 +682,10 @@ function calcItemsCount(items) {
 }
 
 function buildOrderNumber(orderId) {
-  return String(orderId || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase();
+  return String(orderId || "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0, 8)
+    .toUpperCase();
 }
 
 function splitDiscountByGroup(groups, totalDiscount) {
@@ -669,7 +728,11 @@ function normalizeCreateOrderPayload(data) {
   assert(isPlainObject(data), "invalid-argument", "Request payload must be an object.");
   assert(Array.isArray(data.items), "invalid-argument", "Items must be an array.");
   assert(data.items.length > 0, "invalid-argument", "Cart is empty.");
-  assert(data.items.length <= MAX_DISTINCT_PRODUCTS, "invalid-argument", "Cart has too many items.");
+  assert(
+    data.items.length <= MAX_DISTINCT_PRODUCTS,
+    "invalid-argument",
+    "Cart has too many items."
+  );
 
   const paymentMethod = normalizePaymentMethod(data.paymentMethod);
   const receiptImageUrl = normalizeReceiptUrl(data.receiptImageUrl, paymentMethod);
@@ -716,713 +779,813 @@ async function getPromoInTransaction(transaction, promoCode, restaurantId) {
 
   const usageLimit = Number(promo.usageLimit || 0);
   const usedCount = Number(promo.usedCount || 0);
-  assert(!usageLimit || usedCount < usageLimit, "failed-precondition", "Promo code usage limit reached.");
+  assert(
+    !usageLimit || usedCount < usageLimit,
+    "failed-precondition",
+    "Promo code usage limit reached."
+  );
   return promo;
 }
 
-exports.createClickerOrders = onCall({ region: "us-central1" }, async (request) => observeCallable("createClickerOrders", request, async () => {
-  assert(request.auth?.uid, "unauthenticated", "You must be signed in to place an order.");
+exports.createClickerOrders = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("createClickerOrders", request, async () => {
+    assert(request.auth?.uid, "unauthenticated", "You must be signed in to place an order.");
 
-  const uid = request.auth.uid;
-  const payload = normalizeCreateOrderPayload(request.data);
-  const requestRef = db.collection("orderRequests").doc(`${uid}_${payload.clientRequestId}`);
-  const rateRef = db.collection("orderRateLimits").doc(uid);
+    const uid = request.auth.uid;
+    const payload = normalizeCreateOrderPayload(request.data);
+    const requestRef = db.collection("orderRequests").doc(`${uid}_${payload.clientRequestId}`);
+    const rateRef = db.collection("orderRateLimits").doc(uid);
 
-  const result = await db.runTransaction(async (transaction) => {
-    const existingRequest = await transaction.get(requestRef);
-    if (existingRequest.exists) {
-      logger.info("createClickerOrders.idempotentReplay", {
+    const result = await db.runTransaction(async (transaction) => {
+      const existingRequest = await transaction.get(requestRef);
+      if (existingRequest.exists) {
+        logger.info("createClickerOrders.idempotentReplay", {
+          uidHint: uidHint(uid),
+          clientRequestId: payload.clientRequestId,
+        });
+        return sanitizeOrderSummary(existingRequest.data().summary || {});
+      }
+
+      const rateSnap = await transaction.get(rateRef);
+      if (rateSnap.exists) {
+        const lastCreateAt = rateSnap.data()?.lastCreateAt;
+        const lastMs = typeof lastCreateAt?.toMillis === "function" ? lastCreateAt.toMillis() : 0;
+        assert(
+          !lastMs || Date.now() - lastMs >= ORDER_CREATE_COOLDOWN_MS,
+          "resource-exhausted",
+          "Please wait a few seconds before placing another order."
+        );
+      }
+
+      const clickerRef = db.collection("clickers").doc(uid);
+      const clickerSnap = await transaction.get(clickerRef);
+      assert(clickerSnap.exists, "permission-denied", "Clicker profile not found.");
+
+      const clicker = clickerSnap.data() || {};
+      assert(clicker.role === "clicker", "permission-denied", "Only clickers can place orders.");
+      assert(
+        !clicker.authUid || clicker.authUid === uid,
+        "permission-denied",
+        "Profile ownership mismatch."
+      );
+
+      const productIds = [...new Set(payload.items.map((item) => item.productId))];
+      const productRefs = productIds.map((id) => db.collection("products").doc(id));
+      const productSnaps = await Promise.all(productRefs.map((ref) => transaction.get(ref)));
+      const productMap = new Map();
+
+      productSnaps.forEach((snap) => {
+        assert(snap.exists, "failed-precondition", "One or more products are no longer available.");
+        productMap.set(snap.id, { id: snap.id, ...snap.data() });
+      });
+
+      const offerIds = [...new Set(payload.items.map((item) => item.offerId).filter(Boolean))];
+      const offerRefs = offerIds.map((id) => db.collection("offers").doc(id));
+      const offerSnaps = await Promise.all(offerRefs.map((ref) => transaction.get(ref)));
+      const offerMap = new Map();
+
+      offerSnaps.forEach((snap) => {
+        if (snap.exists) offerMap.set(snap.id, { id: snap.id, ...snap.data() });
+      });
+
+      const verifiedItems = payload.items.map((item) => {
+        const product = productMap.get(item.productId);
+        assert(product, "failed-precondition", "Product not found.");
+        assert(
+          product.isActive !== false && product.isActive !== "false",
+          "failed-precondition",
+          `${product.name || "Product"} is sold out.`
+        );
+
+        const basePrice = Number(product.price || 0);
+        assert(
+          Number.isFinite(basePrice) && basePrice >= 0,
+          "failed-precondition",
+          "Invalid product price."
+        );
+
+        let offer = null;
+        let finalPrice = basePrice;
+        if (item.offerId) {
+          const candidate = offerMap.get(item.offerId) || null;
+          const validOffer =
+            candidate &&
+            candidate.isActive !== false &&
+            candidate.restaurantId === product.restaurantId &&
+            offerTargetsProduct(candidate, product);
+
+          if (validOffer) {
+            offer = candidate;
+            finalPrice = computeOfferPrice(basePrice, offer);
+          }
+        }
+
+        const offerLabel = offer
+          ? offer.discountType === "flat"
+            ? `-${Number(offer.discountValue || 0).toFixed(0)} EGP`
+            : `-${Number(offer.discountValue || 0).toFixed(0)}%`
+          : "";
+
+        return {
+          menuId: product.id,
+          restaurantId: product.restaurantId,
+          restaurantName: product.restaurantName || "",
+          name: product.name || "",
+          price: Number(finalPrice.toFixed(2)),
+          qty: item.qty,
+          offerId: offer?.id || "",
+          offerTitle: offer?.title || "",
+          offerLabel,
+          basePrice: offer ? basePrice : null,
+        };
+      });
+
+      const groups = splitCartByRestaurant(verifiedItems);
+      assert(groups.length > 0, "invalid-argument", "Cart is empty.");
+
+      const totalSubtotal = calcSubtotal(verifiedItems);
+      const promo =
+        groups.length === 1
+          ? await getPromoInTransaction(transaction, payload.promoCode, groups[0].restaurantId)
+          : null;
+      const totalDiscount = calculatePromoDiscount(totalSubtotal, promo);
+      const splitDiscounts = splitDiscountByGroup(groups, totalDiscount);
+      const instantPoints = payload.paymentMethod === APP_CONFIG.paymentMethods.instaPay;
+
+      const createdOrderIds = [];
+      let pointsGrantedNow = 0;
+      let pointsPendingOnCollection = 0;
+
+      groups.forEach((group, idx) => {
+        const orderRef = db.collection("orders").doc();
+        const subtotal = calcSubtotal(group.items);
+        const discountAmount = splitDiscounts[idx] || 0;
+        const finalTotal = Number(Math.max(0, subtotal - discountAmount).toFixed(2));
+        const pointsEarned = pointsFromAmount(finalTotal);
+        const itemsCount = calcItemsCount(group.items);
+        const restaurantName = group.items[0]?.restaurantName || "";
+
+        transaction.set(orderRef, {
+          orderNumber: buildOrderNumber(orderRef.id),
+          clickerUid: uid,
+          clickerName: clicker.fullName || "",
+          clickerPhone: clicker.phone || "",
+          restaurantId: group.restaurantId,
+          restaurantName,
+          items: group.items,
+          itemsCount,
+          subtotal,
+          promoCode: promo?.code || "",
+          discountAmount,
+          finalTotal,
+          pointsEarned,
+          pointsGranted: instantPoints,
+          status: "Pending",
+          statusHistory: [{ status: "Pending", at: FieldValue.serverTimestamp() }],
+          remainingTimeMinutes: 20,
+          paymentMethod: payload.paymentMethod,
+          paymentStatus: instantPoints ? "ReceiptUploaded" : "PayOnPickup",
+          receiptImageUrl: payload.receiptImageUrl,
+          qrPayload: orderRef.id,
+          createdAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        if (instantPoints) {
+          pointsGrantedNow += pointsEarned;
+        } else {
+          pointsPendingOnCollection += pointsEarned;
+        }
+        createdOrderIds.push(orderRef.id);
+      });
+
+      if (pointsGrantedNow > 0) {
+        const currentPoints = Number(clicker.points || 0);
+        const nextPoints = currentPoints + pointsGrantedNow;
+        transaction.update(clickerRef, {
+          points: nextPoints,
+          level: getLevelFromPoints(nextPoints),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      if (promo?.ref && totalDiscount > 0) {
+        transaction.update(promo.ref, {
+          usedCount: FieldValue.increment(1),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      const summary = sanitizeOrderSummary({
+        createdOrderIds,
+        totalSubtotal,
+        totalDiscount,
+        finalPayable: Number(Math.max(0, totalSubtotal - totalDiscount).toFixed(2)),
+        pointsGrantedNow,
+        pointsPendingOnCollection,
+      });
+
+      transaction.set(requestRef, {
+        uid,
+        createdAt: FieldValue.serverTimestamp(),
+        summary,
+      });
+
+      transaction.set(
+        rateRef,
+        {
+          lastCreateAt: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      logger.info("createClickerOrders.success", {
         uidHint: uidHint(uid),
         clientRequestId: payload.clientRequestId,
+        distinctProducts: productIds.length,
+        orderCount: createdOrderIds.length,
+        paymentMethod: payload.paymentMethod,
+        pointsGrantedNow,
       });
-      return sanitizeOrderSummary(existingRequest.data().summary || {});
-    }
 
-    const rateSnap = await transaction.get(rateRef);
-    if (rateSnap.exists) {
-      const lastCreateAt = rateSnap.data()?.lastCreateAt;
-      const lastMs = typeof lastCreateAt?.toMillis === "function" ? lastCreateAt.toMillis() : 0;
+      return summary;
+    });
+
+    return result;
+  })
+);
+
+exports.cancelClickerOrder = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("cancelClickerOrder", request, async () => {
+    assert(request.auth?.uid, "unauthenticated", "You must be signed in to cancel an order.");
+    assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
+
+    const uid = request.auth.uid;
+    const orderId = normalizeId(request.data.orderId, "orderId");
+    const penalty = 20;
+
+    return db.runTransaction(async (transaction) => {
+      const orderRef = db.collection("orders").doc(orderId);
+      const clickerRef = db.collection("clickers").doc(uid);
+
+      const [orderSnap, clickerSnap] = await Promise.all([
+        transaction.get(orderRef),
+        transaction.get(clickerRef),
+      ]);
+
+      assert(orderSnap.exists, "not-found", "Order not found.");
+      assert(clickerSnap.exists, "permission-denied", "Clicker profile not found.");
+
+      const order = orderSnap.data() || {};
+      const clicker = clickerSnap.data() || {};
+
+      assert(order.clickerUid === uid, "permission-denied", "This order does not belong to you.");
       assert(
-        !lastMs || Date.now() - lastMs >= ORDER_CREATE_COOLDOWN_MS,
-        "resource-exhausted",
-        "Please wait a few seconds before placing another order."
+        order.status !== "Collected" && order.status !== "Cancelled",
+        "failed-precondition",
+        "This order can no longer be cancelled."
       );
-    }
 
-    const clickerRef = db.collection("clickers").doc(uid);
-    const clickerSnap = await transaction.get(clickerRef);
-    assert(clickerSnap.exists, "permission-denied", "Clicker profile not found.");
+      const revokeGrantedPoints = order.pointsGranted ? Number(order.pointsEarned || 0) : 0;
+      const totalDeducted = penalty + revokeGrantedPoints;
+      const nextPoints = Number(clicker.points || 0) - totalDeducted;
+      const statusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
+      statusHistory.push({ status: "Cancelled", at: FieldValue.serverTimestamp() });
 
-    const clicker = clickerSnap.data() || {};
-    assert(clicker.role === "clicker", "permission-denied", "Only clickers can place orders.");
-    assert(!clicker.authUid || clicker.authUid === uid, "permission-denied", "Profile ownership mismatch.");
+      transaction.update(orderRef, {
+        status: "Cancelled",
+        statusHistory,
+        cancelledAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
 
-    const productIds = [...new Set(payload.items.map((item) => item.productId))];
-    const productRefs = productIds.map((id) => db.collection("products").doc(id));
-    const productSnaps = await Promise.all(productRefs.map((ref) => transaction.get(ref)));
-    const productMap = new Map();
+      transaction.update(clickerRef, {
+        points: nextPoints,
+        level: getLevelFromPoints(nextPoints),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
 
-    productSnaps.forEach((snap) => {
-      assert(snap.exists, "failed-precondition", "One or more products are no longer available.");
-      productMap.set(snap.id, { id: snap.id, ...snap.data() });
-    });
-
-    const offerIds = [...new Set(payload.items.map((item) => item.offerId).filter(Boolean))];
-    const offerRefs = offerIds.map((id) => db.collection("offers").doc(id));
-    const offerSnaps = await Promise.all(offerRefs.map((ref) => transaction.get(ref)));
-    const offerMap = new Map();
-
-    offerSnaps.forEach((snap) => {
-      if (snap.exists) offerMap.set(snap.id, { id: snap.id, ...snap.data() });
-    });
-
-    const verifiedItems = payload.items.map((item) => {
-      const product = productMap.get(item.productId);
-      assert(product, "failed-precondition", "Product not found.");
-      assert(product.isActive !== false && product.isActive !== "false", "failed-precondition", `${product.name || "Product"} is sold out.`);
-
-      const basePrice = Number(product.price || 0);
-      assert(Number.isFinite(basePrice) && basePrice >= 0, "failed-precondition", "Invalid product price.");
-
-      let offer = null;
-      let finalPrice = basePrice;
-      if (item.offerId) {
-        const candidate = offerMap.get(item.offerId) || null;
-        const validOffer =
-          candidate &&
-          candidate.isActive !== false &&
-          candidate.restaurantId === product.restaurantId &&
-          offerTargetsProduct(candidate, product);
-
-        if (validOffer) {
-          offer = candidate;
-          finalPrice = computeOfferPrice(basePrice, offer);
-        }
-      }
-
-      const offerLabel = offer
-        ? offer.discountType === "flat"
-          ? `-${Number(offer.discountValue || 0).toFixed(0)} EGP`
-          : `-${Number(offer.discountValue || 0).toFixed(0)}%`
-        : "";
+      logger.info("cancelClickerOrder.success", {
+        uidHint: uidHint(uid),
+        orderId: orderId.slice(0, 8),
+        totalDeducted,
+      });
 
       return {
-        menuId: product.id,
-        restaurantId: product.restaurantId,
-        restaurantName: product.restaurantName || "",
-        name: product.name || "",
-        price: Number(finalPrice.toFixed(2)),
-        qty: item.qty,
-        offerId: offer?.id || "",
-        offerTitle: offer?.title || "",
-        offerLabel,
-        basePrice: offer ? basePrice : null,
+        penalty,
+        totalDeducted,
       };
     });
+  })
+);
 
-    const groups = splitCartByRestaurant(verifiedItems);
-    assert(groups.length > 0, "invalid-argument", "Cart is empty.");
+exports.collectOrderByCashier = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("collectOrderByCashier", request, async () => {
+    assert(request.auth?.uid, "unauthenticated", "You must be signed in to collect an order.");
+    assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
 
-    const totalSubtotal = calcSubtotal(verifiedItems);
-    const promo = groups.length === 1
-      ? await getPromoInTransaction(transaction, payload.promoCode, groups[0].restaurantId)
-      : null;
-    const totalDiscount = calculatePromoDiscount(totalSubtotal, promo);
-    const splitDiscounts = splitDiscountByGroup(groups, totalDiscount);
-    const instantPoints = payload.paymentMethod === APP_CONFIG.paymentMethods.instaPay;
+    const uid = request.auth.uid;
+    const orderId = normalizeId(request.data.orderId, "orderId");
 
-    const createdOrderIds = [];
-    let pointsGrantedNow = 0;
-    let pointsPendingOnCollection = 0;
+    return db.runTransaction(async (transaction) => {
+      const indexRef = db.collection("userAuthIndex").doc(uid);
+      const cashierRef = db.collection("cashiers").doc(uid);
+      const orderRef = db.collection("orders").doc(orderId);
 
-    groups.forEach((group, idx) => {
-      const orderRef = db.collection("orders").doc();
-      const subtotal = calcSubtotal(group.items);
-      const discountAmount = splitDiscounts[idx] || 0;
-      const finalTotal = Number(Math.max(0, subtotal - discountAmount).toFixed(2));
-      const pointsEarned = pointsFromAmount(finalTotal);
-      const itemsCount = calcItemsCount(group.items);
-      const restaurantName = group.items[0]?.restaurantName || "";
+      const [indexSnap, cashierSnap, orderSnap] = await Promise.all([
+        transaction.get(indexRef),
+        transaction.get(cashierRef),
+        transaction.get(orderRef),
+      ]);
 
-      transaction.set(orderRef, {
-        orderNumber: buildOrderNumber(orderRef.id),
-        clickerUid: uid,
-        clickerName: clicker.fullName || "",
-        clickerPhone: clicker.phone || "",
-        restaurantId: group.restaurantId,
-        restaurantName,
-        items: group.items,
-        itemsCount,
-        subtotal,
-        promoCode: promo?.code || "",
-        discountAmount,
-        finalTotal,
-        pointsEarned,
-        pointsGranted: instantPoints,
-        status: "Pending",
-        statusHistory: [{ status: "Pending", at: FieldValue.serverTimestamp() }],
-        remainingTimeMinutes: 20,
-        paymentMethod: payload.paymentMethod,
-        paymentStatus: instantPoints ? "ReceiptUploaded" : "PayOnPickup",
-        receiptImageUrl: payload.receiptImageUrl,
-        qrPayload: orderRef.id,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      if (instantPoints) {
-        pointsGrantedNow += pointsEarned;
-      } else {
-        pointsPendingOnCollection += pointsEarned;
-      }
-      createdOrderIds.push(orderRef.id);
-    });
-
-    if (pointsGrantedNow > 0) {
-      const currentPoints = Number(clicker.points || 0);
-      const nextPoints = currentPoints + pointsGrantedNow;
-      transaction.update(clickerRef, {
-        points: nextPoints,
-        level: getLevelFromPoints(nextPoints),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-    }
-
-    if (promo?.ref && totalDiscount > 0) {
-      transaction.update(promo.ref, {
-        usedCount: FieldValue.increment(1),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-    }
-
-    const summary = sanitizeOrderSummary({
-      createdOrderIds,
-      totalSubtotal,
-      totalDiscount,
-      finalPayable: Number(Math.max(0, totalSubtotal - totalDiscount).toFixed(2)),
-      pointsGrantedNow,
-      pointsPendingOnCollection,
-    });
-
-    transaction.set(requestRef, {
-      uid,
-      createdAt: FieldValue.serverTimestamp(),
-      summary,
-    });
-
-    transaction.set(rateRef, {
-      lastCreateAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
-
-    logger.info("createClickerOrders.success", {
-      uidHint: uidHint(uid),
-      clientRequestId: payload.clientRequestId,
-      distinctProducts: productIds.length,
-      orderCount: createdOrderIds.length,
-      paymentMethod: payload.paymentMethod,
-      pointsGrantedNow,
-    });
-
-    return summary;
-  });
-
-  return result;
-}));
-
-exports.cancelClickerOrder = onCall({ region: "us-central1" }, async (request) => observeCallable("cancelClickerOrder", request, async () => {
-  assert(request.auth?.uid, "unauthenticated", "You must be signed in to cancel an order.");
-  assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
-
-  const uid = request.auth.uid;
-  const orderId = normalizeId(request.data.orderId, "orderId");
-  const penalty = 20;
-
-  return db.runTransaction(async (transaction) => {
-    const orderRef = db.collection("orders").doc(orderId);
-    const clickerRef = db.collection("clickers").doc(uid);
-
-    const [orderSnap, clickerSnap] = await Promise.all([
-      transaction.get(orderRef),
-      transaction.get(clickerRef),
-    ]);
-
-    assert(orderSnap.exists, "not-found", "Order not found.");
-    assert(clickerSnap.exists, "permission-denied", "Clicker profile not found.");
-
-    const order = orderSnap.data() || {};
-    const clicker = clickerSnap.data() || {};
-
-    assert(order.clickerUid === uid, "permission-denied", "This order does not belong to you.");
-    assert(order.status !== "Collected" && order.status !== "Cancelled", "failed-precondition", "This order can no longer be cancelled.");
-
-    const revokeGrantedPoints = order.pointsGranted ? Number(order.pointsEarned || 0) : 0;
-    const totalDeducted = penalty + revokeGrantedPoints;
-    const nextPoints = Number(clicker.points || 0) - totalDeducted;
-    const statusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
-    statusHistory.push({ status: "Cancelled", at: FieldValue.serverTimestamp() });
-
-    transaction.update(orderRef, {
-      status: "Cancelled",
-      statusHistory,
-      cancelledAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    transaction.update(clickerRef, {
-      points: nextPoints,
-      level: getLevelFromPoints(nextPoints),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    logger.info("cancelClickerOrder.success", {
-      uidHint: uidHint(uid),
-      orderId: orderId.slice(0, 8),
-      totalDeducted,
-    });
-
-    return {
-      penalty,
-      totalDeducted,
-    };
-  });
-}));
-
-exports.collectOrderByCashier = onCall({ region: "us-central1" }, async (request) => observeCallable("collectOrderByCashier", request, async () => {
-  assert(request.auth?.uid, "unauthenticated", "You must be signed in to collect an order.");
-  assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
-
-  const uid = request.auth.uid;
-  const orderId = normalizeId(request.data.orderId, "orderId");
-
-  return db.runTransaction(async (transaction) => {
-    const indexRef = db.collection("userAuthIndex").doc(uid);
-    const cashierRef = db.collection("cashiers").doc(uid);
-    const orderRef = db.collection("orders").doc(orderId);
-
-    const [indexSnap, cashierSnap, orderSnap] = await Promise.all([
-      transaction.get(indexRef),
-      transaction.get(cashierRef),
-      transaction.get(orderRef),
-    ]);
-
-    assert(indexSnap.exists && indexSnap.data()?.role === "cashier", "permission-denied", "Cashier role is required.");
-    assert(cashierSnap.exists, "permission-denied", "Cashier profile not found.");
-    assert(orderSnap.exists, "not-found", "Order not found.");
-
-    const cashier = cashierSnap.data() || {};
-    const order = orderSnap.data() || {};
-
-    assert(cashier.restaurantId && order.restaurantId === cashier.restaurantId, "permission-denied", "This order does not belong to your restaurant.");
-    assert(order.status !== "Collected", "failed-precondition", "Order already collected.");
-    assert(order.status !== "Cancelled", "failed-precondition", "Cancelled orders cannot be collected.");
-
-    const statusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
-    statusHistory.push({ status: "Collected", at: FieldValue.serverTimestamp() });
-
-    const isCod = order.paymentMethod === APP_CONFIG.paymentMethods.cod;
-    const shouldGrantPointsNow = order.pointsGranted !== true;
-    let pointsAdded = 0;
-    let clickerRef = null;
-    let clickerSnap = null;
-
-    if (shouldGrantPointsNow) {
-      assert(order.clickerUid, "failed-precondition", "Clicker profile not linked to this order.");
-      clickerRef = db.collection("clickers").doc(order.clickerUid);
-      clickerSnap = await transaction.get(clickerRef);
-      assert(clickerSnap.exists, "failed-precondition", "Clicker profile not found.");
-    }
-
-    transaction.update(orderRef, {
-      status: "Collected",
-      statusHistory,
-      paymentStatus: isCod ? "PaidOnPickup" : (order.paymentStatus || "Confirmed"),
-      pointsGranted: true,
-      collectedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
-    if (shouldGrantPointsNow && clickerRef && clickerSnap) {
-      const clicker = clickerSnap.data() || {};
-      pointsAdded = Number(order.pointsEarned || 0);
-      const nextPoints = Number(clicker.points || 0) + pointsAdded;
-
-      transaction.update(clickerRef, {
-        points: nextPoints,
-        level: getLevelFromPoints(nextPoints),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-    }
-
-    logger.info("collectOrderByCashier.success", {
-      uidHint: uidHint(uid),
-      orderId: orderId.slice(0, 8),
-      restaurantId: cashier.restaurantId,
-      pointsAdded,
-    });
-
-    return {
-      pointsAdded,
-      paymentStatus: isCod ? "PaidOnPickup" : (order.paymentStatus || "Confirmed"),
-    };
-  });
-}));
-
-exports.adminCreateUser = onCall({ region: "us-central1" }, async (request) => observeCallable("adminCreateUser", request, async () => {
-  const adminUid = request.auth?.uid;
-  const admin = await assertSuperAdmin(adminUid);
-  assertRecentAuth(request, "creating users");
-  await enforceAdminRateLimit(admin.uid, "createUser");
-  const payload = normalizeAdminUserPayload(request.data, { requirePassword: true });
-  if (payload.role === "clicker") {
-    await assertClickerIndexAvailable(payload);
-  }
-
-  logger.info("adminCreateUser.request", {
-    adminUidHint: uidHint(admin.uid),
-    role: payload.role,
-    authEmail: redactEmail(payload.authEmail),
-  });
-
-  let userRecord = null;
-  try {
-    userRecord = await getAuth().createUser({
-      email: payload.authEmail,
-      password: payload.password,
-      displayName: payload.displayName,
-      disabled: false,
-    });
-
-    const uid = userRecord.uid;
-    const batch = db.batch();
-    const userRef = db.collection("users").doc(uid);
-    const indexRef = db.collection("userAuthIndex").doc(uid);
-    const now = FieldValue.serverTimestamp();
-
-    batch.set(userRef, {
-      authUid: uid,
-      role: payload.role,
-      email: payload.email || "",
-      authEmail: payload.authEmail,
-      displayName: payload.displayName,
-      phone: payload.phone || "",
-      restaurantId: payload.restaurantId || "",
-      restaurantName: payload.restaurantName || "",
-      disabled: false,
-      createdBy: admin.uid,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    batch.set(indexRef, {
-      role: payload.role,
-      authEmail: payload.authEmail,
-      createdBy: admin.uid,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    const profileCollection = ROLE_PROFILE_COLLECTIONS[payload.role];
-    if (profileCollection) {
-      batch.set(
-        db.collection(profileCollection).doc(uid),
-        buildRoleProfile(payload.role, uid, payload)
+      assert(
+        indexSnap.exists && indexSnap.data()?.role === "cashier",
+        "permission-denied",
+        "Cashier role is required."
       );
+      assert(cashierSnap.exists, "permission-denied", "Cashier profile not found.");
+      assert(orderSnap.exists, "not-found", "Order not found.");
+
+      const cashier = cashierSnap.data() || {};
+      const order = orderSnap.data() || {};
+
+      assert(
+        cashier.restaurantId && order.restaurantId === cashier.restaurantId,
+        "permission-denied",
+        "This order does not belong to your restaurant."
+      );
+      assert(order.status !== "Collected", "failed-precondition", "Order already collected.");
+      assert(
+        order.status !== "Cancelled",
+        "failed-precondition",
+        "Cancelled orders cannot be collected."
+      );
+
+      const statusHistory = Array.isArray(order.statusHistory) ? [...order.statusHistory] : [];
+      statusHistory.push({ status: "Collected", at: FieldValue.serverTimestamp() });
+
+      const isCod = order.paymentMethod === APP_CONFIG.paymentMethods.cod;
+      const shouldGrantPointsNow = order.pointsGranted !== true;
+      let pointsAdded = 0;
+      let clickerRef = null;
+      let clickerSnap = null;
+
+      if (shouldGrantPointsNow) {
+        assert(
+          order.clickerUid,
+          "failed-precondition",
+          "Clicker profile not linked to this order."
+        );
+        clickerRef = db.collection("clickers").doc(order.clickerUid);
+        clickerSnap = await transaction.get(clickerRef);
+        assert(clickerSnap.exists, "failed-precondition", "Clicker profile not found.");
+      }
+
+      transaction.update(orderRef, {
+        status: "Collected",
+        statusHistory,
+        paymentStatus: isCod ? "PaidOnPickup" : order.paymentStatus || "Confirmed",
+        pointsGranted: true,
+        collectedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      if (shouldGrantPointsNow && clickerRef && clickerSnap) {
+        const clicker = clickerSnap.data() || {};
+        pointsAdded = Number(order.pointsEarned || 0);
+        const nextPoints = Number(clicker.points || 0) + pointsAdded;
+
+        transaction.update(clickerRef, {
+          points: nextPoints,
+          level: getLevelFromPoints(nextPoints),
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+      }
+
+      logger.info("collectOrderByCashier.success", {
+        uidHint: uidHint(uid),
+        orderId: orderId.slice(0, 8),
+        restaurantId: cashier.restaurantId,
+        pointsAdded,
+      });
+
+      return {
+        pointsAdded,
+        paymentStatus: isCod ? "PaidOnPickup" : order.paymentStatus || "Confirmed",
+      };
+    });
+  })
+);
+
+exports.adminCreateUser = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("adminCreateUser", request, async () => {
+    const adminUid = request.auth?.uid;
+    const admin = await assertSuperAdmin(adminUid);
+    assertRecentAuth(request, "creating users");
+    await enforceAdminRateLimit(admin.uid, "createUser");
+    const payload = normalizeAdminUserPayload(request.data, { requirePassword: true });
+    if (payload.role === "clicker") {
+      await assertClickerIndexAvailable(payload);
     }
-    writeClickerIndexEntries(batch, payload, uid);
+
+    logger.info("adminCreateUser.request", {
+      adminUidHint: uidHint(admin.uid),
+      role: payload.role,
+      authEmail: redactEmail(payload.authEmail),
+    });
+
+    let userRecord = null;
+    try {
+      userRecord = await getAuth().createUser({
+        email: payload.authEmail,
+        password: payload.password,
+        displayName: payload.displayName,
+        disabled: false,
+      });
+
+      const uid = userRecord.uid;
+      const batch = db.batch();
+      const userRef = db.collection("users").doc(uid);
+      const indexRef = db.collection("userAuthIndex").doc(uid);
+      const now = FieldValue.serverTimestamp();
+
+      batch.set(userRef, {
+        authUid: uid,
+        role: payload.role,
+        email: payload.email || "",
+        authEmail: payload.authEmail,
+        displayName: payload.displayName,
+        phone: payload.phone || "",
+        restaurantId: payload.restaurantId || "",
+        restaurantName: payload.restaurantName || "",
+        disabled: false,
+        createdBy: admin.uid,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      batch.set(indexRef, {
+        role: payload.role,
+        authEmail: payload.authEmail,
+        createdBy: admin.uid,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      const profileCollection = ROLE_PROFILE_COLLECTIONS[payload.role];
+      if (profileCollection) {
+        batch.set(
+          db.collection(profileCollection).doc(uid),
+          buildRoleProfile(payload.role, uid, payload)
+        );
+      }
+      writeClickerIndexEntries(batch, payload, uid);
+
+      writeAuditInBatch(batch, {
+        adminUid: admin.uid,
+        action: "adminCreateUser",
+        targetUid: uid,
+        metadata: {
+          role: payload.role,
+          restaurantId: payload.restaurantId || "",
+        },
+      });
+
+      await batch.commit();
+
+      logger.info("adminCreateUser.success", {
+        adminUidHint: uidHint(admin.uid),
+        targetUidHint: uidHint(uid),
+        role: payload.role,
+      });
+
+      return publicUserRecord(uid, {
+        role: payload.role,
+        email: payload.email,
+        authEmail: payload.authEmail,
+        displayName: payload.displayName,
+        phone: payload.phone,
+        restaurantId: payload.restaurantId,
+        restaurantName: payload.restaurantName,
+        disabled: false,
+      });
+    } catch (error) {
+      if (userRecord?.uid) {
+        await getAuth()
+          .deleteUser(userRecord.uid)
+          .catch(() => {});
+      }
+
+      logger.error("adminCreateUser.failure", {
+        adminUidHint: uidHint(admin.uid),
+        role: payload.role,
+        code: error?.code || "",
+        message: error?.message || "Unknown error",
+      });
+
+      if (error instanceof HttpsError) throw error;
+      throw new HttpsError("internal", "Could not create user safely.");
+    }
+  })
+);
+
+exports.adminUpdateUserRole = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("adminUpdateUserRole", request, async () => {
+    const adminUid = request.auth?.uid;
+    const admin = await assertSuperAdmin(adminUid);
+    assertRecentAuth(request, "changing user roles");
+    await enforceAdminRateLimit(admin.uid, "updateRole");
+    assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
+
+    const targetUid = normalizeId(request.data.targetUid, "targetUid");
+    assert(
+      targetUid !== admin.uid,
+      "failed-precondition",
+      "Super admins cannot change their own role."
+    );
+
+    const payload = normalizeAdminUserPayload(request.data, { requirePassword: false });
+    const userRef = db.collection("users").doc(targetUid);
+    const currentUser = await readManagedUser(targetUid);
+    assert(currentUser, "not-found", "User profile not found.");
+    assert(
+      currentUser.role !== "superAdmin",
+      "failed-precondition",
+      "Super admin accounts must be managed out of band."
+    );
+    if (payload.role === "clicker") {
+      await assertClickerIndexAvailable(payload, targetUid);
+    }
+
+    const nextAuthEmail = payload.authEmail || currentUser.authEmail || currentUser.email || "";
+    if (nextAuthEmail && nextAuthEmail !== currentUser.authEmail) {
+      await getAuth()
+        .updateUser(targetUid, {
+          email: nextAuthEmail,
+          displayName: payload.displayName,
+        })
+        .catch((error) => {
+          logger.error("adminUpdateUserRole.authFailure", {
+            adminUidHint: uidHint(admin.uid),
+            targetUidHint: uidHint(targetUid),
+            code: error?.code || "",
+          });
+          throw new HttpsError("failed-precondition", "Could not update Firebase Auth user.");
+        });
+    } else {
+      await getAuth()
+        .updateUser(targetUid, { displayName: payload.displayName })
+        .catch(() => {});
+    }
+
+    const batch = db.batch();
+    const now = FieldValue.serverTimestamp();
+    batch.set(
+      userRef,
+      {
+        authUid: targetUid,
+        role: payload.role,
+        email: payload.email || currentUser.email || "",
+        authEmail: nextAuthEmail,
+        displayName: payload.displayName,
+        phone: payload.phone || "",
+        restaurantId: payload.restaurantId || "",
+        restaurantName: payload.restaurantName || "",
+        disabled: false,
+        updatedBy: admin.uid,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+
+    batch.set(
+      db.collection("userAuthIndex").doc(targetUid),
+      {
+        role: payload.role,
+        authEmail: nextAuthEmail,
+        updatedBy: admin.uid,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
+
+    for (const [role, collectionName] of Object.entries(ROLE_PROFILE_COLLECTIONS)) {
+      const ref = db.collection(collectionName).doc(targetUid);
+      if (role === payload.role) {
+        const previousSnap = await ref.get();
+        batch.set(ref, buildRoleProfile(role, targetUid, payload, previousSnap.data() || {}), {
+          merge: true,
+        });
+      } else {
+        batch.delete(ref);
+      }
+    }
+    writeClickerIndexEntries(batch, payload, targetUid);
 
     writeAuditInBatch(batch, {
       adminUid: admin.uid,
-      action: "adminCreateUser",
-      targetUid: uid,
+      action: "adminUpdateUserRole",
+      targetUid,
       metadata: {
-        role: payload.role,
+        fromRole: currentUser.role || "",
+        toRole: payload.role,
         restaurantId: payload.restaurantId || "",
       },
     });
 
     await batch.commit();
 
-    logger.info("adminCreateUser.success", {
+    logger.info("adminUpdateUserRole.success", {
       adminUidHint: uidHint(admin.uid),
-      targetUidHint: uidHint(uid),
-      role: payload.role,
-    });
-
-    return publicUserRecord(uid, {
-      role: payload.role,
-      email: payload.email,
-      authEmail: payload.authEmail,
-      displayName: payload.displayName,
-      phone: payload.phone,
-      restaurantId: payload.restaurantId,
-      restaurantName: payload.restaurantName,
-      disabled: false,
-    });
-  } catch (error) {
-    if (userRecord?.uid) {
-      await getAuth().deleteUser(userRecord.uid).catch(() => {});
-    }
-
-    logger.error("adminCreateUser.failure", {
-      adminUidHint: uidHint(admin.uid),
-      role: payload.role,
-      code: error?.code || "",
-      message: error?.message || "Unknown error",
-    });
-
-    if (error instanceof HttpsError) throw error;
-    throw new HttpsError("internal", "Could not create user safely.");
-  }
-}));
-
-exports.adminUpdateUserRole = onCall({ region: "us-central1" }, async (request) => observeCallable("adminUpdateUserRole", request, async () => {
-  const adminUid = request.auth?.uid;
-  const admin = await assertSuperAdmin(adminUid);
-  assertRecentAuth(request, "changing user roles");
-  await enforceAdminRateLimit(admin.uid, "updateRole");
-  assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
-
-  const targetUid = normalizeId(request.data.targetUid, "targetUid");
-  assert(targetUid !== admin.uid, "failed-precondition", "Super admins cannot change their own role.");
-
-  const payload = normalizeAdminUserPayload(request.data, { requirePassword: false });
-  const userRef = db.collection("users").doc(targetUid);
-  const currentUser = await readManagedUser(targetUid);
-  assert(currentUser, "not-found", "User profile not found.");
-  assert(currentUser.role !== "superAdmin", "failed-precondition", "Super admin accounts must be managed out of band.");
-  if (payload.role === "clicker") {
-    await assertClickerIndexAvailable(payload, targetUid);
-  }
-
-  const nextAuthEmail = payload.authEmail || currentUser.authEmail || currentUser.email || "";
-  if (nextAuthEmail && nextAuthEmail !== currentUser.authEmail) {
-    await getAuth().updateUser(targetUid, {
-      email: nextAuthEmail,
-      displayName: payload.displayName,
-    }).catch((error) => {
-      logger.error("adminUpdateUserRole.authFailure", {
-        adminUidHint: uidHint(admin.uid),
-        targetUidHint: uidHint(targetUid),
-        code: error?.code || "",
-      });
-      throw new HttpsError("failed-precondition", "Could not update Firebase Auth user.");
-    });
-  } else {
-    await getAuth().updateUser(targetUid, { displayName: payload.displayName }).catch(() => {});
-  }
-
-  const batch = db.batch();
-  const now = FieldValue.serverTimestamp();
-  batch.set(userRef, {
-    authUid: targetUid,
-    role: payload.role,
-    email: payload.email || currentUser.email || "",
-    authEmail: nextAuthEmail,
-    displayName: payload.displayName,
-    phone: payload.phone || "",
-    restaurantId: payload.restaurantId || "",
-    restaurantName: payload.restaurantName || "",
-    disabled: false,
-    updatedBy: admin.uid,
-    updatedAt: now,
-  }, { merge: true });
-
-  batch.set(db.collection("userAuthIndex").doc(targetUid), {
-    role: payload.role,
-    authEmail: nextAuthEmail,
-    updatedBy: admin.uid,
-    updatedAt: now,
-  }, { merge: true });
-
-  for (const [role, collectionName] of Object.entries(ROLE_PROFILE_COLLECTIONS)) {
-    const ref = db.collection(collectionName).doc(targetUid);
-    if (role === payload.role) {
-      const previousSnap = await ref.get();
-      batch.set(ref, buildRoleProfile(role, targetUid, payload, previousSnap.data() || {}), { merge: true });
-    } else {
-      batch.delete(ref);
-    }
-  }
-  writeClickerIndexEntries(batch, payload, targetUid);
-
-  writeAuditInBatch(batch, {
-    adminUid: admin.uid,
-    action: "adminUpdateUserRole",
-    targetUid,
-    metadata: {
+      targetUidHint: uidHint(targetUid),
       fromRole: currentUser.role || "",
       toRole: payload.role,
-      restaurantId: payload.restaurantId || "",
-    },
-  });
+    });
 
-  await batch.commit();
+    return publicUserRecord(targetUid, {
+      ...currentUser,
+      ...payload,
+      authEmail: nextAuthEmail,
+      role: payload.role,
+      disabled: false,
+    });
+  })
+);
 
-  logger.info("adminUpdateUserRole.success", {
-    adminUidHint: uidHint(admin.uid),
-    targetUidHint: uidHint(targetUid),
-    fromRole: currentUser.role || "",
-    toRole: payload.role,
-  });
+exports.adminDeleteUser = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("adminDeleteUser", request, async () => {
+    const adminUid = request.auth?.uid;
+    const admin = await assertSuperAdmin(adminUid);
+    assertRecentAuth(request, "deleting users");
+    await enforceAdminRateLimit(admin.uid, "deleteUser");
+    assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
 
-  return publicUserRecord(targetUid, {
-    ...currentUser,
-    ...payload,
-    authEmail: nextAuthEmail,
-    role: payload.role,
-    disabled: false,
-  });
-}));
+    const targetUid = normalizeId(request.data.targetUid, "targetUid");
+    assert(
+      targetUid !== admin.uid,
+      "failed-precondition",
+      "Super admins cannot delete their own account."
+    );
 
-exports.adminDeleteUser = onCall({ region: "us-central1" }, async (request) => observeCallable("adminDeleteUser", request, async () => {
-  const adminUid = request.auth?.uid;
-  const admin = await assertSuperAdmin(adminUid);
-  assertRecentAuth(request, "deleting users");
-  await enforceAdminRateLimit(admin.uid, "deleteUser");
-  assert(isPlainObject(request.data), "invalid-argument", "Request payload must be an object.");
+    const userRef = db.collection("users").doc(targetUid);
+    const targetUser = await readManagedUser(targetUid);
+    assert(targetUser, "not-found", "User profile not found.");
+    assert(
+      targetUser.role !== "superAdmin",
+      "failed-precondition",
+      "Super admin accounts must be managed out of band."
+    );
 
-  const targetUid = normalizeId(request.data.targetUid, "targetUid");
-  assert(targetUid !== admin.uid, "failed-precondition", "Super admins cannot delete their own account.");
-
-  const userRef = db.collection("users").doc(targetUid);
-  const targetUser = await readManagedUser(targetUid);
-  assert(targetUser, "not-found", "User profile not found.");
-  assert(targetUser.role !== "superAdmin", "failed-precondition", "Super admin accounts must be managed out of band.");
-
-  await getAuth().deleteUser(targetUid).catch((error) => {
-    if (error?.code !== "auth/user-not-found") {
-      logger.error("adminDeleteUser.authFailure", {
-        adminUidHint: uidHint(admin.uid),
-        targetUidHint: uidHint(targetUid),
-        code: error?.code || "",
+    await getAuth()
+      .deleteUser(targetUid)
+      .catch((error) => {
+        if (error?.code !== "auth/user-not-found") {
+          logger.error("adminDeleteUser.authFailure", {
+            adminUidHint: uidHint(admin.uid),
+            targetUidHint: uidHint(targetUid),
+            code: error?.code || "",
+          });
+          throw new HttpsError("failed-precondition", "Could not delete Firebase Auth user.");
+        }
       });
-      throw new HttpsError("failed-precondition", "Could not delete Firebase Auth user.");
-    }
-  });
 
-  const batch = db.batch();
-  batch.delete(userRef);
-  batch.delete(db.collection("userAuthIndex").doc(targetUid));
-  batch.delete(db.collection("clickers").doc(targetUid));
-  batch.delete(db.collection("cashiers").doc(targetUid));
-  batch.delete(db.collection("managers").doc(targetUid));
-  batch.set(db.collection("deletedUsers").doc(targetUid), {
-    authUid: targetUid,
-    deletedBy: admin.uid,
-    previousRole: targetUser.role || "",
-    email: targetUser.email || "",
-    restaurantId: targetUser.restaurantId || "",
-    deletedAt: FieldValue.serverTimestamp(),
-  });
-
-  writeAuditInBatch(batch, {
-    adminUid: admin.uid,
-    action: "adminDeleteUser",
-    targetUid,
-    metadata: {
-      role: targetUser.role || "",
+    const batch = db.batch();
+    batch.delete(userRef);
+    batch.delete(db.collection("userAuthIndex").doc(targetUid));
+    batch.delete(db.collection("clickers").doc(targetUid));
+    batch.delete(db.collection("cashiers").doc(targetUid));
+    batch.delete(db.collection("managers").doc(targetUid));
+    batch.set(db.collection("deletedUsers").doc(targetUid), {
+      authUid: targetUid,
+      deletedBy: admin.uid,
+      previousRole: targetUser.role || "",
+      email: targetUser.email || "",
       restaurantId: targetUser.restaurantId || "",
-    },
-  });
+      deletedAt: FieldValue.serverTimestamp(),
+    });
 
-  await batch.commit();
+    writeAuditInBatch(batch, {
+      adminUid: admin.uid,
+      action: "adminDeleteUser",
+      targetUid,
+      metadata: {
+        role: targetUser.role || "",
+        restaurantId: targetUser.restaurantId || "",
+      },
+    });
 
-  logger.info("adminDeleteUser.success", {
-    adminUidHint: uidHint(admin.uid),
-    targetUidHint: uidHint(targetUid),
-    role: targetUser.role || "",
-  });
+    await batch.commit();
 
-  return { deleted: true, targetUid };
-}));
+    logger.info("adminDeleteUser.success", {
+      adminUidHint: uidHint(admin.uid),
+      targetUidHint: uidHint(targetUid),
+      role: targetUser.role || "",
+    });
 
-exports.adminListUsers = onCall({ region: "us-central1" }, async (request) => observeCallable("adminListUsers", request, async () => {
-  const adminUid = request.auth?.uid;
-  const admin = await assertSuperAdmin(adminUid);
-  await enforceAdminRateLimit(admin.uid, "listUsers");
-  const limitCount = normalizeAdminLimit(request.data?.limit, ADMIN_LIST_LIMIT);
+    return { deleted: true, targetUid };
+  })
+);
 
-  const managedUsers = new Map();
-  const usersSnapshot = await db
-    .collection("users")
-    .orderBy("createdAt", "desc")
-    .limit(limitCount)
-    .get();
+exports.adminListUsers = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("adminListUsers", request, async () => {
+    const adminUid = request.auth?.uid;
+    const admin = await assertSuperAdmin(adminUid);
+    await enforceAdminRateLimit(admin.uid, "listUsers");
+    const limitCount = normalizeAdminLimit(request.data?.limit, ADMIN_LIST_LIMIT);
 
-  usersSnapshot.docs.forEach((doc) => {
-    managedUsers.set(doc.id, publicUserRecord(doc.id, doc.data()));
-  });
+    const managedUsers = new Map();
+    const usersSnapshot = await db
+      .collection("users")
+      .orderBy("createdAt", "desc")
+      .limit(limitCount)
+      .get();
 
-  const [clickersSnap, cashiersSnap, managersSnap] = await Promise.all([
-    db.collection("clickers").limit(limitCount).get(),
-    db.collection("cashiers").limit(limitCount).get(),
-    db.collection("managers").limit(limitCount).get(),
-  ]);
+    usersSnapshot.docs.forEach((doc) => {
+      managedUsers.set(doc.id, publicUserRecord(doc.id, doc.data()));
+    });
 
-  clickersSnap.docs.forEach((doc) => {
-    if (managedUsers.has(doc.id)) return;
-    const data = doc.data() || {};
-    managedUsers.set(doc.id, publicUserRecord(doc.id, {
-      role: "clicker",
-      displayName: data.fullName || data.displayName || "",
-      email: data.email || "",
-      phone: data.phone || "",
-      createdAt: data.createdAt || null,
-      updatedAt: data.updatedAt || null,
-    }));
-  });
+    const [clickersSnap, cashiersSnap, managersSnap] = await Promise.all([
+      db.collection("clickers").limit(limitCount).get(),
+      db.collection("cashiers").limit(limitCount).get(),
+      db.collection("managers").limit(limitCount).get(),
+    ]);
 
-  cashiersSnap.docs.forEach((doc) => {
-    if (managedUsers.has(doc.id)) return;
-    const data = doc.data() || {};
-    managedUsers.set(doc.id, publicUserRecord(doc.id, {
-      role: "cashier",
-      displayName: data.displayName || "",
-      phone: data.phone || "",
-      restaurantId: data.restaurantId || "",
-      restaurantName: data.restaurantName || "",
-      createdAt: data.createdAt || null,
-      updatedAt: data.updatedAt || null,
-    }));
-  });
+    clickersSnap.docs.forEach((doc) => {
+      if (managedUsers.has(doc.id)) return;
+      const data = doc.data() || {};
+      managedUsers.set(
+        doc.id,
+        publicUserRecord(doc.id, {
+          role: "clicker",
+          displayName: data.fullName || data.displayName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          createdAt: data.createdAt || null,
+          updatedAt: data.updatedAt || null,
+        })
+      );
+    });
 
-  managersSnap.docs.forEach((doc) => {
-    if (managedUsers.has(doc.id)) return;
-    const data = doc.data() || {};
-    managedUsers.set(doc.id, publicUserRecord(doc.id, {
-      role: "manager",
-      displayName: data.displayName || "",
-      phone: data.phone || "",
-      restaurantId: data.restaurantId || "",
-      restaurantName: data.restaurantName || "",
-      createdAt: data.createdAt || null,
-      updatedAt: data.updatedAt || null,
-    }));
-  });
+    cashiersSnap.docs.forEach((doc) => {
+      if (managedUsers.has(doc.id)) return;
+      const data = doc.data() || {};
+      managedUsers.set(
+        doc.id,
+        publicUserRecord(doc.id, {
+          role: "cashier",
+          displayName: data.displayName || "",
+          phone: data.phone || "",
+          restaurantId: data.restaurantId || "",
+          restaurantName: data.restaurantName || "",
+          createdAt: data.createdAt || null,
+          updatedAt: data.updatedAt || null,
+        })
+      );
+    });
 
-  const users = [...managedUsers.values()]
-    .sort((a, b) => createdAtMillis(b) - createdAtMillis(a))
-    .slice(0, limitCount);
+    managersSnap.docs.forEach((doc) => {
+      if (managedUsers.has(doc.id)) return;
+      const data = doc.data() || {};
+      managedUsers.set(
+        doc.id,
+        publicUserRecord(doc.id, {
+          role: "manager",
+          displayName: data.displayName || "",
+          phone: data.phone || "",
+          restaurantId: data.restaurantId || "",
+          restaurantName: data.restaurantName || "",
+          createdAt: data.createdAt || null,
+          updatedAt: data.updatedAt || null,
+        })
+      );
+    });
 
-  return {
-    users,
-  };
-}));
+    const users = [...managedUsers.values()]
+      .sort((a, b) => createdAtMillis(b) - createdAtMillis(a))
+      .slice(0, limitCount);
 
-exports.adminGetAuditLogs = onCall({ region: "us-central1" }, async (request) => observeCallable("adminGetAuditLogs", request, async () => {
-  const adminUid = request.auth?.uid;
-  const admin = await assertSuperAdmin(adminUid);
-  await enforceAdminRateLimit(admin.uid, "getAuditLogs");
-  const limitCount = normalizeAdminLimit(request.data?.limit, ADMIN_AUDIT_LIMIT);
+    return {
+      users,
+    };
+  })
+);
 
-  const snapshot = await db
-    .collection("auditLogs")
-    .orderBy("createdAt", "desc")
-    .limit(limitCount)
-    .get();
+exports.adminGetAuditLogs = onCall({ region: "us-central1" }, async (request) =>
+  observeCallable("adminGetAuditLogs", request, async () => {
+    const adminUid = request.auth?.uid;
+    const admin = await assertSuperAdmin(adminUid);
+    await enforceAdminRateLimit(admin.uid, "getAuditLogs");
+    const limitCount = normalizeAdminLimit(request.data?.limit, ADMIN_AUDIT_LIMIT);
 
-  return {
-    logs: snapshot.docs.map((doc) => publicAuditRecord(doc.id, doc.data())),
-  };
-}));
+    const snapshot = await db
+      .collection("auditLogs")
+      .orderBy("createdAt", "desc")
+      .limit(limitCount)
+      .get();
+
+    return {
+      logs: snapshot.docs.map((doc) => publicAuditRecord(doc.id, doc.data())),
+    };
+  })
+);

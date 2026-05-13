@@ -1,5 +1,9 @@
 import { guardClickerPage, mountHeader, renderClickerMiniProfile } from "./clicker-common.js";
-import { cancelClickerOrder, canClickerCancelOrder, getClickerOrders } from "../services/order-service.js";
+import {
+  cancelClickerOrder,
+  canClickerCancelOrder,
+  getClickerOrders,
+} from "../services/order-service.js";
 import { APP_CONFIG } from "../../../config/app-config.js";
 import { applyPointsDeltaToProfileCache } from "../services/auth-service.js";
 import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "../../../core/utils/popup.js";
@@ -107,12 +111,11 @@ async function renderOrders(orders) {
         </div>
         <div class="kc-list kc-section-spaced-xl">
           ${order.items
-            .map(
-              (item) => {
-                const safeName = escapeHtml(item.name || "");
-                const safeOfferTitle = escapeHtml(item.offerTitle || "Special Offer");
-                const safeOfferLabel = escapeHtml(item.offerLabel || "");
-                return `
+            .map((item) => {
+              const safeName = escapeHtml(item.name || "");
+              const safeOfferTitle = escapeHtml(item.offerTitle || "Special Offer");
+              const safeOfferLabel = escapeHtml(item.offerLabel || "");
+              return `
                 <div class="kc-item">
                   <div><strong>${safeName}</strong> x${item.qty} - ${item.price * item.qty} EGP</div>
                   ${
@@ -132,18 +135,18 @@ async function renderOrders(orders) {
                       : ""
                   }
                 </div>
-              `
-              ;})
+              `;
+            })
             .join("")}
         </div>
         ${
-        canClickerCancelOrder(order)
+          canClickerCancelOrder(order)
             ? `<div class="kc-order-footer"><button type="button" class="kc-btn-danger kc-order-cancel-btn" data-cancel-order="${order.id}">Cancel Order</button></div>`
             : ""
         }
       </article>
-    `
-      ;})
+    `;
+    })
     .join("");
 }
 
@@ -164,22 +167,26 @@ async function loadAndRender(state) {
       );
       if (!ok) return;
 
-      await withButtonLoading(btn, async () => {
-        try {
-          const result = await cancelClickerOrder({
-            orderId,
-            uid: state.uid,
-          });
-          applyPointsDeltaToProfileCache(state.uid, -result.totalDeducted);
-          await showSuccessPopup(
-            `Order cancelled. ${result.totalDeducted} points deducted (${result.penalty} cancellation penalty).`,
-            "Order Cancelled"
-          );
-          await loadAndRender(state);
-        } catch (error) {
-          await showErrorPopup(error.message || "Could not cancel order.", "Cancel Failed");
-        }
-      }, "Cancelling...");
+      await withButtonLoading(
+        btn,
+        async () => {
+          try {
+            const result = await cancelClickerOrder({
+              orderId,
+              uid: state.uid,
+            });
+            applyPointsDeltaToProfileCache(state.uid, -result.totalDeducted);
+            await showSuccessPopup(
+              `Order cancelled. ${result.totalDeducted} points deducted (${result.penalty} cancellation penalty).`,
+              "Order Cancelled"
+            );
+            await loadAndRender(state);
+          } catch (error) {
+            await showErrorPopup(error.message || "Could not cancel order.", "Cancel Failed");
+          }
+        },
+        "Cancelling..."
+      );
     });
   });
 }

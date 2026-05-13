@@ -1,5 +1,9 @@
 import { getCashierCollectedOrdersPage } from "../services/cashier-service.js";
-import { guardCashierPage, mountCashierHeader, renderCashierMiniProfile } from "./cashier-common.js";
+import {
+  guardCashierPage,
+  mountCashierHeader,
+  renderCashierMiniProfile,
+} from "./cashier-common.js";
 import { showErrorPopup } from "../../../core/utils/popup.js";
 import { escapeHtml } from "../../../core/utils/dom.js";
 import { logError, logInfo } from "../../../core/utils/logger.js";
@@ -44,13 +48,12 @@ function renderCompleted(orders) {
   }
 
   root.innerHTML = orders
-    .map(
-      (order) => {
-        const safeClickerName = escapeHtml(order.clickerName || "N/A");
-        const safeClickerPhone = escapeHtml(order.clickerPhone || "N/A");
-        const safePaymentStatus = escapeHtml(order.paymentStatus || "N/A");
-        const safePaymentMethod = escapeHtml(order.paymentMethod || "N/A");
-        return `
+    .map((order) => {
+      const safeClickerName = escapeHtml(order.clickerName || "N/A");
+      const safeClickerPhone = escapeHtml(order.clickerPhone || "N/A");
+      const safePaymentStatus = escapeHtml(order.paymentStatus || "N/A");
+      const safePaymentMethod = escapeHtml(order.paymentMethod || "N/A");
+      return `
       <article class="kc-card">
         <div class="kc-inline kc-inline-between">
           <div class="kc-order-id-wrap">
@@ -77,12 +80,15 @@ function renderCompleted(orders) {
 
         <div class="kc-list kc-section-spaced-lg">
           ${(order.items || [])
-            .map((item) => `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${item.price * item.qty} EGP</div>`)
+            .map(
+              (item) =>
+                `<div class="kc-item">${escapeHtml(item.name || "")} x${item.qty} - ${item.price * item.qty} EGP</div>`
+            )
             .join("")}
         </div>
       </article>
-    `
-      ;})
+    `;
+    })
     .join("");
 }
 

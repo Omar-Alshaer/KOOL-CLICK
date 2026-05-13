@@ -85,25 +85,32 @@ async function init() {
     }
 
     if (!isValidUsername(normalized)) {
-      await showErrorPopup("Username must be letters, numbers, or underscore only.", "Invalid Username");
+      await showErrorPopup(
+        "Username must be letters, numbers, or underscore only.",
+        "Invalid Username"
+      );
       return;
     }
 
-    await withButtonLoading(submitBtn, async () => {
-      try {
-        const updated = await updateClickerUsername({
-          uid: currentState.uid,
-          newUsername: normalized,
-        });
-        currentState.profile.username = updated;
-        if (usernameEl) usernameEl.textContent = formatUsername(updated);
-        renderClickerMiniProfile("clickerMini", currentState.profile);
-        await showSuccessPopup("Username updated.", "Saved");
-        closeUsernameModal();
-      } catch (error) {
-        await showErrorPopup(error.message || "Could not update username.", "Update Failed");
-      }
-    }, "Saving...");
+    await withButtonLoading(
+      submitBtn,
+      async () => {
+        try {
+          const updated = await updateClickerUsername({
+            uid: currentState.uid,
+            newUsername: normalized,
+          });
+          currentState.profile.username = updated;
+          if (usernameEl) usernameEl.textContent = formatUsername(updated);
+          renderClickerMiniProfile("clickerMini", currentState.profile);
+          await showSuccessPopup("Username updated.", "Saved");
+          closeUsernameModal();
+        } catch (error) {
+          await showErrorPopup(error.message || "Could not update username.", "Update Failed");
+        }
+      },
+      "Saving..."
+    );
   });
 }
 

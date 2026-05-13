@@ -5,18 +5,10 @@ import {
   adminListUsers,
   adminUpdateUserRole,
 } from "../services/admin-service.js";
-import {
-  guardSuperAdminPage,
-  mountAdminHeader,
-  renderAdminMiniProfile,
-} from "./admin-common.js";
+import { guardSuperAdminPage, mountAdminHeader, renderAdminMiniProfile } from "./admin-common.js";
 import { escapeHtml } from "../../../core/utils/dom.js";
 import { withButtonLoading } from "../../../core/utils/loading.js";
-import {
-  showConfirmPopup,
-  showErrorPopup,
-  showSuccessPopup,
-} from "../../../core/utils/popup.js";
+import { showConfirmPopup, showErrorPopup, showSuccessPopup } from "../../../core/utils/popup.js";
 import { logError, logInfo } from "../../../core/utils/logger.js";
 
 const state = {
@@ -84,7 +76,9 @@ function renderUsers() {
           </tr>
         </thead>
         <tbody>
-          ${state.users.map((user) => `
+          ${state.users
+            .map(
+              (user) => `
             <tr>
               <td>
                 <strong>${escapeHtml(user.displayName || user.uid)}</strong>
@@ -99,7 +93,9 @@ function renderUsers() {
                 <button class="kc-btn kc-btn-danger" type="button" data-delete-user="${escapeHtml(user.uid)}">Delete</button>
               </td>
             </tr>
-          `).join("")}
+          `
+            )
+            .join("")}
         </tbody>
       </table>
     </div>
@@ -115,7 +111,9 @@ function renderAuditLogs() {
     return;
   }
 
-  host.innerHTML = state.auditLogs.map((log) => `
+  host.innerHTML = state.auditLogs
+    .map(
+      (log) => `
     <div class="kc-card kc-section-spaced-sm">
       <div class="kc-inline" style="justify-content: space-between; flex-wrap: wrap;">
         <strong>${escapeHtml(log.action)}</strong>
@@ -124,14 +122,13 @@ function renderAuditLogs() {
       <div class="kc-muted">Admin: ${escapeHtml(log.adminUid)} | Target: ${escapeHtml(log.targetUid || "-")}</div>
       <div class="kc-muted">Status: ${escapeHtml(log.status || "success")}</div>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 async function refreshSystemData() {
-  const [users, auditLogs] = await Promise.all([
-    adminListUsers(100),
-    adminGetAuditLogs(50),
-  ]);
+  const [users, auditLogs] = await Promise.all([adminListUsers(100), adminGetAuditLogs(50)]);
   state.users = users;
   state.auditLogs = auditLogs;
   renderUsers();
@@ -172,42 +169,54 @@ function bindEvents() {
   const createForm = document.getElementById("createUserForm");
   const roleForm = document.getElementById("roleEditForm");
 
-  createForm?.querySelector("[name='role']")?.addEventListener("change", () => applyRoleFieldState(createForm));
-  roleForm?.querySelector("[name='role']")?.addEventListener("change", () => applyRoleFieldState(roleForm));
+  createForm
+    ?.querySelector("[name='role']")
+    ?.addEventListener("change", () => applyRoleFieldState(createForm));
+  roleForm
+    ?.querySelector("[name='role']")
+    ?.addEventListener("change", () => applyRoleFieldState(roleForm));
   applyRoleFieldState(createForm);
   applyRoleFieldState(roleForm);
 
   createForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const submitBtn = createForm.querySelector("button[type='submit']");
-    await withButtonLoading(submitBtn, async () => {
-      try {
-        await adminCreateUser(formPayload(createForm));
-        createForm.reset();
-        applyRoleFieldState(createForm);
-        await refreshSystemData();
-        await showSuccessPopup("User created successfully.", "System Updated");
-      } catch (error) {
-        logError("admin.createUser.failure", error);
-        await showErrorPopup(error.message || "Could not create user.", "Create User Failed");
-      }
-    }, "Creating...");
+    await withButtonLoading(
+      submitBtn,
+      async () => {
+        try {
+          await adminCreateUser(formPayload(createForm));
+          createForm.reset();
+          applyRoleFieldState(createForm);
+          await refreshSystemData();
+          await showSuccessPopup("User created successfully.", "System Updated");
+        } catch (error) {
+          logError("admin.createUser.failure", error);
+          await showErrorPopup(error.message || "Could not create user.", "Create User Failed");
+        }
+      },
+      "Creating..."
+    );
   });
 
   roleForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const submitBtn = roleForm.querySelector("button[type='submit']");
-    await withButtonLoading(submitBtn, async () => {
-      try {
-        await adminUpdateUserRole(formPayload(roleForm));
-        closeRoleModal();
-        await refreshSystemData();
-        await showSuccessPopup("User role updated successfully.", "System Updated");
-      } catch (error) {
-        logError("admin.updateRole.failure", error, { targetUid: state.editingUid });
-        await showErrorPopup(error.message || "Could not update role.", "Role Update Failed");
-      }
-    }, "Saving...");
+    await withButtonLoading(
+      submitBtn,
+      async () => {
+        try {
+          await adminUpdateUserRole(formPayload(roleForm));
+          closeRoleModal();
+          await refreshSystemData();
+          await showSuccessPopup("User role updated successfully.", "System Updated");
+        } catch (error) {
+          logError("admin.updateRole.failure", error, { targetUid: state.editingUid });
+          await showErrorPopup(error.message || "Could not update role.", "Role Update Failed");
+        }
+      },
+      "Saving..."
+    );
   });
 
   document.getElementById("adminUsersList")?.addEventListener("click", async (event) => {

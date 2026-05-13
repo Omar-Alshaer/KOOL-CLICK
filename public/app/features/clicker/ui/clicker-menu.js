@@ -24,12 +24,11 @@ function renderRestaurants(restaurants) {
   }
 
   root.innerHTML = restaurants
-    .map(
-      (r) => {
-        const safeName = escapeHtml(r.name || "");
-        const safeZone = escapeHtml(r.campusZone || "Campus");
-        const safeLogo = sanitizeUrl(r.logoUrl) || "../../assets/brand/logo.svg";
-        return `
+    .map((r) => {
+      const safeName = escapeHtml(r.name || "");
+      const safeZone = escapeHtml(r.campusZone || "Campus");
+      const safeLogo = sanitizeUrl(r.logoUrl) || "../../assets/brand/logo.svg";
+      return `
       <article class="kc-card kc-restaurant-card">
         <img class="kc-restaurant-thumb" src="${safeLogo}" alt="${safeName}" />
         <div class="kc-restaurant-body">
@@ -48,8 +47,8 @@ function renderRestaurants(restaurants) {
           <a class="kc-btn" href="./restaurant.html?id=${encodeURIComponent(r.id)}">Open Restaurant</a>
         </div>
       </article>
-    `
-      ;})
+    `;
+    })
     .join("");
 }
 

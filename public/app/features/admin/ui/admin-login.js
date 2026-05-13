@@ -8,19 +8,23 @@ form?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const submitBtn = form.querySelector("button[type='submit']");
 
-  await withButtonLoading(submitBtn, async () => {
-    try {
-      const formData = new FormData(form);
-      await loginSuperAdmin({
-        email: formData.get("email"),
-        password: formData.get("password"),
-      });
-      window.location.href = "./system.html";
-    } catch (error) {
-      await showErrorPopup(
-        error.message || "Could not sign in as system owner.",
-        "Access Denied"
-      );
-    }
-  }, "Signing in...");
+  await withButtonLoading(
+    submitBtn,
+    async () => {
+      try {
+        const formData = new FormData(form);
+        await loginSuperAdmin({
+          email: formData.get("email"),
+          password: formData.get("password"),
+        });
+        window.location.href = "./system.html";
+      } catch (error) {
+        await showErrorPopup(
+          error.message || "Could not sign in as system owner.",
+          "Access Denied"
+        );
+      }
+    },
+    "Signing in..."
+  );
 });

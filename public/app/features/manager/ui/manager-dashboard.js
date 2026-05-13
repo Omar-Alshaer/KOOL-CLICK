@@ -1,5 +1,17 @@
-import { guardManagerPage, mountManagerHeader, renderManagerMiniProfile } from "./manager-common.js";
-import { db, collection, query, where, orderBy, limit, onSnapshot } from "../../../config/firebase.js";
+import {
+  guardManagerPage,
+  mountManagerHeader,
+  renderManagerMiniProfile,
+} from "./manager-common.js";
+import {
+  db,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot,
+} from "../../../config/firebase.js";
 import { escapeHtml } from "../../../core/utils/dom.js";
 import { logError, logWarn } from "../../../core/utils/logger.js";
 
@@ -83,9 +95,7 @@ function renderTopItems(orders) {
     });
   });
 
-  const top = [...tally.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
+  const top = [...tally.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
 
   const list = document.getElementById("mgrTopItems");
   if (!list) return;
@@ -114,12 +124,7 @@ function subscribeOrders(restaurantId) {
 
   const base = [where("restaurantId", "==", restaurantId)];
   try {
-    const q = query(
-      collection(db, "orders"),
-      ...base,
-      orderBy("createdAt", "desc"),
-      limit(200)
-    );
+    const q = query(collection(db, "orders"), ...base, orderBy("createdAt", "desc"), limit(200));
 
     unsubscribeOrders = onSnapshot(
       q,
@@ -154,11 +159,7 @@ function subscribeOrdersFallback(restaurantId) {
     unsubscribeOrders = null;
   }
 
-  const q = query(
-    collection(db, "orders"),
-    where("restaurantId", "==", restaurantId),
-    limit(260)
-  );
+  const q = query(collection(db, "orders"), where("restaurantId", "==", restaurantId), limit(260));
 
   unsubscribeOrders = onSnapshot(
     q,

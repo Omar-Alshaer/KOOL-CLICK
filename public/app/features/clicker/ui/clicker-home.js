@@ -27,7 +27,10 @@ function renderOfferBanner(offers, restaurants) {
   track.innerHTML = offers
     .map((offer) => {
       const restaurant = restaurantMap.get(offer.restaurantId) || {};
-      const imageUrl = sanitizeUrl(offer.imageUrl) || sanitizeUrl(restaurant.logoUrl) || "../../assets/brand/logo.svg";
+      const imageUrl =
+        sanitizeUrl(offer.imageUrl) ||
+        sanitizeUrl(restaurant.logoUrl) ||
+        "../../assets/brand/logo.svg";
       const restaurantName = escapeHtml(offer.restaurantName || restaurant.name || "Restaurant");
       const targetLabel = escapeHtml(offer.targetLabel || offer.targetValue || "Offer");
       const targetLine =
@@ -102,10 +105,7 @@ async function init() {
 
   document.getElementById("statusFlow").textContent = APP_CONFIG.orderStatuses.join(" -> ");
 
-  const [offers, restaurants] = await Promise.all([
-    getActiveOffers(12),
-    getRestaurants(200),
-  ]);
+  const [offers, restaurants] = await Promise.all([getActiveOffers(12), getRestaurants(200)]);
   renderOfferBanner(offers, restaurants);
 }
 
